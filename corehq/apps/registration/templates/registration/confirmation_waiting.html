@@ -1,9 +1,0 @@
-{% extends "registration/base.html" %}
-{% load i18n %}
-
-{% block title %}Waiting for Email Confirmation{% endblock title %}
-
-{% block registration-content %}
-    <p>Thank you for requesting a new CommCare HQ project: <strong>{{ requested_domain }}</strong>. Before you can use this project, you must first confirm your account.</p>
-    {% include "registration/partials/confirmation_waiting_actions.html" %}
-{% endblock %}
