@@ -1,1 +1,0 @@
-This is an app for (usually single-use) scripts to be run on CommCare HQ
