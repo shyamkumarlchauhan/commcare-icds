@@ -1,2 +1,0 @@
-class CopiedFromDeletedException(Exception):
-    pass

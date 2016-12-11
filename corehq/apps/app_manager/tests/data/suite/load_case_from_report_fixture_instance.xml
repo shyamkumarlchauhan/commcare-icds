@@ -1,4 +1,0 @@
-<partial>
-	<instance id="casedb" src="jr://instance/casedb"/>
-	<instance id="commcare:reports" src="jr://fixture/commcare:reports"/>
-</partial>

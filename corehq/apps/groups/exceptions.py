@@ -1,2 +1,0 @@
-class CantSaveException(Exception):
-    pass

@@ -1,2 +1,0 @@
-class DomainDumpError(Exception):
-    pass
