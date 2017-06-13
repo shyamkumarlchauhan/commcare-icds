@@ -8,10 +8,10 @@
     "softlayer",
     "icds"
   ],
-  "report_id": "static-it_individual_issues",
-  "data_source_table": "static-tech_issue_cases",
+  "report_id": "static-hardware_individual",
+  "data_source_table": "static-hardware_cases",
   "config": {
-    "title": "Issue Tracker - Individual Issues",
+    "title": "Hardware - Individual Hardware",
     "description": "",
     "visible": true,
     "aggregation_columns": [
@@ -22,10 +22,10 @@
         "compare_as_string": false,
         "datatype": "date",
         "required": false,
-        "slug": "opened_on",
+        "display": "Date Registered",
         "field": "opened_on",
         "type": "date",
-        "display": "Date Opened"
+        "slug": "opened_on"
       },
       {
         "compare_as_string": false,
@@ -37,25 +37,6 @@
         "slug": "block_id",
         "include_descendants": true,
         "max_drilldown_levels": 3
-      },
-      {
-        "compare_as_string": false,
-        "slug": "closed",
-        "datatype": "string",
-        "show_all": true,
-        "choices": [
-          {
-            "display": null,
-            "value": "True"
-          },
-          {
-            "display": null,
-            "value": "False"
-          }
-        ],
-        "field": "closed",
-        "type": "choice_list",
-        "display": "Resolved"
       }
     ],
     "columns": [
@@ -123,26 +104,8 @@
         "calculate_total": false,
         "type": "field",
         "display": {
-          "en": "Name",
-          "hin": "Name"
-        },
-        "aggregation": "simple"
-      },
-      {
-        "sortable": false,
-        "description": null,
-        "format": "default",
-        "transform": {
-          "type": "custom",
-          "custom_type": "days_elapsed_from_date"
-        },
-        "column_id": "opened_on",
-        "field": "opened_on",
-        "calculate_total": false,
-        "type": "field",
-        "display": {
-          "en": "Days Open",
-          "hin": "Days Open"
+          "en": "Device Code",
+          "hin": "Device Code"
         },
         "aggregation": "simple"
       },
@@ -151,13 +114,103 @@
         "description": null,
         "format": "default",
         "transform": {},
-        "column_id": "ticket_level",
-        "field": "ticket_level",
+        "column_id": "registered_user_name",
+        "field": "registered_user_name",
         "calculate_total": false,
         "type": "field",
         "display": {
-          "en": "Ticket Level",
-          "hin": "Ticket Level"
+          "en": "Registered User",
+          "hin": "Registered User"
+        },
+        "aggregation": "simple"
+      },
+      {
+        "sortable": false,
+        "description": null,
+        "format": "default",
+        "transform": {},
+        "column_id": "hardware_status",
+        "field": "hardware_status",
+        "calculate_total": false,
+        "type": "field",
+        "display": {
+          "en": "Hardware Status",
+          "hin": "Hardware Status"
+        },
+        "aggregation": "simple"
+      },
+      {
+        "sortable": false,
+        "description": null,
+        "format": "default",
+        "transform": {},
+        "column_id": "serial_number",
+        "field": "serial_number",
+        "calculate_total": false,
+        "type": "field",
+        "display": {
+          "en": "Serial Number",
+          "hin": "Serial Number"
+        },
+        "aggregation": "simple"
+      },
+      {
+        "sortable": false,
+        "description": null,
+        "format": "default",
+        "transform": {},
+        "column_id": "hardware_type",
+        "field": "hardware_type",
+        "calculate_total": false,
+        "type": "field",
+        "display": {
+          "en": "Device Type",
+          "hin": "Device Type"
+        },
+        "aggregation": "simple"
+      },
+      {
+        "sortable": false,
+        "description": null,
+        "format": "default",
+        "transform": {},
+        "column_id": "brand",
+        "field": "brand",
+        "calculate_total": false,
+        "type": "field",
+        "display": {
+          "en": "Brand",
+          "hin": "Brand"
+        },
+        "aggregation": "simple"
+      },
+      {
+        "sortable": false,
+        "description": null,
+        "format": "default",
+        "transform": {},
+        "column_id": "model",
+        "field": "model",
+        "calculate_total": false,
+        "type": "field",
+        "display": {
+          "en": "Model Number",
+          "hin": "Model Number"
+        },
+        "aggregation": "simple"
+      },
+      {
+        "sortable": false,
+        "description": null,
+        "format": "default",
+        "transform": {},
+        "column_id": "hardware_history",
+        "field": "hardware_history",
+        "calculate_total": false,
+        "type": "field",
+        "display": {
+          "en": "Hardware History",
+          "hin": "Hardware History"
         },
         "aggregation": "simple"
       }
