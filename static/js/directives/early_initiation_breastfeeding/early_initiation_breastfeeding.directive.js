@@ -1,8 +1,7 @@
 /* global d3*/
-
 var url = hqImport('hqwebapp/js/urllib.js').reverse;
 
-function PrevalenceOfSevereReportController($scope, $routeParams, $location, $filter, maternalChildService,
+function EarlyInitiationBreastfeedingController($scope, $routeParams, $location, $filter, maternalChildService,
                                              locationsService, userLocationId, storageService) {
     var vm = this;
     if (Object.keys($location.search()).length === 0) {
@@ -11,14 +10,14 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
         storageService.setKey('search', $location.search());
     }
     vm.filtersData = $location.search();
-    vm.label = "Prevalence of Wasting (Weight-for-Height)";
+    vm.label = "% Early Initiation of Breastfeeding";
     vm.step = $routeParams.step;
     vm.steps = {
-        'map': {route: '/wasting/map', label: 'Map'},
-        'chart': {route: '/wasting/chart', label: 'Chart'},
+        'map': {route: '/early_initiation/map', label: 'Map'},
+        'chart': {route: '/early_initiation/chart', label: 'Chart'},
     };
     vm.data = {
-        legendTitle: 'Percentage Children',
+        legendTitle: '% Newborns',
     };
     vm.chartData = null;
     vm.top_three = [];
@@ -28,7 +27,7 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
     vm.filters = [];
 
     vm.rightLegend = {
-        info: 'Percentage of children (6-60 months) enrolled for ICDS services with weight-for-height below -2 standard deviations of the WHO Child Growth Standards median.',
+        info: 'Percentage of newborns with born with birth weight less than 2500 grams.',
     };
 
     vm.message = storageService.getKey('message') || false;
@@ -53,12 +52,9 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
     }, true);
 
     vm.templatePopup = function(loc, row) {
-        var total = row ? $filter('indiaNumbers')(row.total) : 'N/A';
-        var total_measured = row ? $filter('indiaNumbers')(row.total_measured) : 'N/A';
-        var sever = row ? d3.format(".0%")(row.severe / row.total) : 'N/A';
-        var moderate = row ? d3.format(".0%")(row.moderate / row.total) : 'N/A';
-        var normal = row ? d3.format(".0%")(row.normal /row.total) : 'N/A';
-        return '<div class="hoverinfo" style="max-width: 200px !important;"><p>' + loc.properties.name + '</p><p>' + vm.rightLegend.info + '</p>' + '<div>Total Children weighed in given month: <strong>' + total + '</strong></div><div>Total Children with height measured in given month: <strong>' + total_measured + '</strong></div><div>Severely Acute Malnutrition: <strong>' + sever + '</strong></div><div>Moderately Acute Malnutrition: <strong>' + moderate +'</strong></div><div>Normal: <strong>' + normal + '</strong></div></ul>';
+        var total = row ? $filter('indiaNumbers')(row.in_month) : 'N/A';
+        var birth = row ? $filter('indiaNumbers')(row.birth) : 'N/A';
+        return '<div class="hoverinfo" style="max-width: 200px !important;"><p>' + loc.properties.name + '</p><p>' + vm.rightLegend.info + '</p>' + '<div>Total Number of Children born in the given month: <strong>' + total + '</strong></div><div>Total Number of Children who were put to the breast within one hour of birth: <strong>' + birth + '</strong></div></ul>';
     };
 
     vm.loadData = function () {
@@ -70,14 +66,14 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
             vm.steps['map'].label = 'Map';
         }
 
-        vm.myPromise = maternalChildService.getPrevalenceOfSevereData(vm.step, vm.filtersData).then(function(response) {
+        vm.myPromise = maternalChildService.earlyInitiationBreastfeeding(vm.step, vm.filtersData).then(function(response) {
             if (vm.step === "map") {
                 vm.data.mapData = response.data.report_data;
             } else if (vm.step === "chart") {
                 vm.chartData = response.data.report_data.chart_data;
+                vm.all_locations = response.data.report_data.all_locations;
                 vm.top_three = response.data.report_data.top_three;
                 vm.bottom_three = response.data.report_data.bottom_three;
-                vm.all_locations = response.data.report_data.all_locations;
                 vm.location_type = response.data.report_data.location_type;
                 vm.chartTicks = vm.chartData[0].values.map(function(d) { return d.x; });
             }
@@ -99,7 +95,6 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
     };
 
     init();
-
 
     $scope.$on('filtersChange', function() {
         vm.loadData();
@@ -138,7 +133,7 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
             yAxis: {
                 axisLabel: '',
                 tickFormat: function(d){
-                    return d3.format(".0%")(d);
+                    return d3.format(",")(d);
                 },
                 axisLabelDistance: 20,
             },
@@ -148,28 +143,19 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
 
                     var findValue = function (values, date) {
                         var day = _.find(values, function(num) { return d3.time.format('%b %Y')(new Date(num['x'])) === date;});
-                        return d3.format(".2%")(day['y']);
+                        return d3.format(",")(day['y']);
                     };
 
                     var tooltip_content = "<p><strong>" + d.value + "</strong></p><br/>";
-                    tooltip_content += "<p>% children with Severe Acute Malnutrition (SAM) or Moderate Acute Malnutrition (MAM): <strong>" + findValue(vm.chartData[0].values, d.value) + "</strong></p>";
-                    tooltip_content += "<span>Percentage of children (6-60 months) enrolled for ICDS services with weight-for-height below -2 standard deviations (moderate acute malnutrition) or -3 standard deviations (severe acute malnutrition) of the WHO Child Growth Standards median.</span>";
+                    tooltip_content += "<p>Total Number of Children born in the given month:<strong>" + findValue(vm.chartData[1].values, d.value) + "</strong></p>";
+                    tooltip_content += "<p>Total Number of Children who were put to the breast within one hour of birth:  <strong>" + findValue(vm.chartData[0].values, d.value) + "</strong></p>";
+                    tooltip_content += "<span>Percentage of children who were put to the breast within one hour of birth</span>";
 
                     return tooltip_content;
                 });
                 return chart;
             },
         },
-    };
-
-    vm.getDisableIndex = function () {
-        var i = -1;
-        window.angular.forEach(vm.selectedLocations, function (key, value) {
-            if (key.location_id === userLocationId) {
-                i = value;
-            }
-        });
-        return i;
     };
 
     vm.moveToLocation = function(loc, index) {
@@ -189,9 +175,9 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
     };
 }
 
-PrevalenceOfSevereReportController.$inject = ['$scope', '$routeParams', '$location', '$filter', 'maternalChildService', 'locationsService', 'userLocationId', 'storageService'];
+EarlyInitiationBreastfeedingController.$inject = ['$scope', '$routeParams', '$location', '$filter', 'maternalChildService', 'locationsService', 'userLocationId', 'storageService'];
 
-window.angular.module('icdsApp').directive('prevalenceOfSevere', function() {
+window.angular.module('icdsApp').directive('earlyInitiationBreastfeeding', function() {
     return {
         restrict: 'E',
         templateUrl: url('icds-ng-template', 'map-chart'),
@@ -199,7 +185,7 @@ window.angular.module('icdsApp').directive('prevalenceOfSevere', function() {
         scope: {
             data: '=',
         },
-        controller: PrevalenceOfSevereReportController,
+        controller: EarlyInitiationBreastfeedingController,
         controllerAs: '$ctrl',
     };
 });

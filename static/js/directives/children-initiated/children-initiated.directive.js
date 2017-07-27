@@ -1,8 +1,7 @@
-/* global d3*/
-
+/* global d3 */
 var url = hqImport('hqwebapp/js/urllib.js').reverse;
 
-function PrevalenceOfSevereReportController($scope, $routeParams, $location, $filter, maternalChildService,
+function ChildrenInitiatedController($scope, $routeParams, $location, $filter, maternalChildService,
                                              locationsService, userLocationId, storageService) {
     var vm = this;
     if (Object.keys($location.search()).length === 0) {
@@ -11,11 +10,11 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
         storageService.setKey('search', $location.search());
     }
     vm.filtersData = $location.search();
-    vm.label = "Prevalence of Wasting (Weight-for-Height)";
+    vm.label = "% Children initiated appropriate complementary feeding";
     vm.step = $routeParams.step;
     vm.steps = {
-        'map': {route: '/wasting/map', label: 'Map'},
-        'chart': {route: '/wasting/chart', label: 'Chart'},
+        'map': {route: '/children_initiated/map', label: 'Map'},
+        'chart': {route: '/children_initiated/chart', label: 'Chart'},
     };
     vm.data = {
         legendTitle: 'Percentage Children',
@@ -26,11 +25,9 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
     vm.location_type = null;
     vm.loaded = false;
     vm.filters = [];
-
     vm.rightLegend = {
-        info: 'Percentage of children (6-60 months) enrolled for ICDS services with weight-for-height below -2 standard deviations of the WHO Child Growth Standards median.',
+        info: 'Percentage of children between 6 - 8 months given timely introduction to solid, semi-solid or soft food.',
     };
-
     vm.message = storageService.getKey('message') || false;
 
     $scope.$watch(function() {
@@ -53,12 +50,9 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
     }, true);
 
     vm.templatePopup = function(loc, row) {
-        var total = row ? $filter('indiaNumbers')(row.total) : 'N/A';
-        var total_measured = row ? $filter('indiaNumbers')(row.total_measured) : 'N/A';
-        var sever = row ? d3.format(".0%")(row.severe / row.total) : 'N/A';
-        var moderate = row ? d3.format(".0%")(row.moderate / row.total) : 'N/A';
-        var normal = row ? d3.format(".0%")(row.normal /row.total) : 'N/A';
-        return '<div class="hoverinfo" style="max-width: 200px !important;"><p>' + loc.properties.name + '</p><p>' + vm.rightLegend.info + '</p>' + '<div>Total Children weighed in given month: <strong>' + total + '</strong></div><div>Total Children with height measured in given month: <strong>' + total_measured + '</strong></div><div>Severely Acute Malnutrition: <strong>' + sever + '</strong></div><div>Moderately Acute Malnutrition: <strong>' + moderate +'</strong></div><div>Normal: <strong>' + normal + '</strong></div></ul>';
+        var total = $filter('indiaNumbers')(row ? row.total : 0);
+        var children = $filter('indiaNumbers')(row ? row.children : 0);
+        return '<div class="hoverinfo" style="max-width: 200px !important;"><p>' + loc.properties.name + '</p><p>' + vm.rightLegend.info + '</p>' + '<div>Total number of children between age 6 - 8 months: <strong>' + total + '</strong></div><div>Total number of children (6-8 months) given timely introduction to sold or semi-solid food in the given month: <strong>' + children + '</strong></div></ul>';
     };
 
     vm.loadData = function () {
@@ -70,14 +64,15 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
             vm.steps['map'].label = 'Map';
         }
 
-        vm.myPromise = maternalChildService.getPrevalenceOfSevereData(vm.step, vm.filtersData).then(function(response) {
+
+        vm.myPromise = maternalChildService.getChildrenInitiatedData(vm.step, vm.filtersData).then(function(response) {
             if (vm.step === "map") {
                 vm.data.mapData = response.data.report_data;
             } else if (vm.step === "chart") {
                 vm.chartData = response.data.report_data.chart_data;
+                vm.all_locations = response.data.report_data.all_locations;
                 vm.top_three = response.data.report_data.top_three;
                 vm.bottom_three = response.data.report_data.bottom_three;
-                vm.all_locations = response.data.report_data.all_locations;
                 vm.location_type = response.data.report_data.location_type;
                 vm.chartTicks = vm.chartData[0].values.map(function(d) { return d.x; });
             }
@@ -86,7 +81,7 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
 
     var init = function() {
         var locationId = vm.filtersData.location_id || userLocationId;
-        if (!locationId || locationId === 'all') {
+        if (!locationId || locationId === 'all' || locationId === 'null') {
             vm.loadData();
             vm.loaded = true;
             return;
@@ -100,67 +95,9 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
 
     init();
 
-
     $scope.$on('filtersChange', function() {
         vm.loadData();
     });
-
-
-    vm.chartOptions = {
-        chart: {
-            type: 'lineChart',
-            height: 450,
-            width: 1100,
-            margin : {
-                top: 20,
-                right: 60,
-                bottom: 60,
-                left: 80,
-            },
-            x: function(d){ return d.x; },
-            y: function(d){ return d.y; },
-
-            color: d3.scale.category10().range(),
-            useInteractiveGuideline: true,
-            clipVoronoi: false,
-            xAxis: {
-                axisLabel: '',
-                showMaxMin: true,
-                tickFormat: function(d) {
-                    return d3.time.format('%b %Y')(new Date(d));
-                },
-                tickValues: function() {
-                    return vm.chartTicks;
-                },
-                axisLabelDistance: -100,
-            },
-
-            yAxis: {
-                axisLabel: '',
-                tickFormat: function(d){
-                    return d3.format(".0%")(d);
-                },
-                axisLabelDistance: 20,
-            },
-            callback: function(chart) {
-                var tooltip = chart.interactiveLayer.tooltip;
-                tooltip.contentGenerator(function (d) {
-
-                    var findValue = function (values, date) {
-                        var day = _.find(values, function(num) { return d3.time.format('%b %Y')(new Date(num['x'])) === date;});
-                        return d3.format(".2%")(day['y']);
-                    };
-
-                    var tooltip_content = "<p><strong>" + d.value + "</strong></p><br/>";
-                    tooltip_content += "<p>% children with Severe Acute Malnutrition (SAM) or Moderate Acute Malnutrition (MAM): <strong>" + findValue(vm.chartData[0].values, d.value) + "</strong></p>";
-                    tooltip_content += "<span>Percentage of children (6-60 months) enrolled for ICDS services with weight-for-height below -2 standard deviations (moderate acute malnutrition) or -3 standard deviations (severe acute malnutrition) of the WHO Child Growth Standards median.</span>";
-
-                    return tooltip_content;
-                });
-                return chart;
-            },
-        },
-    };
 
     vm.getDisableIndex = function () {
         var i = -1;
@@ -184,14 +121,71 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
         }
     };
 
+    vm.chartOptions = {
+        chart: {
+            type: 'lineChart',
+            height: 450,
+            margin : {
+                top: 20,
+                right: 60,
+                bottom: 60,
+                left: 80,
+            },
+            x: function(d){ return d.x; },
+            y: function(d){ return d.y; },
+
+            color: d3.scale.category10().range(),
+            useInteractiveGuideline: true,
+            clipVoronoi: false,
+            tooltips: true,
+            xAxis: {
+                axisLabel: '',
+                showMaxMin: true,
+                tickFormat: function(d) {
+                    return d3.time.format('%b %Y')(new Date(d));
+                },
+                tickValues: function() {
+                    return vm.chartTicks;
+                },
+                axisLabelDistance: -100,
+            },
+
+            yAxis: {
+                axisLabel: '',
+                tickFormat: function(d){
+                    return d3.format(",")(d);
+                },
+                axisLabelDistance: 20,
+            },
+            callback: function(chart) {
+                var tooltip = chart.interactiveLayer.tooltip;
+                tooltip.contentGenerator(function (d) {
+
+                    var findValue = function (values, date) {
+                        var day = _.find(values, function(num) { return d3.time.format('%b %Y')(new Date(num['x'])) === date;});
+                        return d3.format(",")(day['y']);
+                    };
+
+                    var tooltip_content = "<p><strong>" + d.value + "</strong></p><br/>";
+                    tooltip_content += "<p>Total number of children between age 6 - 8 months: <strong>" + findValue(vm.chartData[0].values, d.value) + "</strong></p>";
+                    tooltip_content += "<p>Total number of children (6-8 months) given timely introduction to sold or semi-solid food in the given month: <strong>" + findValue(vm.chartData[1].values, d.value) + "</strong></p>";
+                    tooltip_content += "<span>Percentage of children between 6 - 8 months given timely introduction to solid, semi-solid or soft food.</span>";
+
+                    return tooltip_content;
+                });
+                return chart;
+            },
+        },
+    };
+
     vm.showNational = function () {
         return !isNaN($location.search()['selectedLocationLevel']) && parseInt($location.search()['selectedLocationLevel']) >= 0;
     };
 }
 
-PrevalenceOfSevereReportController.$inject = ['$scope', '$routeParams', '$location', '$filter', 'maternalChildService', 'locationsService', 'userLocationId', 'storageService'];
+ChildrenInitiatedController.$inject = ['$scope', '$routeParams', '$location', '$filter', 'maternalChildService', 'locationsService', 'userLocationId', 'storageService'];
 
-window.angular.module('icdsApp').directive('prevalenceOfSevere', function() {
+window.angular.module('icdsApp').directive('underweightChildrenReport', function() {
     return {
         restrict: 'E',
         templateUrl: url('icds-ng-template', 'map-chart'),
@@ -199,7 +193,7 @@ window.angular.module('icdsApp').directive('prevalenceOfSevere', function() {
         scope: {
             data: '=',
         },
-        controller: PrevalenceOfSevereReportController,
+        controller: ChildrenInitiatedController,
         controllerAs: '$ctrl',
     };
 });
