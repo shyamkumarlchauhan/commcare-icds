@@ -2,8 +2,8 @@
 
 var url = hqImport('hqwebapp/js/initial_page_data').reverse;
 
-function PrevalenceOfStunningReportController($scope, $routeParams, $location, $filter, maternalChildService,
-                                             locationsService, userLocationId, storageService) {
+function PrevalenceOfStuntingReportController($scope, $routeParams, $location, $filter, maternalChildService,
+                                             locationsService, userLocationId, storageService,  genders, ages) {
     var vm = this;
     if (Object.keys($location.search()).length === 0) {
         $location.search(storageService.getKey('search'));
@@ -11,11 +11,26 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
         storageService.setKey('search', $location.search());
     }
     vm.filtersData = $location.search();
+
+    var ageIndex = ages.findIndex(function (x) {
+        return x.id === vm.filtersData.age;
+    });
+    if (ageIndex !== -1) {
+        vm.ageLabel = ages[ageIndex].name;
+    }
+
+    var genderIndex = genders.findIndex(function (x) {
+        return x.id === vm.filtersData.gender;
+    });
+    if (genderIndex !== -1) {
+        vm.genderLabel = genders[genderIndex].name;
+    }
+
     vm.label = "Prevalence of Stunting (Height-for-Age)";
     vm.step = $routeParams.step;
     vm.steps = {
-        'map': {route: '/stunning/map', label: 'Map View'},
-        'chart': {route: '/stunning/chart', label: 'Chart View'},
+        'map': {route: '/stunting/map', label: 'Map View'},
+        'chart': {route: '/stunting/chart', label: 'Chart View'},
     };
     vm.data = {
         legendTitle: 'Percentage Children',
@@ -55,9 +70,9 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
     vm.templatePopup = function(loc, row) {
         var total = row ? $filter('indiaNumbers')(row.total) : 'N/A';
         var measured = row ? $filter('indiaNumbers')(row.total_measured) : 'N/A';
-        var sever = row ? d3.format(".0%")(row.severe / (row.total || 1)) : 'N/A';
-        var moderate = row ? d3.format(".0%")(row.moderate / (row.total || 1)) : 'N/A';
-        var normal = row ? d3.format(".0%")(row.normal / (row.total || 1)) : 'N/A';
+        var sever = row ? d3.format(".2%")(row.severe / (row.total || 1)) : 'N/A';
+        var moderate = row ? d3.format(".2%")(row.moderate / (row.total || 1)) : 'N/A';
+        var normal = row ? d3.format(".2%")(row.normal / (row.total || 1)) : 'N/A';
         return '<div class="hoverinfo" style="max-width: 200px !important;">' +
             '<p>' + loc.properties.name + '</p>' +
             '<div>Total Children weighed in given month: <strong>' + total + '</strong></div>' +
@@ -85,7 +100,7 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
             vm.steps['map'].label = 'Map View: ' + loc_type;
         }
 
-        vm.myPromise = maternalChildService.getPrevalenceOfStunningData(vm.step, vm.filtersData).then(function(response) {
+        vm.myPromise = maternalChildService.getPrevalenceOfStuntingData(vm.step, vm.filtersData).then(function(response) {
             if (vm.step === "map") {
                 vm.data.mapData = response.data.report_data;
             } else if (vm.step === "chart") {
@@ -95,6 +110,18 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
                 vm.bottom_five = response.data.report_data.bottom_five;
                 vm.location_type = response.data.report_data.location_type;
                 vm.chartTicks = vm.chartData[0].values.map(function(d) { return d.x; });
+                var max = Math.ceil(d3.max(vm.chartData, function(line) {
+                    return d3.max(line.values, function(d) {
+                        return d.y;
+                    });
+                }) * 100);
+                var min = Math.ceil(d3.min(vm.chartData, function(line) {
+                    return d3.min(line.values, function(d) {
+                        return d.y;
+                    });
+                }) * 100);
+                var range = max - min;
+                vm.chartOptions.chart.forceY = [((min - range/10)/100).toFixed(2), ((max + range/10)/100).toFixed(2)];
             }
         });
     };
@@ -156,8 +183,8 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
                     return d3.format(".2%")(d);
                 },
                 axisLabelDistance: 20,
-                forceY: [0],
             },
+            forceY: [0],
             callback: function(chart) {
                 var tooltip = chart.interactiveLayer.tooltip;
                 tooltip.contentGenerator(function (d) {
@@ -181,7 +208,7 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
             enable: true,
             html: '<i class="fa fa-info-circle"></i> Percentage of children (6-60 months) enrolled for ICDS services with height-for-age below -2Z standard deviations of the WHO Child Growth Standards median. \n' +
             '\n' +
-            'Stunting in children is a sign of chronic undernutrition and has long lasting harmful consequences on the growth of a child',
+            'Stunting is a sign of chronic undernutrition and has long lasting harmful consequences on the growth of a child',
             css: {
                 'text-align': 'center',
                 'margin': '0 auto',
@@ -212,14 +239,26 @@ function PrevalenceOfStunningReportController($scope, $routeParams, $location, $
         }
     };
 
+    vm.resetAdditionalFilter = function() {
+        vm.filtersData.gender = '';
+        vm.filtersData.age = '';
+        $location.search('gender', null);
+        $location.search('age', null);
+    };
+
+    vm.resetOnlyAgeAdditionalFilter = function() {
+        vm.filtersData.age = '';
+        $location.search('age', null);
+    };
+
     vm.showAllLocations = function () {
         return vm.all_locations.length < 10;
     };
 }
 
-PrevalenceOfStunningReportController.$inject = ['$scope', '$routeParams', '$location', '$filter', 'maternalChildService', 'locationsService', 'userLocationId', 'storageService'];
+PrevalenceOfStuntingReportController.$inject = ['$scope', '$routeParams', '$location', '$filter', 'maternalChildService', 'locationsService', 'userLocationId', 'storageService', 'genders', 'ages'];
 
-window.angular.module('icdsApp').directive('prevalenceOfStunning', function() {
+window.angular.module('icdsApp').directive('prevalenceOfStunting', function() {
     return {
         restrict: 'E',
         templateUrl: url('icds-ng-template', 'map-chart'),
@@ -227,7 +266,7 @@ window.angular.module('icdsApp').directive('prevalenceOfStunning', function() {
         scope: {
             data: '=',
         },
-        controller: PrevalenceOfStunningReportController,
+        controller: PrevalenceOfStuntingReportController,
         controllerAs: '$ctrl',
     };
 });
