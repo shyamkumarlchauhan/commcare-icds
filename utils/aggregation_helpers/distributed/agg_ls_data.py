@@ -1,13 +1,11 @@
 from dateutil.relativedelta import relativedelta
 
-from corehq.apps.userreports.models import StaticDataSourceConfiguration, get_datasource_config
-from corehq.apps.userreports.util import get_table_name
 from custom.icds_reports.const import AGG_LS_VHND_TABLE, AGG_LS_AWC_VISIT_TABLE, AGG_LS_BENEFICIARY_TABLE
 from custom.icds_reports.utils.aggregation_helpers import transform_day_to_month, month_formatter
-from custom.icds_reports.utils.aggregation_helpers.monolith.base import BaseICDSAggregationHelper
+from custom.icds_reports.utils.aggregation_helpers.distributed.base import BaseICDSAggregationDistributedHelper
 
 
-class AggLsHelper(BaseICDSAggregationHelper):
+class AggLsHelper(BaseICDSAggregationDistributedHelper):
     helper_key = 'agg-ls'
     base_tablename = 'agg_ls'
 
@@ -61,11 +59,6 @@ class AggLsHelper(BaseICDSAggregationHelper):
     @property
     def tablename(self):
         return self._tablename_func(4)
-
-    def _ucr_tablename(self, ucr_id):
-        doc_id = StaticDataSourceConfiguration.get_doc_id(self.domain, ucr_id)
-        config, _ = get_datasource_config(doc_id, self.domain)
-        return get_table_name(self.domain, config.table_id)
 
     def aggregate_query(self):
         """

@@ -2,10 +2,12 @@ from dateutil.relativedelta import relativedelta
 
 from custom.icds_reports.const import AGG_INFRASTRUCTURE_TABLE
 from custom.icds_reports.utils.aggregation_helpers import month_formatter
-from custom.icds_reports.utils.aggregation_helpers.monolith.base import BaseICDSAggregationHelper
+from custom.icds_reports.utils.aggregation_helpers.distributed.base import (
+    StateBasedAggregationPartitionedHelper,
+)
 
 
-class AwcInfrastructureAggregationHelper(BaseICDSAggregationHelper):
+class AwcInfrastructureAggregationHelper(StateBasedAggregationPartitionedHelper):
     helper_key = 'awc-infrastructure'
     ucr_data_source_id = 'static-infrastructure_form_v2'
     aggregate_parent_table = AGG_INFRASTRUCTURE_TABLE
@@ -13,20 +15,13 @@ class AwcInfrastructureAggregationHelper(BaseICDSAggregationHelper):
     column_names = (
         'supervisor_id',
         'timeend',
-        'awc_building', 'source_drinking_water', 'toilet_functional',
+        'awc_building', 'source_drinking_water', 'toilet_facility', 'type_toilet', 'toilet_functional',
         'electricity_awc', 'adequate_space_pse',
         'adult_scale_available', 'baby_scale_available', 'flat_scale_available',
         'adult_scale_usable', 'baby_scale_usable', 'cooking_utensils_usable',
         'infantometer_usable', 'medicine_kits_usable', 'stadiometer_usable',
+        'preschool_kit_available', 'preschool_kit_usable'
     )
-
-    def aggregate(self, cursor):
-        curr_month_query, curr_month_params = self.create_table_query()
-        agg_query, agg_params = self.aggregation_query()
-
-        cursor.execute(self.drop_table_query())
-        cursor.execute(curr_month_query, curr_month_params)
-        cursor.execute(agg_query, agg_params)
 
     def _window_helper(self, column_name):
         return (
@@ -71,7 +66,7 @@ class AwcInfrastructureAggregationHelper(BaseICDSAggregationHelper):
             "state_id": self.state_id,
         }
 
-    def aggregation_query(self):
+    def aggregate_query(self):
         month = self.month.replace(day=1)
         tablename = self.generate_child_tablename(month)
 
@@ -85,7 +80,8 @@ class AwcInfrastructureAggregationHelper(BaseICDSAggregationHelper):
         return """
         INSERT INTO "{tablename}" (
             state_id, supervisor_id, month, awc_id, latest_time_end_processed,
-            awc_building, source_drinking_water, toilet_functional,
+            awc_building, source_drinking_water, toilet_facility, type_toilet,
+            preschool_kit_usable,preschool_kit_available, toilet_functional,
             electricity_awc, adequate_space_pse,
             adult_scale_available, baby_scale_available, flat_scale_available,
             adult_scale_usable, baby_scale_usable, cooking_utensils_usable,
@@ -99,6 +95,10 @@ class AwcInfrastructureAggregationHelper(BaseICDSAggregationHelper):
             ucr.timeend as latest_time_end_processed,
             ucr.awc_building as awc_building,
             ucr.source_drinking_water as source_drinking_water,
+            CASE WHEN ucr.toilet_facility=1 THEN 1 ELSE 0 END as toilet_facility,
+            ucr.type_toilet as type_toilet,
+            ucr.preschool_kit_usable as preschool_kit_usable,
+            ucr.preschool_kit_available as preschool_kit_available,
             ucr.toilet_functional as toilet_functional,
             ucr.electricity_awc as electricity_awc,
             ucr.adequate_space_pse as adequate_space_pse,
