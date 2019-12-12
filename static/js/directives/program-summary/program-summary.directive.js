@@ -2,7 +2,9 @@
 
 var url = hqImport('hqwebapp/js/initial_page_data').reverse;
 
-function SystemUsageController($scope, $http, $log, $routeParams, $location, storageService, userLocationId, haveAccessToAllLocations, isAlertActive) {
+function ProgramSummaryController($scope, $http, $log, $routeParams, $location, storageService, dateHelperService,
+          baseControllersService, userLocationId, haveAccessToAllLocations, isAlertActive, navMetadata) {
+    baseControllersService.BaseFilterController.call(this, $scope, $routeParams, $location, dateHelperService, storageService);
     var vm = this;
     vm.data = {};
     vm.label = "Program Summary";
@@ -13,7 +15,6 @@ function SystemUsageController($scope, $http, $log, $routeParams, $location, sto
     vm.isAlertActive = isAlertActive;
 
     vm.prevDay = moment().subtract(1, 'days').format('Do MMMM, YYYY');
-    vm.currentMonth = moment().format("MMMM");
     vm.lastDayOfPreviousMonth = moment().set('date', 1).subtract(1, 'days').format('Do MMMM, YYYY');
 
     if (Object.keys($location.search()).length === 0) {
@@ -58,13 +59,20 @@ function SystemUsageController($scope, $http, $log, $routeParams, $location, sto
         return newValue;
     }, true);
 
+    function _getStep(stepId) {
+        return {
+            "id": stepId,
+            "route": "/program_summary/" + stepId,
+            "label": navMetadata[stepId]["label"],
+            "image": navMetadata[stepId]["image"],
+        };
+    }
     vm.steps = {
-        "maternal_child": {"route": "/program_summary/maternal_child", "label": "Maternal and Child Nutrition", "data": null},
-        "icds_cas_reach": {"route": "/program_summary/icds_cas_reach", "label": "ICDS-CAS Reach", "data": null},
-        "demographics": {"route": "/program_summary/demographics", "label": "Demographics", "data": null},
-        "awc_infrastructure": {"route": "/program_summary/awc_infrastructure", "label": "AWC Infrastructure", "data": null},
+        "maternal_child": _getStep("maternal_child"),
+        "icds_cas_reach": _getStep("icds_cas_reach"),
+        "demographics": _getStep("demographics"),
+        "awc_infrastructure": _getStep("awc_infrastructure"),
     };
-
     vm.getDisableIndex = function () {
         var i = -1;
         if (!haveAccessToAllLocations) {
@@ -75,18 +83,6 @@ function SystemUsageController($scope, $http, $log, $routeParams, $location, sto
             });
         }
         return i;
-    };
-
-    vm.moveToLocation = function(loc, index) {
-        if (loc === 'national') {
-            $location.search('location_id', '');
-            $location.search('selectedLocationLevel', -1);
-            $location.search('location_name', '');
-        } else {
-            $location.search('location_id', loc.location_id);
-            $location.search('selectedLocationLevel', index);
-            $location.search('location_name', loc.name);
-        }
     };
 
     vm.showInfoMessage = function () {
@@ -124,16 +120,21 @@ function SystemUsageController($scope, $http, $log, $routeParams, $location, sto
     }
 
     vm.getDataForStep(vm.step);
+    vm.currentStepMeta = vm.steps[vm.step];
+
 }
 
-SystemUsageController.$inject = ['$scope', '$http', '$log', '$routeParams', '$location', 'storageService', 'userLocationId', 'haveAccessToAllLocations', 'isAlertActive'];
+ProgramSummaryController.$inject = ['$scope', '$http', '$log', '$routeParams', '$location', 'storageService',
+    'dateHelperService', 'baseControllersService', 'userLocationId', 'haveAccessToAllLocations', 'isAlertActive', 'navMetadata'];
 
-window.angular.module('icdsApp').directive('systemUsage', function() {
+window.angular.module('icdsApp').directive("programSummary", ['templateProviderService', function (templateProviderService) {
     return {
         restrict: 'E',
-        templateUrl: url('icds-ng-template', 'system-usage.directive'),
+        templateUrl: function () {
+            return templateProviderService.getTemplate('program-summary.directive');
+        },
         bindToController: true,
-        controller: SystemUsageController,
+        controller: ProgramSummaryController,
         controllerAs: '$ctrl',
     };
-});
+}]);
