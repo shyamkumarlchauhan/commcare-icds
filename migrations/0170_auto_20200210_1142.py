@@ -11,7 +11,7 @@ from custom.icds_reports.utils.migrations import (
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0166_auto_20200123_0748'),
+        ('icds_reports', '0169_merge_20200217_1447'),
     ]
 
     operations = [
