@@ -26,57 +26,89 @@
     "icds",
     "icds-staging"
   ],
-  "report_id": "ls_v2_thr_30_days",
-  "data_source_table": "static-ccs_record_cases",
+  "report_id": "ls_v2_ag_out_of_school",
+  "data_source_table": "static-person_cases_v3",
   "config": {
-    "title": "UCR V2 - LS - THR in Last 30 days",
+    "title": "UCR V2 - LS - AG Out Of School",
     "description": "",
     "visible": false,
     "aggregation_columns": [
-      "owner_id"
+      "owner_id",
+      "month"
     ],
     "filters": [
       {
-        "compare_as_string": false,
-        "show_all": true,
-        "datatype": "string",
+        "display": "Date Case Modified",
+        "slug": "modified_on",
+        "type": "date",
+        "field": "modified_on",
+        "datatype": "date",
+        "compare_as_string": false
+      },
+      {
+        "display": "Date of Birth",
+        "slug": "dob",
+        "type": "date",
+        "field": "dob",
+        "datatype": "date",
+        "compare_as_string": false
+      },
+      {
+        "display": "Filter by AWW",
+        "slug": "awc_id",
         "type": "dynamic_choice_list",
-        "required": false,
+        "field": "awc_id",
+        "choice_provider": {
+          "type": "location"
+        },
+        "ancestor_expression": {
+          "field": "supervisor_id",
+          "location_type": "supervisor"
+        },
+        "datatype": "string",
+        "show_all": true
+      },
+      {
+        "display": "Filter by Supervisor",
         "slug": "supervisor_id",
+        "type": "dynamic_choice_list",
         "field": "supervisor_id",
         "choice_provider": {
           "type": "location"
         },
-        "display": "Filter by Supervisor",
+        "datatype": "string",
+        "show_all": true,
         "ancestor_expression": {}
       },
       {
-        "compare_as_string": true,
-        "datatype": "date",
-        "required": false,
-        "slug": "last_date_thr",
-        "field": "last_date_thr",
-        "type": "date",
-        "display": "Last Date THR"
-      },
-      {
         "required": false,
         "type": "numeric",
-        "slug": "is_migrated",
-        "field": "is_migrated",
+        "slug": "migration_status",
+        "field": "migration_status",
         "display": "Whether Migrated",
-        "datatype": "string"
+        "datatype": "integer"
       },
       {
         "required": false,
         "type": "numeric",
-        "slug": "is_availing",
-        "field": "is_availing",
+        "slug": "registered_status",
+        "field": "registered_status",
         "display": "Whether Availing Services",
-        "datatype": "string"
+        "datatype": "integer"
       }
     ],
     "columns": [
+      {
+        "display": "Month",
+        "column_id": "month",
+        "type": "aggregate_date",
+        "field": "modified_on",
+        "format": "%Y-%m",
+        "transform": {},
+        "calculate_total": false,
+        "description": null,
+        "visible": true
+      },
       {
         "sortable": false,
         "description": null,
@@ -86,44 +118,23 @@
           "custom_type": "owner_display"
         },
         "column_id": "owner_id",
-        "field": "owner_id",
+        "field": "awc_id",
         "calculate_total": false,
         "type": "field",
         "display": "owner_id",
-        "aggregation": "simple",
-        "width": null,
-        "css_class": null,
-        "visible": true
+        "aggregation": "simple"
       },
       {
         "sortable": false,
         "description": null,
         "format": "default",
         "aggregation": "sum",
-        "column_id": "open_count",
-        "field": "open_count",
+        "column_id": "is_oos",
+        "field": "is_oos",
         "transform": {},
         "calculate_total": true,
         "type": "field",
-        "display": "open_count",
-        "width": null,
-        "css_class": null,
-        "visible": true
-      },
-      {
-        "sortable": false,
-        "description": null,
-        "format": "default",
-        "aggregation": "sum",
-        "column_id": "open_ccs_thr_gte_21",
-        "field": "open_ccs_thr_gte_21",
-        "transform": {},
-        "calculate_total": true,
-        "type": "field",
-        "display": "open_ccs_thr_gte_21",
-        "width": null,
-        "css_class": null,
-        "visible": true
+        "display": "is_oos"
       }
     ],
     "sort_expression": [ ],
