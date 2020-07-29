@@ -12,7 +12,7 @@ This does not include populating any data.
 
 1. Clone this repository into the following path:
     ```bash
-    git clone https://github.com/dimagi/commcarehq-icds.git [PATH/TO/COMMCARE]/extensions/icds/
+    git clone https://github.com/dimagi/commcare-icds.git [PATH/TO/COMMCARE]/extensions/icds/
     ```
 
 2. Update your `settings.SERVER_ENVIRONMENT` to `'icds'`
