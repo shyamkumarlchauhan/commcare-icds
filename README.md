@@ -69,6 +69,32 @@ This does not include populating any data.
 
 6. [Enable the feature flag](http://localhost:8000/hq/flags/edit/dashboard_icds_reports/) for that domain
 
+## Automated build
+
+Executing a build and running tests is done as part of the `commcare-hq` Travis build.
+
+The Travis job will clone this repository and run the tests as part of the normal test run.
+
+In order to run tests for a specific branch in this repository you need to create a branch in the
+`commcare-hq` repository with the same name:
+
+**commcare-icds** repo:
+
+```
+git checkout --branch my-feature-branch
+# make changes and commit
+git push origin
+```
+
+**commcare-hq** repo:
+
+```
+git checkout --branch my-feature-branch
+git push origin
+```
+
+Now you can create a PR for the branch in the `commcare-hq` repo. This will trigger
+a build which will checkout the `my-feature-branch` of the `commcare-icds` repo and run all the tests.
 
 ## Citus setup
 
