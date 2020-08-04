@@ -5,12 +5,10 @@ from corehq.form_processor.backends.sql.dbaccessors import CaseAccessorSQL
 from corehq.form_processor.models import XFormInstanceSQL
 from corehq.sql_db.util import get_db_aliases_for_partitioned_query
 from custom.icds.case_relationships import (
-    child_person_case_from_tasks_case,
     child_person_case_from_child_health_case,
     mother_person_case_from_ccs_record_case,
 )
-from custom.icds.const import (STATE_TYPE_CODE, ANDHRA_PRADESH_SITE_CODE, MAHARASHTRA_SITE_CODE,
-    HINDI, TELUGU, MARATHI, AWC_LOCATION_TYPE_CODE, SUPERVISOR_LOCATION_TYPE_CODE)
+from custom.icds.const import AWC_LOCATION_TYPE_CODE, SUPERVISOR_LOCATION_TYPE_CODE
 from custom.icds.exceptions import CaseRelationshipError
 from custom.icds.messaging.custom_recipients import skip_notifying_missing_ccs_record_parent
 from custom.icds.messaging.indicators import (
