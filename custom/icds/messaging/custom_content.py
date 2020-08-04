@@ -15,6 +15,7 @@ from custom.icds.case_relationships import (
 )
 from custom.icds.const import (
     AWC_LOCATION_TYPE_CODE,
+    SUPERVISOR_APP_ID,
     SUPERVISOR_LOCATION_TYPE_CODE,
 )
 from custom.icds.exceptions import CaseRelationshipError
@@ -33,6 +34,11 @@ from custom.icds.messaging.indicators import (
     LSIndicator,
     LSSubmissionPerformanceIndicator,
     LSVHNDSurveyIndicator,
+)
+from custom.icds.messaging.utils import (
+    get_app_version_used_by_user,
+    get_supervisor_for_aww,
+    has_functional_version_set,
 )
 from dimagi.utils.logging import notify_exception
 
@@ -262,16 +268,20 @@ def aww_1(recipient, case_schedule_instance):
 
 def aww_2(recipient, case_schedule_instance):
     indicator_class = AWWAggregatePerformanceIndicator
-    if _use_v2_indicators(case_schedule_instance.case):
+    aww_usercase = case_schedule_instance.case
+    if aww_usercase.type != USERCASE_TYPE:
+        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {aww_usercase.type}")
+    aww_user = get_user_from_usercase(aww_usercase)
+    supervisor_user = get_supervisor_for_aww(aww_user)
+    if supervisor_user and _use_v2_indicators(supervisor_user):
         indicator_class = AWWAggregatePerformanceIndicatorV2
     return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
 
 
-def _use_v2_indicators(usercase):
-    if usercase.type != USERCASE_TYPE:
-        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {usercase.type}")
-    # ToDo: add condition to check for functional version of the app
-    return True
+def _use_v2_indicators(supervisor_user):
+    app_version_in_use = get_app_version_used_by_user(SUPERVISOR_APP_ID, supervisor_user)
+    return app_version_in_use and has_functional_version_set(supervisor_user.domain, SUPERVISOR_APP_ID,
+                                                              app_version_in_use)
 
 
 def phase2_aww_1(recipient, case_schedule_instance):
@@ -280,7 +290,11 @@ def phase2_aww_1(recipient, case_schedule_instance):
 
 def ls_1(recipient, case_schedule_instance):
     indicator_class = LSAggregatePerformanceIndicator
-    if _use_v2_indicators(case_schedule_instance.case):
+    supervisor_usercase = case_schedule_instance.case
+    if supervisor_usercase.type != USERCASE_TYPE:
+        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {supervisor_usercase.type}")
+    supervisor_user = get_user_from_usercase(supervisor_usercase)
+    if supervisor_user and _use_v2_indicators(supervisor_user):
         indicator_class = LSAggregatePerformanceIndicatorV2
     return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
 
