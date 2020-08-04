@@ -20,7 +20,6 @@ from corehq.apps.app_manager.dbaccessors import (
 from corehq.apps.app_manager.fixtures.mobile_ucr import (
     ReportFixturesProviderV1,
 )
-from corehq.apps.locations.dbaccessors import get_users_by_location_id
 from corehq.apps.userreports.models import StaticDataSourceConfiguration
 from corehq.apps.userreports.util import get_table_name
 from corehq.sql_db.connections import connection_manager
@@ -43,6 +42,7 @@ from custom.icds.const import (
 )
 from custom.icds.messaging.utils import (
     get_app_version_used_by_user,
+    get_supervisor_for_aww,
 )
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.models.aggregate import AggregateInactiveAWW
@@ -201,15 +201,7 @@ class AWWIndicator(SMSIndicator):
     @property
     @memoized
     def supervisor(self):
-        """
-        Returns None if there is a misconfiguration (i.e., if the AWW's location
-        has no parent location, or if there are no users at the parent location).
-        """
-        supervisor_location = self.user.sql_location.parent
-        if supervisor_location is None:
-            return None
-
-        return get_users_by_location_id(self.domain, supervisor_location.location_id).first()
+        return get_supervisor_for_aww(self.user)
 
 
 class LSIndicator(SMSIndicator):
