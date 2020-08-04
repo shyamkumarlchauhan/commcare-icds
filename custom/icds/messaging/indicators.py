@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import connections
 from django.db.models import Max
 from django.template import TemplateDoesNotExist
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, get_template
 
 import pytz
 from lxml import etree
@@ -190,8 +190,11 @@ class SMSIndicator(object):
             return self._render_template(context, DEFAULT_LANGUAGE)
 
     def _render_template(self, context, language_code):
-        template_name = 'icds/messaging/indicators/%s/%s' % (language_code, self.template)
-        return render_to_string(template_name, context).strip()
+        template_path = self._template_path(language_code)
+        return render_to_string(template_path, context).strip()
+
+    def _template_path(self, language_code):
+        return 'icds/messaging/indicators/%s/%s' % (language_code, self.template)
 
 
 class AWWIndicator(SMSIndicator):
@@ -304,6 +307,7 @@ class AWWAggregatePerformanceIndicatorV2(BaseAWWAggregatePerformanceIndicator):
         return count
 
     def get_messages(self, language_code=None):
+        get_template(self._template_path(language_code))  # fail early if template missing
         if self.supervisor is None:
             return []
 
@@ -608,6 +612,7 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
         return len(rows)
 
     def get_messages(self, language_code=None):
+        get_template(self._template_path(language_code))  # fail early if template missing
         data = _get_data_for_performance_indicator(self, self)
         num_awc_locations = len(self.awc_locations)
         num_days_open = int(data.pop('num_days_open'))
