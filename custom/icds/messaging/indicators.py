@@ -1,20 +1,21 @@
 from datetime import datetime, timedelta
 
-import pytz
 from django.conf import settings
 from django.db import connections
 from django.db.models import Max
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
+
+import pytz
 from lxml import etree
 from memoized import memoized
 
 from casexml.apps.phone.models import OTARestoreCommCareUser
 from corehq.apps.app_manager.dbaccessors import get_app
-from corehq.apps.app_manager.fixtures.mobile_ucr import ReportFixturesProviderV1
-from corehq.apps.locations.dbaccessors import (
-    get_users_by_location_id,
+from corehq.apps.app_manager.fixtures.mobile_ucr import (
+    ReportFixturesProviderV1,
 )
+from corehq.apps.locations.dbaccessors import get_users_by_location_id
 from corehq.apps.userreports.models import StaticDataSourceConfiguration
 from corehq.apps.userreports.util import get_table_name
 from corehq.sql_db.connections import connection_manager
