@@ -134,6 +134,9 @@ def static_negative_growth_indicator(recipient, schedule_instance):
 
 
 def get_user_from_usercase(usercase):
+    if usercase.type != USERCASE_TYPE:
+        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {usercase.type}")
+
     user = get_wrapped_owner(get_owner_id(usercase))
     if not isinstance(user, CommCareUser):
         return None
@@ -252,9 +255,6 @@ def run_indicator_for_user(user, indicator_class, language_code=None):
 
 
 def run_indicator_for_usercase(usercase, indicator_class):
-    if usercase.type != USERCASE_TYPE:
-        raise ValueError("Expected '%s' case" % USERCASE_TYPE)
-
     user = get_user_from_usercase(usercase)
     if user and user.location:
         return run_indicator_for_user(user, indicator_class, language_code=usercase.get_language_code())
@@ -268,10 +268,7 @@ def aww_1(recipient, case_schedule_instance):
 
 def aww_2(recipient, case_schedule_instance):
     indicator_class = AWWAggregatePerformanceIndicator
-    aww_usercase = case_schedule_instance.case
-    if aww_usercase.type != USERCASE_TYPE:
-        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {aww_usercase.type}")
-    aww_user = get_user_from_usercase(aww_usercase)
+    aww_user = get_user_from_usercase(case_schedule_instance.case)
     supervisor_user = get_supervisor_for_aww(aww_user)
     if supervisor_user and _use_v2_indicators(supervisor_user):
         indicator_class = AWWAggregatePerformanceIndicatorV2
@@ -290,10 +287,7 @@ def phase2_aww_1(recipient, case_schedule_instance):
 
 def ls_1(recipient, case_schedule_instance):
     indicator_class = LSAggregatePerformanceIndicator
-    supervisor_usercase = case_schedule_instance.case
-    if supervisor_usercase.type != USERCASE_TYPE:
-        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {supervisor_usercase.type}")
-    supervisor_user = get_user_from_usercase(supervisor_usercase)
+    supervisor_user = get_user_from_usercase(case_schedule_instance.case)
     if supervisor_user and _use_v2_indicators(supervisor_user):
         indicator_class = LSAggregatePerformanceIndicatorV2
     return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
