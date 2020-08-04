@@ -1,12 +1,11 @@
 import math
-
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 
 from django.conf import settings
 from django.db import connections
 from django.db.models import Max
 from django.template import TemplateDoesNotExist
-from django.template.loader import render_to_string, get_template
+from django.template.loader import get_template, render_to_string
 
 import pytz
 from lxml import etree
@@ -42,11 +41,12 @@ from custom.icds.const import (
     UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS,
     UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS,
 )
+from custom.icds.messaging.utils import (
+    get_app_version_used_by_user,
+)
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.models.aggregate import AggregateInactiveAWW
 from dimagi.utils.couch import CriticalSection
-
-from custom.icds.messaging.utils import get_app_version_used_by_user
 
 DEFAULT_LANGUAGE = 'hin'
 
