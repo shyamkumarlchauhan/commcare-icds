@@ -155,7 +155,12 @@ class LSIndicator(SMSIndicator):
         return {l.location_id: l.name for l in self.child_locations}
 
 
-class AWWAggregatePerformanceIndicator(AWWIndicator):
+class BaseAWWAggregatePerformanceIndicator(AWWIndicator):
+    def get_messages(self, language_code=None):
+        raise NotImplementedError()
+
+
+class AWWAggregatePerformanceIndicator(BaseAWWAggregatePerformanceIndicator):
     template = 'aww_aggregate_performance.txt'
     slug = 'aww_2'
 
@@ -198,6 +203,14 @@ class AWWAggregatePerformanceIndicator(AWWIndicator):
         }
 
         return [self.render_template(context, language_code=language_code)]
+
+
+class AWWAggregatePerformanceIndicatorV2(BaseAWWAggregatePerformanceIndicator):
+    template = 'aww_aggregate_performance_v2.txt'
+    slug = 'aww_v2'
+
+    def get_messages(self, language_code=None):
+        pass
 
 
 # All process_sms tasks should hopefully be finished in 4 hours
@@ -391,14 +404,19 @@ def compute_awws_in_vhnd_timeframe(domain):
         return {row[0] for row in cursor.fetchall()}
 
 
-class LSAggregatePerformanceIndicator(LSIndicator):
-    template = 'ls_aggregate_performance.txt'
-    slug = 'ls_1'
-
+class BaseLSAggregatePerformanceIndicator(LSIndicator):
     @property
     @memoized
     def restore_user(self):
         return OTARestoreCommCareUser(self.domain, self.user)
+
+    def get_messages(self, language_code=None):
+        pass
+
+
+class LSAggregatePerformanceIndicator(BaseLSAggregatePerformanceIndicator):
+    template = 'ls_aggregate_performance.txt'
+    slug = 'ls_1'
 
     def get_report_fixture(self, report_id):
         return get_report_fixture_for_user(self.domain, report_id, self.restore_user)
@@ -457,3 +475,11 @@ class LSAggregatePerformanceIndicator(LSIndicator):
         }
 
         return [self.render_template(context, language_code=language_code)]
+
+
+class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
+    template = 'ls_aggregate_performance_v2.txt'
+    slug = 'ls_v2'
+
+    def get_messages(self, language_code=None):
+        pass

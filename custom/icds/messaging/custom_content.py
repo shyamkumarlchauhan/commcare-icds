@@ -17,10 +17,12 @@ from custom.icds.messaging.indicators import (
     LSIndicator,
     AWWSubmissionPerformanceIndicator,
     AWWAggregatePerformanceIndicator,
+    AWWAggregatePerformanceIndicatorV2,
     AWWVHNDSurveyIndicator,
     LSAggregatePerformanceIndicator,
     LSVHNDSurveyIndicator,
     LSSubmissionPerformanceIndicator,
+    LSAggregatePerformanceIndicatorV2,
 )
 from decimal import Decimal, InvalidOperation
 from dimagi.utils.logging import notify_exception
@@ -252,7 +254,17 @@ def aww_1(recipient, case_schedule_instance):
 
 
 def aww_2(recipient, case_schedule_instance):
-    return run_indicator_for_usercase(case_schedule_instance.case, AWWAggregatePerformanceIndicator)
+    indicator_class = AWWAggregatePerformanceIndicator
+    if _use_v2_indicators(case_schedule_instance.case):
+        indicator_class = AWWAggregatePerformanceIndicatorV2
+    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
+
+
+def _use_v2_indicators(usercase):
+    if usercase.type != USERCASE_TYPE:
+        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {usercase.type}")
+    # ToDo: add condition to check for functional version of the app
+    return True
 
 
 def phase2_aww_1(recipient, case_schedule_instance):
@@ -260,7 +272,10 @@ def phase2_aww_1(recipient, case_schedule_instance):
 
 
 def ls_1(recipient, case_schedule_instance):
-    return run_indicator_for_usercase(case_schedule_instance.case, LSAggregatePerformanceIndicator)
+    indicator_class = LSAggregatePerformanceIndicator
+    if _use_v2_indicators(case_schedule_instance.case):
+        indicator_class = LSAggregatePerformanceIndicatorV2
+    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
 
 
 def ls_2(recipient, case_schedule_instance):
