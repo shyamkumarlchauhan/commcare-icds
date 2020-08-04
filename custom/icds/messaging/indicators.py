@@ -11,7 +11,11 @@ from lxml import etree
 from memoized import memoized
 
 from casexml.apps.phone.models import OTARestoreCommCareUser
-from corehq.apps.app_manager.dbaccessors import get_app
+from corehq.apps.app_manager.dbaccessors import (
+    get_app,
+    get_build_by_version,
+    wrap_app,
+)
 from corehq.apps.app_manager.fixtures.mobile_ucr import (
     ReportFixturesProviderV1,
 )
@@ -27,10 +31,20 @@ from custom.icds.const import (
     HOME_VISIT_REPORT_ID,
     SUPERVISOR_APP_ID,
     THR_REPORT_ID,
+    UCR_V2_AG_ALIAS,
+    UCR_V2_AG_MONTHLY_ALIAS,
+    UCR_V2_CBE_LAST_MONTH_ALIAS,
+    UCR_V2_LS_DAYS_AWC_OPEN_ALIAS,
+    UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS,
+    UCR_V2_MPR_5_CCS_RECORD_ALIAS,
+    UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS,
+    UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS,
 )
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.models.aggregate import AggregateInactiveAWW
 from dimagi.utils.couch import CriticalSection
+
+from custom.icds.messaging.utils import get_app_version_used_by_user
 
 DEFAULT_LANGUAGE = 'hin'
 
@@ -39,6 +53,17 @@ REPORT_IDS = [
     THR_REPORT_ID,
     CHILDREN_WEIGHED_REPORT_ID,
     DAYS_AWC_OPEN_REPORT_ID,
+]
+
+REPORT_ALIASES = [
+    UCR_V2_AG_ALIAS,
+    UCR_V2_AG_MONTHLY_ALIAS,
+    UCR_V2_CBE_LAST_MONTH_ALIAS,
+    UCR_V2_LS_DAYS_AWC_OPEN_ALIAS,
+    UCR_V2_MPR_5_CCS_RECORD_ALIAS,
+    UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS,
+    UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS,
+    UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS,
 ]
 
 
@@ -72,6 +97,44 @@ def get_report_fixture_for_user(domain, report_id, ota_user):
     So instead we cache the XML string and convert back here.
     """
     return etree.fromstring(_get_cached_report_fixture_for_user(domain, report_id, ota_user))
+
+
+def get_v2_report_fixture_for_user(domain, report_slug, ota_user, ls_app_version):
+    """
+    The Element objects used by the lxml library don't cache properly.
+    So instead we cache the XML string and convert back here.
+    """
+    return etree.fromstring(_get_cached_v2_report_fixture_for_user(domain, report_slug, ota_user, ls_app_version))
+
+
+@quickcache(['domain', 'report_slug', 'ota_user.user_id', 'ls_app_version'], timeout=12 * 60 * 60)
+def _get_cached_v2_report_fixture_for_user(domain, report_slug, ota_user, ls_app_version):
+    """
+    :param domain: the domain
+    :param report_slug: the slug/alias of the report
+    :param ota_user: the OTARestoreCommCareUser for which to get the report fixture
+    :param ls_app_version: the version of app user is on
+    """
+    report_config = _get_v2_report_configs(domain, ls_app_version)[report_slug]
+    # ToDo: should we be using ReportFixturesProviderV2?
+    [xml] = ReportFixturesProviderV1().report_config_to_fixture(
+        report_config, ota_user
+    )
+    return etree.tostring(xml)
+
+
+@quickcache(['domain', 'ls_app_version'], timeout=4 * 60 * 60, memoize_timeout=4 * 60 * 60)
+def _get_v2_report_configs(domain, ls_app_version):
+    if ls_app_version:
+        app = wrap_app(get_build_by_version(domain, SUPERVISOR_APP_ID, ls_app_version, return_doc=True))
+    else:
+        app = get_app(domain, SUPERVISOR_APP_ID, latest=True)
+    return {
+        report_config.report_slug: report_config
+        for module in app.get_report_modules()
+        for report_config in module.report_configs
+        if report_config.report_slug in REPORT_ALIASES
+    }
 
 
 class IndicatorError(Exception):
@@ -482,5 +545,52 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
     template = 'ls_aggregate_performance_v2.txt'
     slug = 'ls_v2'
 
+    def __init__(self, domain, user):
+        super().__init__(domain, user)
+        self.app_version = get_app_version_used_by_user(SUPERVISOR_APP_ID, user)
+
+    def get_report_fixture(self, report_id):
+        return get_v2_report_fixture_for_user(self.domain, report_id, self.restore_user, self.app_version)
+
     def get_messages(self, language_code=None):
         pass
+
+    @property
+    @memoized
+    def ucr_v2_ls_timely_home_visits_fixture(self):
+        return self.get_report_fixture(UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_mpr_5_ccs_record_fixture(self):
+        return self.get_report_fixture(UCR_V2_MPR_5_CCS_RECORD_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_mpr_5_child_health_pt1_fixture(self):
+        return self.get_report_fixture(UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_mpr_5_child_health_cases_monthly_fixture(self):
+        return self.get_report_fixture(UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_ls_days_awc_open_fixture(self):
+        return self.get_report_fixture(UCR_V2_LS_DAYS_AWC_OPEN_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_ag_monthly_fixture(self):
+        return self.get_report_fixture(UCR_V2_AG_MONTHLY_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_ag_fixture(self):
+        return self.get_report_fixture(UCR_V2_AG_ALIAS)
+
+    @property
+    @memoized
+    def ucr_v2_cbe_last_month_fixture(self):
+        return self.get_report_fixture(UCR_V2_CBE_LAST_MONTH_ALIAS)
