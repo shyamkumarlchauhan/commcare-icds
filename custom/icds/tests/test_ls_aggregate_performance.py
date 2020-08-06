@@ -35,8 +35,8 @@ class PropertyMock(Mock):
 
 class BaseAggregatePerformanceTestCase(TestCase, TestXmlMixin):
     domain = 'domain'
-    root = Path(__file__)
-    file_path = ('fixtures',)
+    root = Path(__file__).parent
+    file_path = ('data', 'fixtures',)
 
     @classmethod
     def setUpClass(cls):
