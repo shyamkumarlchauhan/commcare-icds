@@ -304,7 +304,7 @@ class AWWAggregatePerformanceIndicatorV2(BaseAWWAggregatePerformanceIndicator):
             return []
 
         ls_agg_perf_indicator = LSAggregatePerformanceIndicatorV2(self.domain, self.supervisor)
-        data = _get_data_for_performance_indicator(self, ls_agg_perf_indicator)
+        data = _get_data_for_v2_performance_indicator(self, ls_agg_perf_indicator)
         return [self.render_template(data, language_code=language_code)]
 
 
@@ -605,7 +605,7 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
 
     def get_messages(self, language_code=None):
         get_template(self._template_path(language_code))  # fail early if template missing
-        data = _get_data_for_performance_indicator(self, self)
+        data = _get_data_for_v2_performance_indicator(self, self)
         num_awc_locations = len(self.awc_locations)
         num_days_open = int(data.pop('num_days_open'))
 
@@ -657,62 +657,21 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
         return self.get_report_fixture(UCR_V2_CBE_LAST_MONTH_ALIAS)
 
 
-def _get_data_for_performance_indicator(indicator_obj, ls_indicator_obj):
-    visits = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_ls_timely_home_visits_fixture, 'count')
+def _get_data_for_v2_performance_indicator(indicator_obj, ls_indicator_obj):
+    data = {}
+    for store_as, fixture, column_name in v2_indicator_data_points:
+        fixture = getattr(ls_indicator_obj, fixture)
+        data[store_as] = int(indicator_obj.get_value_from_fixture(fixture, column_name))
 
-    count_bp = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_ccs_record_fixture, 'count_bp')
-    count_ebf = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_ccs_record_fixture, 'count_ebf')
-    count_cf = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_child_health_pt1_fixture,
-                                                    'count_cf')
-    count_pnc = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_ccs_record_fixture,
-                                                     'count_pnc')
-    visits_goal = math.ceil(
-        (int(count_bp) * 0.44) + int(count_ebf) + (int(count_pnc) * 6) + (int(count_cf) * 0.39)
+    data["visits_goal"] = math.ceil(
+        (data.pop("count_bp") * 0.44) + data.pop("count_ebf")
+        + (data.pop("count_pnc") * 6) + (data.pop("count_cf") * 0.39)
     )
+    data["ccs_gte_21"] = data.pop("ccs_thr_rations_gte_21") + data.pop("child_health_thr_rations_gte_21")
+    data["ccs_total"] = data.pop("ccs_open_in_month") + data.pop("child_health_open_in_month")
 
-    on_time_visits = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_ls_timely_home_visits_fixture,
-                                                          'visit_on_time')
-
-    ccs_gte_21 = (
-        int(indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_ccs_record_fixture,
-                                                 'thr_rations_gte_21'))
-        + int(indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_child_health_pt1_fixture,
-                                                   'thr_rations_gte_21'))
-    )
-    ccs_total = (
-        int(indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_ccs_record_fixture,
-                                                 'open_in_month'))
-        + int(indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_mpr_5_child_health_pt1_fixture,
-                                                   'open_in_month'))
-    )
-    weighed_in_month = indicator_obj.get_value_from_fixture(
-        ls_indicator_obj.ucr_v2_mpr_5_child_health_cases_monthly_fixture, 'weighed_in_month')
-    open_in_month = indicator_obj.get_value_from_fixture(
-        ls_indicator_obj.ucr_v2_mpr_5_child_health_cases_monthly_fixture, 'open_in_month')
-    num_days_open = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_ls_days_awc_open_fixture,
-                                                         'awc_opened_count')
-
-    hcm_21_plus_days = int(indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_ag_monthly_fixture,
-                                                                'hcm_21_plus_days'))
-
-    thr_21_plus_days= int(indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_ag_monthly_fixture,
-                                                               'thr_21_plus_days'))
-    total_ag_oos = indicator_obj.get_value_from_fixture(ls_indicator_obj.ucr_v2_ag_fixture, 'out_of_school')
-    cbe_conducted = indicator_obj.get_rows_count_from_fixture(ls_indicator_obj.ucr_v2_cbe_last_month_fixture)
-    return {
-        'visits': visits,
-        'visits_goal': visits_goal,
-        'on_time_visits': on_time_visits,
-        'ccs_gte_21': ccs_gte_21,
-        'ccs_total': ccs_total,
-        'weighed_in_month': weighed_in_month,
-        'open_in_month': open_in_month,
-        'num_days_open': num_days_open,
-        'hcm_21_plus_days': hcm_21_plus_days,
-        'thr_21_plus_days': thr_21_plus_days,
-        'total_ag_oos': total_ag_oos,
-        'cbe_conducted': cbe_conducted
-    }
+    data["cbe_conducted"] = indicator_obj.get_rows_count_from_fixture(ls_indicator_obj.ucr_v2_cbe_last_month_fixture)
+    return data
 
 
 def _get_last_month_string():
@@ -720,3 +679,24 @@ def _get_last_month_string():
     first = today.replace(day=1)
     last_month = first - timedelta(days=1)
     return last_month.strftime("%Y-%m")
+
+
+v2_indicator_data_points = (
+    # store as, fixture to use, column name
+    ("visits", "ucr_v2_ls_timely_home_visits_fixture", "count"),
+    ("count_bp", "ucr_v2_mpr_5_ccs_record_fixture", "count_bp"),
+    ("count_ebf", "ucr_v2_mpr_5_ccs_record_fixture", "count_ebf"),
+    ("count_cf", "ucr_v2_mpr_5_child_health_pt1_fixture", "count_cf"),
+    ("count_pnc", "ucr_v2_mpr_5_ccs_record_fixture", "count_pnc"),
+    ("on_time_visits", "ucr_v2_ls_timely_home_visits_fixture", "visit_on_time"),
+    ("ccs_thr_rations_gte_21", "ucr_v2_mpr_5_ccs_record_fixture", "thr_rations_gte_21"),
+    ("child_health_thr_rations_gte_21", "ucr_v2_mpr_5_child_health_pt1_fixture", "thr_rations_gte_21"),
+    ("ccs_open_in_month", "ucr_v2_mpr_5_ccs_record_fixture", "open_in_month"),
+    ("child_health_open_in_month", "ucr_v2_mpr_5_child_health_pt1_fixture", "open_in_month"),
+    ("weighed_in_month", "ucr_v2_mpr_5_child_health_cases_monthly_fixture", "weighed_in_month"),
+    ("open_in_month", "ucr_v2_mpr_5_child_health_cases_monthly_fixture", "open_in_month"),
+    ("num_days_open", "ucr_v2_ls_days_awc_open_fixture", "awc_opened_count"),
+    ("hcm_21_plus_days", "ucr_v2_ag_monthly_fixture", "hcm_21_plus_days"),
+    ("thr_21_plus_days", "ucr_v2_ag_monthly_fixture", "thr_21_plus_days"),
+    ("total_ag_oos", "ucr_v2_ag_fixture", "out_of_school"),
+)
