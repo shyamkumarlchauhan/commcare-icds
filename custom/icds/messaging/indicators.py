@@ -580,6 +580,7 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
         super().__init__(domain, user)
         self.app_version = get_app_version_used_by_user(SUPERVISOR_APP_ID, user)
 
+    @memoized
     def get_report_fixture(self, report_id):
         return get_v2_report_fixture_for_user(self.domain, report_id, self.restore_user, self.app_version)
 
@@ -616,51 +617,11 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
         data["avg_days_open"] = avg_days_open
         return [self.render_template(data, language_code=language_code)]
 
-    @property
-    @memoized
-    def ucr_v2_ls_timely_home_visits_fixture(self):
-        return self.get_report_fixture(UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_mpr_5_ccs_record_fixture(self):
-        return self.get_report_fixture(UCR_V2_MPR_5_CCS_RECORD_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_mpr_5_child_health_pt1_fixture(self):
-        return self.get_report_fixture(UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_mpr_5_child_health_cases_monthly_fixture(self):
-        return self.get_report_fixture(UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_ls_days_awc_open_fixture(self):
-        return self.get_report_fixture(UCR_V2_LS_DAYS_AWC_OPEN_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_ag_monthly_fixture(self):
-        return self.get_report_fixture(UCR_V2_AG_MONTHLY_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_ag_fixture(self):
-        return self.get_report_fixture(UCR_V2_AG_ALIAS)
-
-    @property
-    @memoized
-    def ucr_v2_cbe_last_month_fixture(self):
-        return self.get_report_fixture(UCR_V2_CBE_LAST_MONTH_ALIAS)
-
 
 def _get_data_for_v2_performance_indicator(indicator_obj, ls_indicator_obj):
     data = {}
-    for store_as, fixture, column_name in v2_indicator_data_points:
-        fixture = getattr(ls_indicator_obj, fixture)
+    for store_as, report_alias, column_name in v2_indicator_data_points:
+        fixture = ls_indicator_obj.get_report_fixture(report_alias)
         data[store_as] = int(indicator_obj.get_value_from_fixture(fixture, column_name))
 
     data["visits_goal"] = math.ceil(
@@ -670,7 +631,8 @@ def _get_data_for_v2_performance_indicator(indicator_obj, ls_indicator_obj):
     data["ccs_gte_21"] = data.pop("ccs_thr_rations_gte_21") + data.pop("child_health_thr_rations_gte_21")
     data["ccs_total"] = data.pop("ccs_open_in_month") + data.pop("child_health_open_in_month")
 
-    data["cbe_conducted"] = indicator_obj.get_rows_count_from_fixture(ls_indicator_obj.ucr_v2_cbe_last_month_fixture)
+    cbe_report_fixture = ls_indicator_obj.get_report_fixture(UCR_V2_CBE_LAST_MONTH_ALIAS)
+    data["cbe_conducted"] = indicator_obj.get_rows_count_from_fixture(cbe_report_fixture)
     return data
 
 
@@ -682,21 +644,21 @@ def _get_last_month_string():
 
 
 v2_indicator_data_points = (
-    # store as, fixture to use, column name
-    ("visits", "ucr_v2_ls_timely_home_visits_fixture", "count"),
-    ("count_bp", "ucr_v2_mpr_5_ccs_record_fixture", "count_bp"),
-    ("count_ebf", "ucr_v2_mpr_5_ccs_record_fixture", "count_ebf"),
-    ("count_cf", "ucr_v2_mpr_5_child_health_pt1_fixture", "count_cf"),
-    ("count_pnc", "ucr_v2_mpr_5_ccs_record_fixture", "count_pnc"),
-    ("on_time_visits", "ucr_v2_ls_timely_home_visits_fixture", "visit_on_time"),
-    ("ccs_thr_rations_gte_21", "ucr_v2_mpr_5_ccs_record_fixture", "thr_rations_gte_21"),
-    ("child_health_thr_rations_gte_21", "ucr_v2_mpr_5_child_health_pt1_fixture", "thr_rations_gte_21"),
-    ("ccs_open_in_month", "ucr_v2_mpr_5_ccs_record_fixture", "open_in_month"),
-    ("child_health_open_in_month", "ucr_v2_mpr_5_child_health_pt1_fixture", "open_in_month"),
-    ("weighed_in_month", "ucr_v2_mpr_5_child_health_cases_monthly_fixture", "weighed_in_month"),
-    ("open_in_month", "ucr_v2_mpr_5_child_health_cases_monthly_fixture", "open_in_month"),
-    ("num_days_open", "ucr_v2_ls_days_awc_open_fixture", "awc_opened_count"),
-    ("hcm_21_plus_days", "ucr_v2_ag_monthly_fixture", "hcm_21_plus_days"),
-    ("thr_21_plus_days", "ucr_v2_ag_monthly_fixture", "thr_21_plus_days"),
-    ("total_ag_oos", "ucr_v2_ag_fixture", "out_of_school"),
+    # store as, report alias, column name
+    ("visits", UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS, "count"),
+    ("count_bp", UCR_V2_MPR_5_CCS_RECORD_ALIAS, "count_bp"),
+    ("count_ebf", UCR_V2_MPR_5_CCS_RECORD_ALIAS, "count_ebf"),
+    ("count_cf", UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS, "count_cf"),
+    ("count_pnc", UCR_V2_MPR_5_CCS_RECORD_ALIAS, "count_pnc"),
+    ("on_time_visits", UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS, "visit_on_time"),
+    ("ccs_thr_rations_gte_21", UCR_V2_MPR_5_CCS_RECORD_ALIAS, "thr_rations_gte_21"),
+    ("child_health_thr_rations_gte_21", UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS, "thr_rations_gte_21"),
+    ("ccs_open_in_month", UCR_V2_MPR_5_CCS_RECORD_ALIAS, "open_in_month"),
+    ("child_health_open_in_month", UCR_V2_MPR_5_CHILD_HEALTH_PT1_ALIAS, "open_in_month"),
+    ("weighed_in_month", UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS, "weighed_in_month"),
+    ("open_in_month", UCR_V2_MPR_5_CHILD_HEALTH_CASES_MONTHLY_ALIAS, "open_in_month"),
+    ("num_days_open", UCR_V2_LS_DAYS_AWC_OPEN_ALIAS, "awc_opened_count"),
+    ("hcm_21_plus_days", UCR_V2_AG_MONTHLY_ALIAS, "hcm_21_plus_days"),
+    ("thr_21_plus_days", UCR_V2_AG_MONTHLY_ALIAS, "thr_21_plus_days"),
+    ("total_ag_oos", UCR_V2_AG_ALIAS, "out_of_school"),
 )
