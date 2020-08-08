@@ -1,5 +1,6 @@
 import textwrap
 import uuid
+from pathlib import Path
 
 from django.template.exceptions import TemplateDoesNotExist
 from django.test import TestCase
@@ -38,7 +39,8 @@ class PropertyMock(Mock):
 
 class BaseAggregatePerformanceTestCase(TestCase, TestXmlMixin):
     domain = 'domain'
-    file_path = ('../../../..', 'custom/icds/tests/data/fixtures')
+    root = Path(__file__).parent
+    file_path = ('data', 'fixtures',)
 
     @classmethod
     def setUpClass(cls):
