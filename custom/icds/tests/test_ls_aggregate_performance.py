@@ -174,10 +174,7 @@ class TestLSAggregatePerformanceIndicatorV2(TestAggregatePerformanceV2TestCase):
             "THR: 2\n\n"
             "Community-Based Events conducted: 6"
         )
-        self.assertEqual(
-            message,
-            textwrap.dedent(expected_message)
-        )
+        self.assertEqual(message, textwrap.dedent(expected_message))
 
 
 class TestAWWAggregatePerformanceIndicatorV2(TestAggregatePerformanceV2TestCase):

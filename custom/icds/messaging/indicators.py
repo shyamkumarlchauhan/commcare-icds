@@ -620,8 +620,8 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
 
 def _get_data_for_v2_performance_indicator(indicator_obj, ls_indicator_obj):
     data = {}
-    for store_as, report_alias, column_name in v2_indicator_data_points:
-        fixture = ls_indicator_obj.get_report_fixture(report_alias)
+    for store_as, report_slug, column_name in v2_indicator_data_points:
+        fixture = ls_indicator_obj.get_report_fixture(report_slug)
         data[store_as] = int(indicator_obj.get_value_from_fixture(fixture, column_name))
 
     data["visits_goal"] = math.ceil(
