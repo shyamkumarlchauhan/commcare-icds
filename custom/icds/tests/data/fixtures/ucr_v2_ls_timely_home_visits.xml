@@ -1,0 +1,34 @@
+<fixture id="3585b6db4bcc48f885d7f992404865ec" indexed="true" report_id="static-icds-cas-ls_v2_timely_home_visits" user_id="4cbee2f9f0354c0cb6e8af998e01b7e9">
+    <rows last_sync="2020-08-08T16:56:29.285503+05:30">
+        <row index="0" is_total_row="False">
+            <count>3</count>
+            <month>2019-02</month>
+            <owner_id>AWC1</owner_id>
+            <visit_on_time>2</visit_on_time>
+        </row>
+        <row index="1" is_total_row="False">
+            <count>7</count>
+            <month>2020-07</month>
+            <owner_id>AWC1</owner_id>
+            <visit_on_time>3</visit_on_time>
+        </row>
+        <row index="2" is_total_row="False">
+            <count>2</count>
+            <month>2019-04</month>
+            <owner_id>AWC2</owner_id>
+            <visit_on_time>1</visit_on_time>
+        </row>
+        <row index="3" is_total_row="False">
+            <count>1</count>
+            <month>2020-07</month>
+            <owner_id>AWC2</owner_id>
+            <visit_on_time>0</visit_on_time>
+        </row>
+        <row index="4" is_total_row="True">
+            <count>77</count>
+            <month>Total</month>
+            <owner_id/>
+            <visit_on_time>20</visit_on_time>
+        </row>
+    </rows>
+</fixture>

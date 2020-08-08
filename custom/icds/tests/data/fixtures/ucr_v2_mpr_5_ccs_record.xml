@@ -1,0 +1,49 @@
+<fixture id="commcare-reports:177052cc34954256b2a5d4f4997eb526" indexed="true" report_id="static-icds-cas-static-mpr_v2_5_ccs_record_cases_v2" user_id="4cbee2f9f0354c0cb6e8af998e01b7e9">
+    <rows last_sync="2020-08-08T16:56:33.921814+05:30">
+        <row index="0" is_total_row="False">
+            <count_bp>2</count_bp>
+            <count_ebf>4</count_ebf>
+            <count_pnc>0</count_pnc>
+            <month>2020-04</month>
+            <open_in_month>6</open_in_month>
+            <owner_id>AWC1</owner_id>
+            <thr_rations_gte_21>0</thr_rations_gte_21>
+        </row>
+        <row index="1" is_total_row="False">
+            <count_bp>0</count_bp>
+            <count_ebf>1</count_ebf>
+            <count_pnc>0</count_pnc>
+            <month>2020-07</month>
+            <open_in_month>3</open_in_month>
+            <owner_id>AWC1</owner_id>
+            <thr_rations_gte_21>0</thr_rations_gte_21>
+        </row>
+        <row index="2" is_total_row="False">
+            <count_bp>2</count_bp>
+            <count_ebf>4</count_ebf>
+            <count_pnc>0</count_pnc>
+            <month>2020-05</month>
+            <open_in_month>6</open_in_month>
+            <owner_id>AWC2</owner_id>
+            <thr_rations_gte_21>0</thr_rations_gte_21>
+        </row>
+        <row index="3" is_total_row="False">
+            <count_bp>2</count_bp>
+            <count_ebf>1</count_ebf>
+            <count_pnc>1</count_pnc>
+            <month>2020-07</month>
+            <open_in_month>8</open_in_month>
+            <owner_id>AWC2</owner_id>
+            <thr_rations_gte_21>0</thr_rations_gte_21>
+        </row>
+        <row index="4" is_total_row="True">
+            <count_bp>31</count_bp>
+            <count_ebf>27</count_ebf>
+            <count_pnc>3</count_pnc>
+            <month>Total</month>
+            <open_in_month>85</open_in_month>
+            <owner_id/>
+            <thr_rations_gte_21>5</thr_rations_gte_21>
+        </row>
+    </rows>
+</fixture>
