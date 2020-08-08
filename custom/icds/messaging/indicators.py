@@ -19,6 +19,7 @@ from corehq.apps.app_manager.dbaccessors import (
 )
 from corehq.apps.app_manager.fixtures.mobile_ucr import (
     ReportFixturesProviderV1,
+    ReportFixturesProviderV2,
 )
 from corehq.apps.userreports.models import StaticDataSourceConfiguration
 from corehq.apps.userreports.util import get_table_name
@@ -118,8 +119,7 @@ def _get_cached_v2_report_fixture_for_user(domain, report_slug, ota_user, ls_app
     :param ls_app_version: the version of app user is on
     """
     report_config = _get_v2_report_configs(domain, ls_app_version)[report_slug]
-    # ToDo: should we be using ReportFixturesProviderV2?
-    [xml] = ReportFixturesProviderV1().report_config_to_fixture(
+    [xml] = ReportFixturesProviderV2().report_config_to_fixture(
         report_config, ota_user
     )
     return etree.tostring(xml)
@@ -276,11 +276,11 @@ class AWWAggregatePerformanceIndicatorV2(BaseAWWAggregatePerformanceIndicator):
         location_name = self.user.sql_location.name
         last_month_string = _get_last_month_string()
         for row in rows:
-            owner_id = row.find('./column[@id="owner_id"]')
-            month = row.find('./column[@id="month"]')
+            owner_id = row.find('owner_id')
+            month = row.find('month')
             if owner_id.text == location_name and month is not None and month.text == last_month_string:
                 try:
-                    return row.find(f'./column[@id="{attribute}"]').text
+                    return row.find(attribute).text
                 except:
                     raise IndicatorError(
                         f"Attribute {attribute} not found in restore for AWC {location_name}"
@@ -293,7 +293,7 @@ class AWWAggregatePerformanceIndicatorV2(BaseAWWAggregatePerformanceIndicator):
         rows = fixture.findall(xpath)
         location_name = self.user.sql_location.name
         for row in rows:
-            owner_id = row.find('./column[@id="awc_id"]')
+            owner_id = row.find("awc_id")
             if owner_id.text == location_name:
                 count += 1
         return count
@@ -590,10 +590,10 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
         last_month_string = _get_last_month_string()
         total = 0
         for row in rows:
-            month = row.find('./column[@id="month"]')
+            month = row.find('month')
             if month is not None and month.text == last_month_string:
                 try:
-                    total += int(row.find(f'./column[@id="{attribute}"]').text)
+                    total += int(row.find(attribute).text)
                 except:
                     raise IndicatorError(f"{attribute} not found in fixture {fixture} for user {self.user.get_id}")
         return total
