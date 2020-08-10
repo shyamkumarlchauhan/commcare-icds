@@ -12,7 +12,7 @@ def can_access_location_data(view_fn):
     @wraps(view_fn)
     def _inner(request, domain, *args, **kwargs):
         def call_view(): return view_fn(request, domain, *args, **kwargs)
-        loc_id = request.GET.get('location_sid')
+        loc_id = request.GET.get('location_id')
 
         def return_no_location_access_response():
             return HttpResponse('No access to the location {} for the logged in user'.format(loc_id),
