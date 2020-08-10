@@ -119,9 +119,9 @@ def _get_cached_v2_report_fixture_for_user(domain, report_slug, ota_user, ls_app
     :param ls_app_version: the version of app user is on
     """
     report_config = _get_v2_report_configs(domain, ls_app_version)[report_slug]
-    [xml] = ReportFixturesProviderV2().report_config_to_fixture(
+    xml = ReportFixturesProviderV2().report_config_to_fixture(
         report_config, ota_user
-    )
+    )[1]
     return etree.tostring(xml)
 
 
