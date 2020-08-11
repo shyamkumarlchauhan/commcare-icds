@@ -1,9 +1,6 @@
 language: python
 sudo: required
 group: edge
-branches:
-  only:
-    - master
 env:
   - TEST=python REUSE_DB=true  # can't drop the citus DB since it's the postgres database
 before_install:
