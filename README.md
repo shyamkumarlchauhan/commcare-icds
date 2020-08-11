@@ -67,6 +67,39 @@ git push origin
 Now you can create a PR for the branch in the `commcare-hq` repo. This will trigger
 a build which will checkout the `my-feature-branch` of the `commcare-icds` repo and run all the tests.
 
+## Deploy
+
+You can deploy this repo using commcare-cloud to either the `icds-cas` (`icds`) or `icds-staging` environments.
+
+```bash
+cchq <env> deploy
+```
+
+The configuration for deploying the repo is found in `<env>/meta.yml`
+
+### Deploying a specific branch
+
+```bash
+cchq icds deploy --icds-rev <my-branch>
+```
+
+or to setup a limited release:
+
+```bash
+cchq icds fab setup_limited_release --set icds_code_branch=my-branch
+```
+
+### Deploying to staging
+The `icds-staging` environment deploys the `icds-autostaging` branch by default. The contents
+of this branch is controlled by `icds-staging/deploy_branches.yml`. This config file
+can be used to rebuild the branch as follows:
+
+```bash
+scripts/rebuild-deploy-branch icds-staging --commcare-hq-root=/path/to/commcare/repo/
+```
+
+See [commcare-cloud docs](https://dimagi.github.io/commcare-cloud/commcare-cloud/deploy-branches.html)
+
 ## Citus setup
 
 To get setup on CitusDB follow [these instructions](https://github.com/dimagi/commcare-hq/blob/master/CITUSDB_SETUP.md).
