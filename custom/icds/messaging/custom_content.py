@@ -254,8 +254,9 @@ def run_indicator_for_user(user, indicator_class, language_code=None):
     return indicator.get_messages(language_code=language_code)
 
 
-def run_indicator_for_usercase(usercase, indicator_class):
-    user = get_user_from_usercase(usercase)
+def run_indicator_for_usercase(usercase, indicator_class, user=None):
+    if not user:
+        user = get_user_from_usercase(usercase)
     if user and user.location:
         return run_indicator_for_user(user, indicator_class, language_code=usercase.get_language_code())
 
@@ -272,7 +273,7 @@ def aww_2(recipient, case_schedule_instance):
     supervisor_user = get_supervisor_for_aww(aww_user)
     if supervisor_user and _use_v2_indicators(supervisor_user):
         indicator_class = AWWAggregatePerformanceIndicatorV2
-    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
+    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class, user=aww_user)
 
 
 def _use_v2_indicators(supervisor_user):
@@ -290,7 +291,7 @@ def ls_1(recipient, case_schedule_instance):
     supervisor_user = get_user_from_usercase(case_schedule_instance.case)
     if supervisor_user and _use_v2_indicators(supervisor_user):
         indicator_class = LSAggregatePerformanceIndicatorV2
-    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class)
+    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class, user=supervisor_user)
 
 
 def ls_2(recipient, case_schedule_instance):
