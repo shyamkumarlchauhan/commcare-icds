@@ -1,0 +1,29 @@
+<fixture id="commcare-reports:dd97212bd9cc4454944feb00ae541558" indexed="true" report_id="static-icds-cas-ls_v2_ag" user_id="4cbee2f9f0354c0cb6e8af998e01b7e9">
+    <rows last_sync="2020-08-08T16:56:30.287303+05:30">
+        <row index="0" is_total_row="False">
+            <month>2019-02</month>
+            <out_of_school>1</out_of_school>
+            <owner_id>AWC1</owner_id>
+        </row>
+        <row index="1" is_total_row="False">
+            <month>2020-07</month>
+            <out_of_school>1</out_of_school>
+            <owner_id>AWC1</owner_id>
+        </row>
+        <row index="2" is_total_row="False">
+            <month>2019-11</month>
+            <out_of_school>2</out_of_school>
+            <owner_id>AWC2</owner_id>
+        </row>
+        <row index="3" is_total_row="False">
+            <month>2020-07</month>
+            <out_of_school>1</out_of_school>
+            <owner_id>AWC2</owner_id>
+        </row>
+        <row index="4" is_total_row="True">
+            <month>Total</month>
+            <out_of_school>7</out_of_school>
+            <owner_id/>
+        </row>
+    </rows>
+</fixture>
