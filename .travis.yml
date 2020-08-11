@@ -5,7 +5,7 @@ branches:
   only:
     - master
 env:
-- TEST=python REUSE_DB=true  # can't drop the citus DB since it's the postgres database
+  - TEST=python REUSE_DB=true  # can't drop the citus DB since it's the postgres database
 before_install:
   # get newer version of docker-compose for variable substitution in compose files
   - sudo rm /usr/local/bin/docker-compose
