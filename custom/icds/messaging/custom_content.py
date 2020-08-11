@@ -1,3 +1,8 @@
+from decimal import Decimal, InvalidOperation
+
+from django.template import TemplateDoesNotExist
+from django.template.loader import render_to_string
+
 from corehq.apps.app_manager.const import USERCASE_TYPE
 from corehq.apps.users.cases import get_owner_id, get_wrapped_owner
 from corehq.apps.users.models import CommCareUser
@@ -5,29 +10,37 @@ from corehq.form_processor.backends.sql.dbaccessors import CaseAccessorSQL
 from corehq.form_processor.models import XFormInstanceSQL
 from corehq.sql_db.util import get_db_aliases_for_partitioned_query
 from custom.icds.case_relationships import (
-    child_person_case_from_tasks_case,
     child_person_case_from_child_health_case,
     mother_person_case_from_ccs_record_case,
 )
-from custom.icds.const import (STATE_TYPE_CODE, ANDHRA_PRADESH_SITE_CODE, MAHARASHTRA_SITE_CODE,
-    HINDI, TELUGU, MARATHI, AWC_LOCATION_TYPE_CODE, SUPERVISOR_LOCATION_TYPE_CODE)
+from custom.icds.const import (
+    AWC_LOCATION_TYPE_CODE,
+    SUPERVISOR_APP_ID,
+    SUPERVISOR_LOCATION_TYPE_CODE,
+)
 from custom.icds.exceptions import CaseRelationshipError
-from custom.icds.messaging.custom_recipients import skip_notifying_missing_ccs_record_parent
+from custom.icds.messaging.custom_recipients import (
+    skip_notifying_missing_ccs_record_parent,
+)
 from custom.icds.messaging.indicators import (
     DEFAULT_LANGUAGE,
-    AWWIndicator,
-    LSIndicator,
-    AWWSubmissionPerformanceIndicator,
     AWWAggregatePerformanceIndicator,
+    AWWAggregatePerformanceIndicatorV2,
+    AWWIndicator,
+    AWWSubmissionPerformanceIndicator,
     AWWVHNDSurveyIndicator,
     LSAggregatePerformanceIndicator,
-    LSVHNDSurveyIndicator,
+    LSAggregatePerformanceIndicatorV2,
+    LSIndicator,
     LSSubmissionPerformanceIndicator,
+    LSVHNDSurveyIndicator,
 )
-from decimal import Decimal, InvalidOperation
+from custom.icds.messaging.utils import (
+    get_app_version_used_by_user,
+    get_supervisor_for_aww,
+    has_functional_version_set,
+)
 from dimagi.utils.logging import notify_exception
-from django.template import TemplateDoesNotExist
-from django.template.loader import render_to_string
 
 GROWTH_MONITORING_XMLNS = 'http://openrosa.org/formdesigner/b183124a25f2a0ceab266e4564d3526199ac4d75'
 
@@ -121,6 +134,9 @@ def static_negative_growth_indicator(recipient, schedule_instance):
 
 
 def get_user_from_usercase(usercase):
+    if usercase.type != USERCASE_TYPE:
+        raise ValueError(f"Expected '{USERCASE_TYPE}' case, got {usercase.type}")
+
     user = get_wrapped_owner(get_owner_id(usercase))
     if not isinstance(user, CommCareUser):
         return None
@@ -238,11 +254,9 @@ def run_indicator_for_user(user, indicator_class, language_code=None):
     return indicator.get_messages(language_code=language_code)
 
 
-def run_indicator_for_usercase(usercase, indicator_class):
-    if usercase.type != USERCASE_TYPE:
-        raise ValueError("Expected '%s' case" % USERCASE_TYPE)
-
-    user = get_user_from_usercase(usercase)
+def run_indicator_for_usercase(usercase, indicator_class, user=None):
+    if not user:
+        user = get_user_from_usercase(usercase)
     if user and user.location:
         return run_indicator_for_user(user, indicator_class, language_code=usercase.get_language_code())
 
@@ -254,7 +268,18 @@ def aww_1(recipient, case_schedule_instance):
 
 
 def aww_2(recipient, case_schedule_instance):
-    return run_indicator_for_usercase(case_schedule_instance.case, AWWAggregatePerformanceIndicator)
+    indicator_class = AWWAggregatePerformanceIndicator
+    aww_user = get_user_from_usercase(case_schedule_instance.case)
+    supervisor_user = get_supervisor_for_aww(aww_user)
+    if supervisor_user and _use_v2_indicators(supervisor_user):
+        indicator_class = AWWAggregatePerformanceIndicatorV2
+    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class, user=aww_user)
+
+
+def _use_v2_indicators(supervisor_user):
+    app_version_in_use = get_app_version_used_by_user(SUPERVISOR_APP_ID, supervisor_user)
+    return app_version_in_use and has_functional_version_set(supervisor_user.domain, SUPERVISOR_APP_ID,
+                                                              app_version_in_use)
 
 
 def phase2_aww_1(recipient, case_schedule_instance):
@@ -262,7 +287,11 @@ def phase2_aww_1(recipient, case_schedule_instance):
 
 
 def ls_1(recipient, case_schedule_instance):
-    return run_indicator_for_usercase(case_schedule_instance.case, LSAggregatePerformanceIndicator)
+    indicator_class = LSAggregatePerformanceIndicator
+    supervisor_user = get_user_from_usercase(case_schedule_instance.case)
+    if supervisor_user and _use_v2_indicators(supervisor_user):
+        indicator_class = LSAggregatePerformanceIndicatorV2
+    return run_indicator_for_usercase(case_schedule_instance.case, indicator_class, user=supervisor_user)
 
 
 def ls_2(recipient, case_schedule_instance):

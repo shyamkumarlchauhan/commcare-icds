@@ -1,0 +1,29 @@
+<fixture id="commcare-reports:754728b2b584484a93c2a00ad2e10a75" indexed="true" report_id="static-icds-cas-ls_v2_awc_days_open" user_id="4cbee2f9f0354c0cb6e8af998e01b7e9">
+    <rows last_sync="2020-08-08T16:56:29.552060+05:30">
+        <row index="0" is_total_row="False">
+            <awc_opened_count>1</awc_opened_count>
+            <month>2020-07</month>
+            <owner_id>AWC1</owner_id>
+        </row>
+        <row index="1" is_total_row="False">
+            <awc_opened_count>1</awc_opened_count>
+            <month>2020-08</month>
+            <owner_id>AWC1</owner_id>
+        </row>
+        <row index="2" is_total_row="False">
+            <awc_opened_count>6</awc_opened_count>
+            <month>2020-04</month>
+            <owner_id>AWC2</owner_id>
+        </row>
+        <row index="3" is_total_row="False">
+            <awc_opened_count>1</awc_opened_count>
+            <month>2020-07</month>
+            <owner_id>AWC2</owner_id>
+        </row>
+        <row index="4" is_total_row="True">
+            <awc_opened_count>41</awc_opened_count>>
+            <month>Total</month>
+            <owner_id/>
+        </row>
+    </rows>
+</fixture>

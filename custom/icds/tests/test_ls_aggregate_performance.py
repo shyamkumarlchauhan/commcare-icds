@@ -1,6 +1,8 @@
+import textwrap
 import uuid
 from pathlib import Path
 
+from django.template.exceptions import TemplateDoesNotExist
 from django.test import TestCase
 
 from casexml.apps.phone.tests.utils import create_restore_user
@@ -20,9 +22,11 @@ from corehq.util.test_utils import flag_enabled
 from custom.icds.messaging.custom_content import run_indicator_for_user
 from custom.icds.messaging.indicators import (
     AWWAggregatePerformanceIndicator,
+    AWWAggregatePerformanceIndicatorV2,
     IndicatorError,
     LSAggregatePerformanceIndicator,
-    _get_report_fixture_for_user,
+    LSAggregatePerformanceIndicatorV2,
+    _get_cached_report_fixture_for_user,
 )
 from lxml import etree
 from mock import Mock, patch
@@ -141,6 +145,61 @@ class TestAWWAggregatePerformanceIndicator(BaseAggregatePerformanceTestCase):
         self.assertIn('Attribute awc_opened_count not found in restore for AWC AWC1', str(e.exception))
 
 
+class TestAggregatePerformanceV2TestCase(BaseAggregatePerformanceTestCase):
+    def test_missing_translation_file(self):
+        with self.assertRaises(TemplateDoesNotExist):
+            run_indicator_for_user(self.ls, LSAggregatePerformanceIndicatorV2, language_code=None)
+
+    def _get_v2_report_fixture(self, domain, report_slug, *args, **kwargs):
+        return self.get_xml(report_slug)
+
+
+class TestLSAggregatePerformanceIndicatorV2(TestAggregatePerformanceV2TestCase):
+
+    @patch('custom.icds.messaging.indicators._get_last_month_string')
+    @patch('custom.icds.messaging.indicators._get_cached_v2_report_fixture_for_user')
+    def test_get_messages(self, get_report_fixture_patch, last_month_string_patch):
+        last_month_string_patch.return_value = "2020-07"
+        get_report_fixture_patch.side_effect = self._get_v2_report_fixture
+        [message] = LSAggregatePerformanceIndicatorV2(self.ls.domain, self.ls).get_messages(language_code='en')
+        expected_message = (
+            "Aggregate Performance Report over the last month for your AWCs\n\n"
+            "1. Number of visits / Number of desired visits: 8 / 12\n"
+            "2. Number of visits on time / Number of visits: 3 / 8\n\n"
+            "THR Distribution: 0 / 29\n\n"
+            "Number of children weighed: 8 / 18\n\n"
+            "Average Days AWC open / Goal: 1 / 25\n\n"
+            "Adolescent Girls Services:\n"
+            "HCM: 2\n"
+            "THR: 2\n\n"
+            "Community-Based Events conducted: 6"
+        )
+        self.assertEqual(message, textwrap.dedent(expected_message))
+
+
+class TestAWWAggregatePerformanceIndicatorV2(TestAggregatePerformanceV2TestCase):
+
+    @patch('custom.icds.messaging.indicators._get_last_month_string')
+    @patch('custom.icds.messaging.indicators._get_cached_v2_report_fixture_for_user')
+    def test_get_messages(self, get_report_fixture_patch, last_month_string_patch):
+        last_month_string_patch.return_value = "2020-07"
+        get_report_fixture_patch.side_effect = self._get_v2_report_fixture
+        [message] = AWWAggregatePerformanceIndicatorV2(self.ls.domain, self.aww).get_messages(language_code='en')
+        expected_message = (
+            "Aggregate Performance Report over the last month for your AWC\n\n"
+            "1. Number of visits / Number of desired visits: 7 / 2\n"
+            "2. Number of visits on time / Number of visits: 3 / 7\n\n"
+            "THR Distribution: 0 / 8\n\n"
+            "Number of children weighed: 3 / 5\n\n"
+            "Total Days AWC open / Goal: 1 / 25\n\n"
+            "Adolescent Girls Services:\n"
+            "HCM: 1\n"
+            "THR: 1\n\n"
+            "Community-Based Events conducted: 5"
+        )
+        self.assertEqual(message, textwrap.dedent(expected_message))
+
+
 @flag_enabled('MOBILE_UCR')
 class TestGetReportFixture(TestCase):
     @classmethod
@@ -169,11 +228,11 @@ class TestGetReportFixture(TestCase):
             'report_id': self.report_config1.get_id,
             'uuid': 'abcdef'
         })
-        with mock.patch.object(ConfigurableReportDataSource, 'get_data') as get_data_mock, \
-            mock.patch('custom.icds.messaging.indicators.get_report_configs') as get_report_configs:
-            get_report_configs.return_value = {'test_id': app_report_config}
+        with mock.patch.object(ConfigurableReportDataSource, 'get_data') as get_data_mock,\
+                mock.patch('custom.icds.messaging.indicators.get_latest_report_configs') as get_latest_report_configs:
+            get_latest_report_configs.return_value = {'test_id': app_report_config}
             get_data_mock.return_value = [{'owner': 'bob', 'count': 3, 'is_starred': True}]
 
             with mock_datasource_config():
-                fixture = _get_report_fixture_for_user(self.domain, 'test_id', self.user).decode('utf8')
+                fixture = _get_cached_report_fixture_for_user(self.domain, 'test_id', self.user).decode('utf8')
                 self.assertIn(self.report_config1.get_id, fixture)
