@@ -1,0 +1,31 @@
+language: python
+sudo: required
+group: edge
+branches:
+  only:
+    - master
+env:
+- TEST=python REUSE_DB=true  # can't drop the citus DB since it's the postgres database
+before_install:
+  # get newer version of docker-compose for variable substitution in compose files
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.26.2/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv -v docker-compose /usr/local/bin/
+install:
+  # checkout the commcare-hq code from it's own repo
+  - git clone git@github.com:dimagi/commcare-hq.git $HOME/commcare --depth=1
+  - cd $HOME/commcare && git fetch origin $TRAVIS_PULL_REQUEST_BRANCH && git checkout $TRAVIS_PULL_REQUEST_BRANCH || echo "Branch $TRAVIS_PULL_REQUEST_BRANCH not found in commcare repo. Defaulting to 'master'"
+  - mkdir -p $HOME/commcare/extensions && ln -s $TRAVIS_BUILD_DIR $HOME/commcare/extensions/icds
+  - mkdir -p $HOME/commcare/docker-volumes
+before_script:
+  - docker version
+  - docker-compose version
+  - cd $HOME/commcare
+script:
+  - scripts/docker test extensions/icds --noinput --stop --verbosity=2 --divide-depth=1 --with-timing --threshold=10 --max-test-time=29 --collect-only
+after_success:
+  # create symlink so artifacts are available
+  - sudo ln -s $(pwd) /mnt/commcare-hq-ro
+services:
+  - docker
