@@ -234,5 +234,5 @@ class TestGetReportFixture(TestCase):
             get_data_mock.return_value = [{'owner': 'bob', 'count': 3, 'is_starred': True}]
 
             with mock_datasource_config():
-                fixture = _get_cached_report_fixture_for_user(self.domain, 'test_id', self.user).decode('utf8')
+                fixture = _get_cached_report_fixture_for_user(self.domain, 'test_id', self.user, None).decode('utf8')
                 self.assertIn(self.report_config1.get_id, fixture)
