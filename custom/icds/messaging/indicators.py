@@ -70,9 +70,12 @@ REPORT_ALIASES = [
 ]
 
 
-@quickcache(['domain'], timeout=4 * 60 * 60, memoize_timeout=4 * 60 * 60)
-def get_latest_report_configs(domain):
-    app = get_app(domain, SUPERVISOR_APP_ID, latest=True)
+@quickcache(['domain', 'ls_app_version'], timeout=4 * 60 * 60, memoize_timeout=4 * 60 * 60)
+def get_report_configs(domain, ls_app_version):
+    if ls_app_version:
+        app = wrap_app(get_build_by_version(domain, SUPERVISOR_APP_ID, ls_app_version, return_doc=True))
+    else:
+        app = get_app(domain, SUPERVISOR_APP_ID, latest=True)
     return {
         report_config.report_id: report_config
         for module in app.get_report_modules()
@@ -81,25 +84,26 @@ def get_latest_report_configs(domain):
     }
 
 
-@quickcache(['domain', 'report_id', 'ota_user.user_id'], timeout=12 * 60 * 60)
-def _get_cached_report_fixture_for_user(domain, report_id, ota_user):
+@quickcache(['domain', 'report_id', 'ota_user.user_id', 'ls_app_version'], timeout=12 * 60 * 60)
+def _get_cached_report_fixture_for_user(domain, report_id, ota_user, ls_app_version):
     """
     :param domain: the domain
-    :param report_id: the index to the result from get_latest_report_configs()
+    :param report_id: the index to the result from get_report_configs()
     :param ota_user: the OTARestoreCommCareUser for which to get the report fixture
+    :param ls_app_version: the version of the app ls is on
     """
     [xml] = ReportFixturesProviderV1().report_config_to_fixture(
-        get_latest_report_configs(domain)[report_id], ota_user
+        get_report_configs(domain, ls_app_version)[report_id], ota_user
     )
     return etree.tostring(xml)
 
 
-def get_report_fixture_for_user(domain, report_id, ota_user):
+def get_report_fixture_for_user(domain, report_id, ota_user, ls_app_version):
     """
     The Element objects used by the lxml library don't cache properly.
     So instead we cache the XML string and convert back here.
     """
-    return etree.fromstring(_get_cached_report_fixture_for_user(domain, report_id, ota_user))
+    return etree.fromstring(_get_cached_report_fixture_for_user(domain, report_id, ota_user, ls_app_version))
 
 
 def get_v2_report_fixture_for_user(domain, report_slug, ota_user, ls_app_version):
@@ -513,8 +517,12 @@ class LSAggregatePerformanceIndicator(BaseLSAggregatePerformanceIndicator):
     template = 'ls_aggregate_performance.txt'
     slug = 'ls_1'
 
+    def __init__(self, domain, user):
+        super().__init__(domain, user)
+        self.app_version = get_app_version_used_by_user(SUPERVISOR_APP_ID, user)
+
     def get_report_fixture(self, report_id):
-        return get_report_fixture_for_user(self.domain, report_id, self.restore_user)
+        return get_report_fixture_for_user(self.domain, report_id, self.restore_user, self.app_version)
 
     @property
     @memoized
