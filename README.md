@@ -42,17 +42,16 @@ This does not include populating any data.
 
 ## Automated build
 
-Executing a build and running tests is done as part of the `commcare-hq` Travis build.
+If you need to test changes to this codebase in conjunction with changes made to the `commcare-hq`
+code you can accomplish this by ensuring that the branch name in the two repositories is the same.
 
-The Travis job will clone this repository and run the tests as part of the normal test run.
-
-In order to run tests for a specific branch in this repository you need to create a branch in the
-`commcare-hq` repository with the same name:
+This will cause both the `commcare-hq` build as well as the build on this repository to checkout
+the branch prior to running tests.
 
 **commcare-icds** repo:
 
 ```
-git checkout --branch my-feature-branch
+git checkout --branch $BRANCH
 # make changes and commit
 git push origin
 ```
@@ -60,12 +59,10 @@ git push origin
 **commcare-hq** repo:
 
 ```
-git checkout --branch my-feature-branch
+git checkout --branch $BRANCH
+# make chnages and commit
 git push origin
 ```
-
-Now you can create a PR for the branch in the `commcare-hq` repo. This will trigger
-a build which will checkout the `my-feature-branch` of the `commcare-icds` repo and run all the tests.
 
 ## Deploy
 
