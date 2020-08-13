@@ -38,6 +38,7 @@ from corehq.const import ONE_DAY
 from corehq.util.files import TransientTempfile
 from corehq.util.quickcache import quickcache
 from corehq.util.timer import TimingContext
+from custom.icds.const import ICDS_APPS_ROOT
 from custom.icds_reports import const
 from custom.icds_reports.const import (
     ISSUE_TRACKER_APP_ID,
@@ -86,11 +87,11 @@ india_timezone = pytz.timezone('Asia/Kolkata')
 
 
 class MPRData(object):
-    resource_file = ('custom', 'icds_reports', 'resources', 'block_mpr.json')
+    resource_file = ('icds_reports', 'resources', 'block_mpr.json')
 
 
 class ASRData(object):
-    resource_file = ('custom', 'icds_reports', 'resources', 'block_asr.json')
+    resource_file = ('icds_reports', 'resources', 'block_asr.json')
 
 
 class ICDSData(object):
@@ -134,6 +135,7 @@ class ICDSData(object):
 class ICDSMixin(object):
     has_sections = False
     posttitle = None
+    resource_file = None  # tuple path to resource file
 
     def __init__(self, config, allow_conditional_agg=False):
         self.config = config
@@ -153,7 +155,8 @@ class ICDSMixin(object):
 
     @property
     def sources(self):
-        with open(os.path.join(*self.resource_file), encoding='utf-8') as f:
+        path = (ICDS_APPS_ROOT,) + self.resource_file
+        with open(os.path.join(*path), encoding='utf-8') as f:
             return json.loads(f.read())[self.slug]
 
     @property
