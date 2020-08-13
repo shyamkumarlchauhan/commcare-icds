@@ -21,7 +21,7 @@ before_script:
   - docker-compose version
   - cd $HOME/commcare
 script:
-  - scripts/docker test extensions/icds --noinput --stop --verbosity=2 --divide-depth=1 --with-timing --threshold=10 --max-test-time=29 --collect-only
+  - scripts/docker test extensions/icds --noinput --stop --verbosity=2 --divide-depth=1 --with-timing --threshold=10 --max-test-time=29
 after_success:
   # create symlink so artifacts are available
   - sudo ln -s $(pwd) /mnt/commcare-hq-ro
