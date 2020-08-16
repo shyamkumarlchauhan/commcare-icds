@@ -169,6 +169,9 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
         yield """
         UPDATE "{tablename}" agg_awc SET
             awc_days_open = ut.awc_days_open,
+            awc_open_with_attended_children = ut.awc_open_with_attended_children,
+            num_days_4_pse_activities = COALESCE(ut.open_4_acts_count, 0),
+            num_days_1_pse_activities = COALESCE(ut.open_1_acts_count, 0),
             awc_num_open = ut.awc_num_open,
             awc_days_pse_conducted = ut.awc_days_pse_conducted
         FROM (
@@ -177,6 +180,9 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
                 supervisor_id,
                 month,
                 sum(awc_open_count) AS awc_days_open,
+                sum(CASE WHEN attended_children>0 then awc_open_count ELSE 0 END) as awc_open_with_attended_children,
+                sum(open_4_acts_count) as open_4_acts_count,
+                sum(open_1_acts_count) as open_1_acts_count,
                 CASE WHEN (sum(awc_open_count) > 0) THEN 1 ELSE 0 END AS awc_num_open,
                 sum(pse_conducted) as awc_days_pse_conducted
             FROM "{daily_attendance}"
@@ -684,6 +690,9 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
             ('month', 'month'),
             ('num_awcs',),
             ('awc_days_open',),
+            ('awc_open_with_attended_children',),
+            ('num_days_4_pse_activities',),
+            ('num_days_1_pse_activities',),
             ('awc_num_open',),
             ('wer_weighed',),
             ('wer_eligible',),

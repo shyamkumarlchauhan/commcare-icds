@@ -83,7 +83,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
         UPDATE "{self.temporary_tablename}" agg_sdr
         SET
             pse_eligible = ut.pse_eligible,
-            pse_0_days = ut.pse_0_days,
             pse_1_7_days = ut.pse_1_7_days,
             pse_8_14_days = ut.pse_8_14_days,
             pse_15_20_days = ut.pse_15_20_days,
@@ -124,7 +123,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                 awc_id,
                 month,
                 SUM(pse_eligible) as pse_eligible,
-                SUM(CASE WHEN pse_eligible=1 AND pse_days_attended=0 THEN 1 ELSE 0 END) as pse_0_days,
                 SUM(CASE WHEN pse_eligible=1 AND
                     pse_days_attended BETWEEN 1 AND 7 THEN 1 ELSE 0 END) as pse_1_7_days,
                 SUM(CASE WHEN pse_eligible=1 AND
@@ -321,7 +319,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
             ('aggregation_level', str(aggregation_level)),
             ('month', 'month'),
             ('pse_eligible',),
-            ('pse_0_days',),
             ('pse_1_7_days',),
             ('pse_8_14_days',),
             ('pse_15_20_days',),
