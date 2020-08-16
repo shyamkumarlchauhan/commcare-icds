@@ -1178,14 +1178,14 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
     @property
     def rows(self):
         if self.config['location_id']:
-            data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
+
             filters = get_location_filter(self.config['location_id'], self.config['domain'])
             if filters.get('aggregation_level') > 1:
                 filters['aggregation_level'] -= 1
 
             filters['month'] = date(self.config['year'], self.config['month'], 1)
 
-            data.update(self.get_child_data(filters))
+            data = self.get_child_data(filters)
             data.update(self.get_activity_data(filters))
 
             sections = []
@@ -1277,6 +1277,36 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
             total_pse_days_attended_m=Sum(Case(When(gender='M',
                                                     then='total_pse_days_attended',
                                                     ), default=Value(0))),
+            pse_attended_16_days_st_f=Sum(Case(When(gender='F',
+                                                    then='pse_attended_16_days_st',
+                                                    ), default=Value(0))),
+            pse_attended_16_days_st_M=Sum(Case(When(gender='M',
+                                                    then='pse_attended_16_days_st',
+                                                    ), default=Value(0))),
+            pse_attended_16_days_sc_f=Sum(Case(When(gender='F',
+                                                    then='pse_attended_16_days_sc',
+                                                    ), default=Value(0))),
+            pse_attended_16_days_sc_m=Sum(Case(When(gender='M',
+                                                    then='pse_attended_16_days_sc',
+                                                    ), default=Value(0))),
+            pse_attended_16_days_other_f=Sum(Case(When(gender='F',
+                                                       then='pse_attended_16_days_other',
+                                                       ), default=Value(0))),
+            pse_attended_16_days_other_m=Sum(Case(When(gender='M',
+                                                       then='pse_attended_16_days_other',
+                                                       ), default=Value(0))),
+            pse_attended_16_days_disabled_f=Sum(Case(When(gender='F',
+                                                          then='pse_attended_16_days_disabled',
+                                                          ), default=Value(0))),
+            pse_attended_16_days_disabled_m=Sum(Case(When(gender='M',
+                                                          then='pse_attended_16_days_disabled',
+                                                          ), default=Value(0))),
+            pse_attended_16_days_minority_f=Sum(Case(When(gender='F',
+                                                          then='pse_attended_16_days_minority',
+                                                          ), default=Value(0))),
+            pse_attended_16_days_minority_m=Sum(Case(When(gender='M',
+                                                          then='pse_attended_16_days_minority',
+                                                          ), default=Value(0))),
         ).order_by('month').first()
 
         if not child_data:
@@ -1335,48 +1365,48 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                 'rows_config': (
                     (
                         _('ST'),
-                        'pse_21_days_female_st',
-                        'pse_21_days_male_st',
+                        'pse_attended_16_days_st_f',
+                        'pse_attended_16_days_st_m',
                         {
-                            'columns': ('pse_21_days_female_st', 'pse_21_days_male_st'),
+                            'columns': ('pse_attended_16_days_st_f', 'pse_attended_16_days_st_m'),
                             'alias': '21_days_st'
                         }
                     ),
                     (
                         _('SC'),
-                        'pse_21_days_female_sc',
-                        'pse_21_days_male_sc',
+                        'pse_attended_16_days_sc_f',
+                        'pse_attended_16_days_sc_m',
                         {
-                            'columns': ('pse_21_days_female_sc', 'pse_21_days_male_sc'),
+                            'columns': ('pse_attended_16_days_sc_f', 'pse_attended_16_days_sc_m'),
                             'alias': '21_days_sc'
                         }
                     ),
                     (
                         _('Other'),
-                        'pse_21_days_female_others',
-                        'pse_21_days_male_others',
+                        'pse_attended_16_days_other_f',
+                        'pse_attended_16_days_other_m',
                         {
-                            'columns': ('pse_21_days_female_others', 'pse_21_days_male_others'),
+                            'columns': ('pse_attended_16_days_other_f', 'pse_attended_16_days_other_m'),
                             'alias': '21_days_others'
                         }
                     ),
                     (
                         _('All Categories (Total)'),
-                        ('pse_21_days_female_st', 'pse_21_days_female_sc', 'pse_21_days_female_others'),
-                        ('pse_21_days_male_st', 'pse_21_days_male_sc', 'pse_21_days_male_others'),
+                        ('pse_attended_16_days_st_f', 'pse_attended_16_days_sc_f', 'pse_attended_16_days_other_f'),
+                        ('pse_attended_16_days_st_m', 'pse_attended_16_days_sc_m', 'pse_attended_16_days_other_m'),
                         ('21_days_st', '21_days_sc', '21_days_others')
                     ),
                     (
                         _('Disabled'),
-                        'pse_21_days_female_disabled',
-                        'pse_21_days_male_disabled',
-                        ('pse_21_days_female_disabled', 'pse_21_days_male_disabled')
+                        'pse_attended_16_days_disabled_f',
+                        'pse_attended_16_days_disabled_m',
+                        ('pse_attended_16_days_disabled_f', 'pse_attended_16_days_disabled_m')
                     ),
                     (
                         _('Minority'),
-                        'pse_21_days_female_minority',
-                        'pse_21_days_male_minority',
-                        ('pse_21_days_female_minority', 'pse_21_days_male_minority')
+                        'pse_attended_16_days_minority_f',
+                        'pse_attended_16_days_minority_m',
+                        ('pse_attended_16_days_minority_f', 'pse_attended_16_days_minority_m')
                     )
                 )
 
