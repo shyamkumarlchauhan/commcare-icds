@@ -18,4 +18,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN total_pse_days_attended smallint"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_0_days integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_1_days integer"),
+        migrations.RunSQL("ALTER TABLE agg_awc ADD COLUMN awc_open_with_attended_children integer"),
+        migrations.RunSQL("ALTER TABLE agg_awc ADD COLUMN num_days_4_pse_activities integer"),
+        migrations.RunSQL("ALTER TABLE agg_awc ADD COLUMN num_days_1_pse_activities integer"),
+        migrations.RunSQL("ALTER TABLE daily_attendance ADD COLUMN open_4_acts_count smallint"),
+        migrations.RunSQL("ALTER TABLE daily_attendance ADD COLUMN open_1_acts_count smallint"),
     ]

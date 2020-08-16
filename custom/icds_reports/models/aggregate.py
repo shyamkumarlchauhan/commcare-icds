@@ -549,6 +549,9 @@ class AggAwc(models.Model, AggregateMixin):
     cases_ccs_lactating_reg_in_month = models.IntegerField(blank=True, null=True)
     cases_ccs_pregnant_all_reg_in_month = models.IntegerField(blank=True, null=True)
     cases_ccs_lactating_all_reg_in_month = models.IntegerField(blank=True, null=True)
+    awc_open_with_attended_children = models.IntegerField(blank=True, null=True)
+    num_days_4_pse_activities = models.IntegerField(blank=True, null=True)
+    num_days_1_pse_activities = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -780,6 +783,8 @@ class AggChildHealth(models.Model, AggregateMixin):
     zscore_grading_wfh_recorded_in_month = models.IntegerField(blank=True, null=True)
     lunch_count_21_days = models.IntegerField(blank=True, null=True)
     total_pse_days_attended = models.IntegerField(blank=True, null=True)
+    pse_attended_0_days = models.IntegerField(null=True)
+    pse_attended_1_days = models.IntegerField(null=True)
 
     class Meta:
         managed = False
@@ -849,6 +854,8 @@ class DailyAttendance(models.Model, AggregateMixin):
     image_name = models.TextField(null=True)
     pse_conducted = models.SmallIntegerField(null=True)
     state_id = models.TextField(null=True)
+    open_4_acts_count = models.SmallIntegerField(null=True)
+    open_1_acts_count = models.SmallIntegerField(null=True)
 
     class Meta:
         managed = False
@@ -1733,12 +1740,14 @@ class AggServiceDeliveryReport(models.Model, AggregateMixin):
     lunch_25_days = models.IntegerField(null=True)
     pse_eligible = models.IntegerField(null=True)
     pse_0_days = models.IntegerField(null=True)
+    pse_1_days = models.IntegerField(null=True)
     pse_1_7_days = models.IntegerField(null=True)
     pse_8_14_days = models.IntegerField(null=True)
     pse_15_20_days = models.IntegerField(null=True)
     pse_21_days = models.IntegerField(null=True)
     pse_21_24_days = models.IntegerField(null=True)
     pse_25_days = models.IntegerField(null=True)
+    total_pse_days = models.IntegerField(null=True)
     thr_eligible = models.IntegerField(null=True)
     thr_0_days = models.IntegerField(null=True)
     thr_1_7_days = models.IntegerField(null=True)
