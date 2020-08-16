@@ -8,7 +8,7 @@ from custom.icds_reports.sqldata.base_identification import BaseIdentification
 from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization
 from custom.icds_reports.sqldata.base_populations import BasePopulation
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
-from custom.icds_reports.models.aggregate import AggChildHealth
+from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport
 from custom.icds_reports.utils import get_location_filter
 from django.db.models.aggregates import Sum
 from django.db.models import Case, When, Value
@@ -1185,13 +1185,12 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
 
             filters['month'] = date(self.config['year'], self.config['month'], 1)
 
-            child_attendance_data = self.get_total_attendance_data(filters)
+            data.update(self.get_child_data(filters))
+            data.update(self.get_activity_data(filters))
 
             sections = []
             for section in self.row_config:
-                section_data = data
-                if section.get('slug') == 'preschool_2':
-                    section_data = child_attendance_data
+
                 rows = []
                 for row in section['rows_config']:
                     row_data = []
@@ -1199,10 +1198,10 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                         if isinstance(cell, dict):
                             num = 0
                             for c in cell['columns']:
-                                num += section_data.get(c, 0)
+                                num += data.get(c, 0)
 
                             if 'second_value' in cell:
-                                denom = section_data.get(cell['second_value'], 1)
+                                denom = data.get(cell['second_value'], 1)
                                 alias_data = cell['func'](num, float(denom or 1))
                                 cell_data = "%.1f" % cell['func'](num, float(denom or 1))
                             else:
@@ -1210,15 +1209,15 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                                 alias_data = num
 
                             if 'alias' in cell:
-                                section_data[cell['alias']] = alias_data
+                                data[cell['alias']] = alias_data
                             row_data.append(cell_data)
                         elif isinstance(cell, tuple):
                             cell_data = 0
                             for c in cell:
-                                cell_data += section_data.get(c, 0)
+                                cell_data += data.get(c, 0)
                             row_data.append(cell_data)
                         else:
-                            row_data.append(section_data.get(cell, cell if cell == '--' or idx == 0 else 0))
+                            row_data.append(data.get(cell, cell if cell == '--' or idx == 0 else 0))
                     rows.append(row_data)
                 sections.append(dict(
                     title=section['title'],
@@ -1228,8 +1227,7 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                 ))
             return sections
 
-    def get_total_attendance_data(self, filters):
-
+    def get_child_data(self, filters):
         child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
             pse_attendance_f_3_4=Sum(Case(When(gender='F',
                                                age_tranche__in=['36', '48'],
@@ -1254,7 +1252,31 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
             pse_attendance_m_5_6=Sum(Case(When(gender='F',
                                                age_tranche__in=['72'],
                                                then='total_pse_days_attended',
-                                               ), default=Value(0)))
+                                               ), default=Value(0))),
+            pse_eligible_f=Sum(Case(When(gender='F',
+                                         then='pse_eligible',
+                                         ), default=Value(0))),
+            pse_eligible_m=Sum(Case(When(gender='F',
+                                         then='pse_eligible',
+                                         ), default=Value(0))),
+            pse_attended_0_days_f=Sum(Case(When(gender='F',
+                                                then='pse_attended_0_days',
+                                                ), default=Value(0))),
+            pse_attended_0_days_m=Sum(Case(When(gender='F',
+                                                then='pse_attended_0_days',
+                                                ), default=Value(0))),
+            pse_attended_1_days_f=Sum(Case(When(gender='F',
+                                                then='pse_attended_1_days',
+                                                ), default=Value(0))),
+            pse_attended_1_days_m=Sum(Case(When(gender='M',
+                                                then='pse_attended_1_days',
+                                                ), default=Value(0))),
+            total_pse_days_attended_f=Sum(Case(When(gender='F',
+                                                    then='total_pse_days_attended',
+                                                    ), default=Value(0))),
+            total_pse_days_attended_m=Sum(Case(When(gender='M',
+                                                    then='total_pse_days_attended',
+                                                    ), default=Value(0))),
         ).order_by('month').first()
 
         if not child_data:
@@ -1273,6 +1295,29 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
         for total_attendance_key, total_attendance_summation_cols in attendance_total_data_map.items():
             child_data[total_attendance_key] = sum([child_data[key] for key in total_attendance_summation_cols])
         return child_data
+
+    def get_activity_data(self, filters):
+        data = AggAwc.objects.filter(**filters).values(
+            'num_launched_awcs',
+            'num_days_4_pse_activities',
+            'num_days_1_pse_activities',
+            'awc_days_open'
+        ).order_by('month').first()
+
+        if not data:
+            return {}
+
+        pse_4 = 0
+        pse_1 = 0
+        if data['num_launched_awcs']:
+            pse_4 = data['num_days_4_pse_activities'] / data['num_launched_awcs']
+            pse_1 = data['num_days_1_pse_activities'] / data['num_launched_awcs']
+
+        return {
+            'open_four_acts_count': pse_4,
+            'open_one_acts_count': pse_1,
+            'open_pse_count': data['awc_days_open']
+        }
 
     @property
     def row_config(self):
@@ -1384,41 +1429,41 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                 'rows_config': (
                     (
                         _('I. Annual Population Totals (3-6 years)'),
-                        'child_count_female',
-                        'child_count_male',
+                        'pse_eligible_f',
+                        'pse_eligible_m',
                         {
-                            'columns': ('child_count_female', 'child_count_male'),
+                            'columns': ('pse_eligible_f', 'pse_eligible_m'),
                             'alias': 'child_count'
                         }
                     ),
                     (
                         _('II. Usual Absentees during the month'),
-                        'pse_absent_female',
-                        'pse_absent_male',
+                        'pse_attended_0_days_f',
+                        'pse_attended_0_days_m',
                         {
-                            'columns': ('pse_absent_female', 'pse_absent_male'),
+                            'columns': ('pse_attended_0_days_f', 'pse_attended_0_days_m'),
                             'alias': 'absent'
                         }
                     ),
                     (
                         _('III. Total present for at least one day in month'),
-                        'pse_partial_female',
-                        'pse_partial_male',
+                        'pse_attended_1_days_f',
+                        'pse_attended_1_days_m',
                         {
-                            'columns': ('pse_partial_female', 'pse_partial_male'),
+                            'columns': ('pse_attended_1_days_f', 'pse_attended_1_days_m'),
                             'alias': 'partial'
                         }
                     ),
                     (
                         _('IV. Expected Total Daily Attendance'),
                         {
-                            'columns': ('pse_partial_female',),
+                            'columns': ('pse_attended_1_days_f',),
                             'func': mul,
                             'second_value': 'open_pse_count',
                             'alias': 'expected_attendance_female'
                         },
                         {
-                            'columns': ('pse_partial_male',),
+                            'columns': ('pse_attended_1_days_m',),
                             'func': mul,
                             'second_value': 'open_pse_count',
                             'alias': 'expected_attendance_male'
@@ -1432,26 +1477,12 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                     ),
                     (
                         _('V. Actual Total Daily Attendance'),
+                            'total_pse_days_attended_f',
+                            'total_pse_days_attended_m',
                         {
                             'columns': (
-                                'pse_daily_attendance_female',
-                                'pse_daily_attendance_female_1',
-                                'pse_daily_attendance_female_2'
-                            ),
-                            'alias': 'attendance_female'
-                        },
-                        {
-                            'columns': (
-                                'pse_daily_attendance_male',
-                                'pse_daily_attendance_male_1',
-                                'pse_daily_attendance_male_2'
-                            ),
-                            'alias': 'attendance_male'
-                        },
-                        {
-                            'columns': (
-                                'attendance_female',
-                                'attendance_male',
+                                'total_pse_days_attended_f',
+                                'total_pse_days_attended_m',
                             ),
                             'alias': 'attendance'
                         }
@@ -1459,13 +1490,13 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                     (
                         _('VI. PSE Attendance Efficiency'),
                         {
-                            'columns': ('attendance_female',),
+                            'columns': ('total_pse_days_attended_f',),
                             'func': truediv,
                             'second_value': 'expected_attendance_female',
                             'format': 'percent',
                         },
                         {
-                            'columns': 'attendance_male',
+                            'columns': 'total_pse_days_attended_m',
                             'func': truediv,
                             'second_value': 'expected_attendance_male',
                             'format': 'percent',
