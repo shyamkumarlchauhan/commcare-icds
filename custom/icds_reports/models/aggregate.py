@@ -1547,7 +1547,6 @@ class AWWIncentiveReport(models.Model, AggregateMixin):
     block_name = models.TextField(null=True)
     supervisor_name = models.TextField(null=True)
     awc_name = models.TextField(null=True)
-    awc_site_code = models.TextField(blank=True, null=True)
     aww_name = models.TextField(null=True)
     contact_phone_number = models.TextField(null=True)
     wer_weighed = models.SmallIntegerField(null=True)
