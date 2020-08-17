@@ -117,7 +117,7 @@ class IcdsLocationFilter(AsyncLocationFilter):
         return load_restricted_locs(self.domain, loc_id, user=self.request.couch_user, show_test=show_test)
 
 
-class IcdsRestrictedLocationFilter(AsyncLocationFilter):
+class IcdsRestrictedLocationFilter(IcdsLocationFilter):
 
     @property
     def location_hierarchy_config(self):
