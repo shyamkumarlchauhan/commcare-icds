@@ -135,7 +135,7 @@ class ICDSData(object):
 class ICDSMixin(object):
     has_sections = False
     posttitle = None
-    resource_file = None  # tuple path to resource file
+
 
     def __init__(self, config, allow_conditional_agg=False):
         self.config = config
