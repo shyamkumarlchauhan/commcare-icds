@@ -32,7 +32,19 @@
       "type": "filter_items",
       "items_expression": {
         "type": "property_path",
-        "property_path": ["form", "child_health_cases", "item"]
+        "property_path": ["form", "update_attended_ag_care_cases"]
+      },
+      "filter_expression": {
+        "type": "boolean_expression",
+        "operator": "eq",
+        "expression": {
+         "type": "root_doc",
+              "expression": {
+            "type": "property_path",
+            "property_path": ["form", "counselling_session_conducted"]
+          }
+        },
+        "property_value": "yes"
       }
     },
     "configured_filter": {
@@ -180,21 +192,12 @@
         }
       },
       {
-        "column_id": "child_health_case_id",
+        "column_id": "ag_care_case_id",
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "named",
-          "name": "child_health_case_id"
-        }
-      },
-      {
-        "column_id": "ag_attendance",
-        "datatype": "string",
-        "type": "expression",
-        "expression": {
-          "type": "property_path",
-          "property_path": ["form", "ag_attendance_ql", "ag_attendance"]
+            "type": "property_name",
+            "property_name": "ag_care_case_id"
         }
       },
       {
@@ -204,8 +207,12 @@
         "expression": {
           "type": "icds_boolean",
           "boolean_property": {
-            "type": "property_name",
-            "property_name": "counselling_session_conducted"
+            "type": "root_doc",
+              "expression": {
+            "type": "property_path",
+            "property_path": ["form", "counselling_session_conducted"]
+          }
+
           },
           "true_values": ["yes"],
           "false_values": ["no"]
@@ -213,9 +220,9 @@
       }
     ],
     "named_expressions": {
-      "child_health_case_id": {
+      "ag_care_case_id": {
         "type": "property_name",
-        "property_name": "@id"
+        "property_name": "ag_care_case_id"
       },
       "user_location_id": {
         "type": "icds_user_location",
