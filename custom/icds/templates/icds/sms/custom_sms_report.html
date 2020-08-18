@@ -10,12 +10,12 @@
       <strong>
         {% trans "Reports in Progress - " %}
       </strong>
-      {{reports_in_progress}}
+      {{ reports_in_progress }}
     </div>
   {% endif %}
   {% if max_report_error %}
     <div class="alert alert-danger" role="alert">
-      {{max_report_error}}
+      {{ max_report_error }}
     </div>
   {% endif %}
   {% crispy request_form %}
