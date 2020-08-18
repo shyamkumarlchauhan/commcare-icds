@@ -27,7 +27,8 @@ from custom.icds_reports.const import (
     AGG_MIGRATION_TABLE,
     BIHAR_API_DEMOGRAPHICS_TABLE,
     AGG_AVAILING_SERVICES_TABLE,
-    CHILD_VACCINE_TABLE
+    CHILD_VACCINE_TABLE,
+    AGG_MPR_AWC_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers.distributed import (
     AggAwcDailyAggregationDistributedHelper,
@@ -63,7 +64,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     MigrationFormsAggregationDistributedHelper,
     BiharApiDemographicsHelper,
     AvailingServiceFormsAggregationDistributedHelper,
-    ChildVaccineHelper
+    ChildVaccineHelper,
+    AggMprAwcHelper
 )
 
 def get_cursor(model):
@@ -1928,3 +1930,48 @@ class ChildVaccines(models.Model, AggregateMixin):
     _agg_helper_cls = ChildVaccineHelper
     _agg_atomic = False
 
+
+class AggMPRAwc(models.Model, AggregateMixin):
+    state_id = models.TextField(null=True)
+    district_id = models.TextField(null=True)
+    block_id = models.TextField(null=True)
+    supervisor_id = models.TextField(null=True)
+    awc_id = models.TextField(primary_key=True)
+    state_is_test = models.SmallIntegerField(null=True)
+    district_is_test = models.SmallIntegerField(null=True)
+    block_is_test = models.SmallIntegerField(null=True)
+    supervisor_is_test = models.SmallIntegerField(null=True)
+    awc_is_test = models.SmallIntegerField(null=True)
+    month = models.DateField(null=True)
+    aggregation_level = models.SmallIntegerField(null=True)
+    visitor_icds_sup = models.IntegerField(null=True)
+    visitor_anm = models.IntegerField(null=True)
+    visitor_health_sup = models.IntegerField(null=True)
+    visitor_cdpo = models.IntegerField(null=True)
+    visitor_med_officer = models.IntegerField(null=True)
+    visitor_dpo = models.IntegerField(null=True)
+    visitor_officer_state = models.IntegerField(null=True)
+    visitor_officer_central = models.IntegerField(null=True)
+    vhnd_done_when_planned = models.IntegerField(null=True)
+    vhnd_with_aww_present = models.IntegerField(null=True)
+    vhnd_with_icds_sup = models.IntegerField(null=True)
+    vhnd_with_asha_present = models.IntegerField(null=True)
+    vhnd_with_anm_mpw = models.IntegerField(null=True)
+    vhnd_with_health_edu_org = models.IntegerField(null=True)
+    vhnd_with_display_tools = models.IntegerField(null=True)
+    vhnd_with_thr_distr = models.IntegerField(null=True)
+    vhnd_with_child_immu = models.IntegerField(null=True)
+    vhnd_with_vit_a_given = models.IntegerField(null=True)
+    vhnd_with_anc_today = models.IntegerField(null=True)
+    vhnd_with_local_leader = models.IntegerField(null=True)
+    vhnd_with_due_list_prep_immunization = models.IntegerField(null=True)
+    vhnd_with_due_list_prep_vita_a = models.IntegerField(null=True)
+    vhnd_with_due_list_prep_antenatal_checkup = models.IntegerField(null=True)
+
+    class Meta(object):
+        db_table = AGG_MPR_AWC_TABLE
+        unique_together = ('month', 'aggregation_level', 'state_id', 'district_id', 'block_id',
+                           'supervisor_id', 'awc_id')  # pkey
+
+    _agg_helper_cls = AggMprAwcHelper
+    _agg_atomic = False
