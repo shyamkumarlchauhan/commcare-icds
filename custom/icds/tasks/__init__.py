@@ -12,6 +12,7 @@ from corehq.util.celery_utils import periodic_task_on_envs
 from corehq.util.metrics import metrics_counter, metrics_gauge
 from custom.icds.tasks.sms import send_monthly_sms_report  # noqa imported for celery
 from custom.icds.tasks.hosted_ccz import setup_ccz_file_for_hosting  # noqa imported for celery
+from custom.icds.tasks.invalid_ucr import delete_old_sms_events  # noqa imported for celery
 
 MAX_RUNTIME = 6 * 3600
 
