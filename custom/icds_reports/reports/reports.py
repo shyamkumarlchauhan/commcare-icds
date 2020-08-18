@@ -1,6 +1,6 @@
 from django.urls import reverse
 
-from corehq import toggles
+from custom.icds import icds_toggles
 from corehq.apps.locations.permissions import location_safe
 from corehq.apps.reports.filters.select import YearFilter
 from corehq.apps.reports.standard import CustomProjectReport
@@ -80,4 +80,4 @@ class DashboardReport(CustomProjectReport):
 
     @classmethod
     def show_in_navigation(cls, domain=None, project=None, user=None):
-        return toggles.DASHBOARD_ICDS_REPORT.enabled(domain)
+        return icds_toggles.DASHBOARD_ICDS_REPORT.enabled(domain)
