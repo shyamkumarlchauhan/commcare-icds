@@ -1,6 +1,11 @@
+from datetime import date
+
+
 from custom.icds_reports.utils import ICDSMixin
 from corehq.apps.reports.datatables import DataTablesColumn
 from corehq.apps.reports.datatables import DataTablesHeader
+from custom.icds_reports.models.aggregate import AggAwc
+from custom.icds_reports.utils import get_location_filter
 
 
 class BaseOperationalization(ICDSMixin):
@@ -33,5 +38,32 @@ class BaseOperationalization(ICDSMixin):
                     0,
                     0,
                     0
+                ]
+            ]
+
+
+class BaseOperationalizationBeta(BaseOperationalization):
+
+    @property
+    def rows(self):
+
+        if self.config['location_id']:
+            filters = get_location_filter(self.config['location_id'], self.config['domain'])
+
+            if filters.get('aggregation_level') > 1:
+                filters['aggregation_level'] -= 1
+
+            filters['month'] = date(self.config['year'], self.config['month'], 1)
+            awc_data = AggAwc.objects.filter(**filters).values(
+                'num_awcs',
+                'num_launched_awcs',
+                'awc_num_open').order_by('month').first()
+
+            return [
+                [
+                    'No. of AWCs',
+                    awc_data.num_awcs if awc_data else None,
+                    awc_data.num_launched_awcs if awc_data else None,
+                    awc_data.awc_num_open if awc_data else None
                 ]
             ]

@@ -1,6 +1,6 @@
 from django.urls import reverse
 
-from custom.icds import icds_toggles
+from corehq import toggles
 from corehq.apps.locations.permissions import location_safe
 from corehq.apps.reports.filters.select import YearFilter
 from corehq.apps.reports.standard import CustomProjectReport
@@ -9,9 +9,11 @@ from custom.icds_reports.asr_sqldata import ASRIdentification, ASROperationaliza
 from custom.icds_reports.filters import ICDSMonthFilter, IcdsLocationFilter, IcdsRestrictedLocationFilter
 from custom.icds_reports.mpr_sqldata import MPRIdentification, MPRSectors, MPRPopulation, MPRBirthsAndDeaths, \
     MPRAWCDetails, MPRSupplementaryNutrition, MPRUsingSalt, MPRProgrammeCoverage, MPRPreschoolEducation, \
-    MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring
+    MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, \
+    MPROperationalizationBeta, MPRPopulationBeta
 from custom.icds_reports.mpr_sqldata import MPROperationalization
 from custom.icds_reports.reports import IcdsBaseReport
+from memoized import memoized
 
 
 @location_safe
@@ -27,9 +29,9 @@ class MPRReport(IcdsBaseReport):
     def data_provider_classes(self):
         return [
             MPRIdentification,
-            MPROperationalization,
+            MPROperationalization if not self.icds_pre_release_features() else MPROperationalizationBeta,
             MPRSectors,
-            MPRPopulation,
+            MPRPopulation if not self.icds_pre_release_features() else MPRPopulationBeta,
             MPRBirthsAndDeaths,
             MPRAWCDetails,
             MPRSupplementaryNutrition,
@@ -78,4 +80,4 @@ class DashboardReport(CustomProjectReport):
 
     @classmethod
     def show_in_navigation(cls, domain=None, project=None, user=None):
-        return icds_toggles.DASHBOARD_ICDS_REPORT.enabled(domain)
+        return toggles.DASHBOARD_ICDS_REPORT.enabled(domain)
