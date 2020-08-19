@@ -376,6 +376,7 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
+    fully_immun_before_month_end = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -779,6 +780,8 @@ class AggChildHealth(models.Model, AggregateMixin):
     zscore_grading_hfa_recorded_in_month = models.IntegerField(blank=True, null=True)
     zscore_grading_wfh_recorded_in_month = models.IntegerField(blank=True, null=True)
     lunch_count_21_days = models.IntegerField(blank=True, null=True)
+    fully_immunized_eligible_in_month = models.IntegerField(blank=True, null=True)
+    fully_immun_before_month_end = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
