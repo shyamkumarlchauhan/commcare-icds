@@ -3,7 +3,7 @@ sudo: required
 group: edge
 env:
   - TEST=python ARGS="extensions/icds --noinput --stop --verbosity=2 --divide-depth=1 --with-timing --threshold=10 --max-test-time=29" REUSE_DB=true  # can't drop the citus DB since it's the postgres database
-  - TEST=javascript ARGS="icds_reports"
+  - TEST=javascript ARGS="icds_reports" JS_SETUP=yes
 before_install:
   # get newer version of docker-compose for variable substitution in compose files
   - sudo rm /usr/local/bin/docker-compose
