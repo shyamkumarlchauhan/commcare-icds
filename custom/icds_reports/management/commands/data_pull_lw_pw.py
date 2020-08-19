@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from django.db import connections
 
 from corehq.form_processor.interfaces.dbaccessors import CaseAccessors
-from corehq.sql_db.connections import get_icds_ucr_citus_db_alias
+from custom.icds_reports.utils.connections import get_icds_ucr_citus_db_alias
 
 
 def _run_custom_sql_script(command):
@@ -136,7 +136,7 @@ class Command(BaseCommand):
             print(f"{i*10000} / {total} record processed\n")
             i = i + 1
         csv_dict = list(awc_locs.values())
-        csv_columns = awc_locs[0].keys()
+        csv_columns = csv_dict[0].keys()
         print("preparing file ====\n")
         with open('pw_lw_data.csv', 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
