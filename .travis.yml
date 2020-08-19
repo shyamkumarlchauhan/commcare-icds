@@ -2,7 +2,8 @@ language: python
 sudo: required
 group: edge
 env:
-  - TEST=python REUSE_DB=true  # can't drop the citus DB since it's the postgres database
+  - TEST=python ARGS="extensions/icds --noinput --stop --verbosity=2 --divide-depth=1 --with-timing --threshold=10 --max-test-time=29" REUSE_DB=true  # can't drop the citus DB since it's the postgres database
+  - TEST=javascript ARGS="icds_reports"
 before_install:
   # get newer version of docker-compose for variable substitution in compose files
   - sudo rm /usr/local/bin/docker-compose
@@ -21,7 +22,7 @@ before_script:
   - docker-compose version
   - cd $HOME/commcare
 script:
-  - scripts/docker test extensions/icds --noinput --stop --verbosity=2 --divide-depth=1 --with-timing --threshold=10 --max-test-time=29
+  - scripts/docker test $ARGS
 after_success:
   # create symlink so artifacts are available
   - sudo ln -s $(pwd) /mnt/commcare-hq-ro
