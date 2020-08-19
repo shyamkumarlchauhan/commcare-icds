@@ -126,7 +126,7 @@ class Command(BaseCommand):
         for chunk in chunked(ccs_data.keys(), 100000):
             for case in case_accessor.get_cases(list(chunk)):
                 lmp = case.get_case_property('lmp')
-                end_date = datetime.datetime(2020, 8, 1)
+                end_date = datetime.datetime.now()
                 start_date = datetime.datetime(2018, 8, 1)
                 try:
                     if lmp and start_date <=parser.parse(lmp)<= end_date:
