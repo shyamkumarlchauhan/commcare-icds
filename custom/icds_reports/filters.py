@@ -10,7 +10,7 @@ from corehq.apps.reports.filters.fixtures import AsyncLocationFilter
 from corehq.apps.reports.filters.select import MonthFilter, YearFilter
 from custom.common.filters import RestrictedAsyncLocationFilter
 from memoized import memoized
-
+from django.db.models import Q
 
 def location_hierarchy_config(domain, location_types=None):
     location_types = location_types or ['state', 'district', 'block']
@@ -44,7 +44,7 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         for loc in locations:
             if not show_test and loc.metadata.get('is_test_location', 'real') == 'test':
                 continue
-            parent_id = str(loc.parent_id)
+            parent_id = loc.parent_id
             if parent_id in loc_dict:
                 loc_dict[parent_id].append(loc)
             else:
@@ -55,19 +55,19 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
     location_types = ['state', 'district', 'block', 'supervisor', 'awc']
     accessible_location = SQLLocation.objects.accessible_to_user(domain, user)
     location_level = 0
-
+    lineage = []
     if selected_loc_id:
         location = SQLLocation.by_location_id(selected_loc_id)
         location_level = location_types.index(location.location_type.name)
         lineage = location.get_ancestors()
-        all_ancestors = [loc.id for loc in lineage] + [None]
+        all_ancestors = [loc.id for loc in lineage]
         # to prevent all unnecessary decendent from being pulled
-        accessible_location = accessible_location.filter(parent_id__in=all_ancestors)
+        accessible_location = accessible_location.filter(Q(parent_id__in=all_ancestors)| Q(parent_id__isnull=True))
 
     accessible_location = accessible_location.filter(
-        location_type__name__in=location_types[: location_level + 1])
+        location_type__name__in=location_types[:location_level + 1])
     parent_child_dict = location_transform(set(accessible_location).union(set(lineage)))
-    locations_list = [loc_to_json(loc) for loc in parent_child_dict['None']]
+    locations_list = [loc_to_json(loc) for loc in parent_child_dict[None]]
 
     # if a location is selected, we need to pre-populate its location hierarchy
     # so that the data is available client-side to pre-populate the drop-downs
@@ -81,7 +81,7 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
             if ancestor_loc_dict is None:
                 break
 
-            children = parent_child_dict.get(str(loc.id), [])
+            children = parent_child_dict.get(loc.id, [])
             ancestor_loc_dict['children'] = [loc_to_json(loc) for loc in children]
 
             # reset level to one level down to find ancestor in next iteration
