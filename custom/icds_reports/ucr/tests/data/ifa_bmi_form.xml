@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<data name="Body Mass Index" uiVersion="1" version="33488" xmlns="http://openrosa.org/formdesigner/8D7650A1-949C-422E-9AFF-CC35ADD7A5E1" xmlns:jrm="http://dev.commcarehq.org/jr/xforms">
+	<prev_height/>
+	<prev_weight/>
+	<prev_form_opening_date/>
+	<latest_form_opening_date>2020-07-31</latest_form_opening_date>
+	<name>AG1</name>
+	<owner_id>83dc0d077dcb409e98d4afc95f1fcd52</owner_id>
+	<is_weight_instructions>yes</is_weight_instructions>
+	<weight_instruction_group>
+		<scale_calibration>yes</scale_calibration>
+		<needle_zero>yes</needle_zero>
+	</weight_instruction_group>
+	<is_height_instructions>no</is_height_instructions>
+	<weight_ag>54.333</weight_ag>
+	<height_ag>45.2</height_ag>
+	<weight_height_confirmation>ok</weight_height_confirmation>
+	<ag_last_bmi_date>2020-07-31</ag_last_bmi_date>
+	<bmi_calc>
+		<prev_bmi/>
+		<new_bmi>265.9419296734278</new_bmi>
+		<bmi_change>no_prev</bmi_change>
+		<bmi_rounded>266</bmi_rounded>
+		<bmi_grading>white</bmi_grading>
+		<bmi_image_path>jr://file/commcare/image/data/white_no_prev.png</bmi_image_path>
+	</bmi_calc>
+	<display_BMI>OK</display_BMI>
+	<case_load_ag_care0>
+		<n0:case case_id="ba4e50ed-f911-48ca-a8ea-2e4662d77b26" date_modified="2020-07-31T12:28:30.536+05:30" user_id="142ae6b2f5564043a697ce1045113e2d" xmlns:n0="http://commcarehq.org/case/transaction/v2">
+			<n0:update>
+				<n0:ag_last_bmi_date>2020-07-31</n0:ag_last_bmi_date>
+				<n0:bmi_rounded>266</n0:bmi_rounded>
+				<n0:height_ag>45.2</n0:height_ag>
+				<n0:new_bmi>265.9419296734278</n0:new_bmi>
+				<n0:weight_ag>54.333</n0:weight_ag>
+			</n0:update>
+		</n0:case>
+	</case_load_ag_care0>
+	<case_autoload_user_case>
+		<n1:case case_id="bbf16b736099442cb3b96db11e0895e1" date_modified="2020-07-31T12:28:30.536+05:30" user_id="142ae6b2f5564043a697ce1045113e2d" xmlns:n1="http://commcarehq.org/case/transaction/v2">
+			<n1:update>
+				<n1:latest_bmi_form_opening_date>2020-07-31</n1:latest_bmi_form_opening_date>
+			</n1:update>
+		</n1:case>
+	</case_autoload_user_case>
+	<n2:meta xmlns:n2="http://openrosa.org/jr/xforms">
+		<n2:deviceID>commcare_1be41f6a-e3d2-43d1-878a-d3e60600b6d2</n2:deviceID>
+		<n2:timeStart>2020-07-31T12:27:52.064+05:30</n2:timeStart>
+		<n2:timeEnd>2020-07-31T12:28:30.536+05:30</n2:timeEnd>
+		<n2:username>qa.thr.otp.awc3</n2:username>
+		<n2:userID>142ae6b2f5564043a697ce1045113e2d</n2:userID>
+		<n2:instanceID>10d8b141-b898-44b3-8c24-4ee2f19092f9</n2:instanceID>
+		<n3:appVersion xmlns:n3="http://commcarehq.org/xforms">CommCare Android, version &quot;2.48.9&quot;(461487). App v33488 (Functional version: V6). CommCare Version 2.48. Build 461487, built on: 2020-06-16</n3:appVersion>
+		<n2:drift>0</n2:drift>
+	</n2:meta>
+</data>

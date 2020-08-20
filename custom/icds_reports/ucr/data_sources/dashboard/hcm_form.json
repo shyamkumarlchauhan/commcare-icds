@@ -24,10 +24,10 @@
     "icds-staging"
   ],
   "config": {
-    "table_id": "static_dashboard_counselling_and_guidance_forms",
-    "display_name": "Forms - Counselling and Guidance for Dashboard",
+    "table_id": "static_dashboard_hcm_forms",
+    "display_name": "Forms - HCM form for Supplementary Nutrition",
     "referenced_doc_type": "XFormInstance",
-    "description": "Counselling and guidance form data for the dashboard",
+    "description": "HCM form data for the dashboard",
     "base_item_expression": {
       "type": "filter_items",
       "items_expression": {
@@ -41,7 +41,7 @@
          "type": "root_doc",
               "expression": {
             "type": "property_path",
-            "property_path": ["form", "counselling_session_conducted"]
+            "property_path": ["form", "check_ag_given_meal"]
           }
         },
         "property_value": "yes"
@@ -54,7 +54,7 @@
         "type": "property_name",
         "property_name": "xmlns"
       },
-      "property_value": "http://openrosa.org/formdesigner/A2604F2C-F52D-4B67-889F-C2F9B44698DD"
+      "property_value": "http://openrosa.org/formdesigner/567140DC-F0A4-4ADC-9646-16EF8E244382"
     },
     "validations": [
       {
@@ -125,42 +125,6 @@
         "type": "expression"
       },
       {
-        "display_name": "Block ID",
-        "transform": {},
-        "datatype": "string",
-        "expression": {
-          "location_id": {
-            "type": "named",
-            "name": "user_location_id"
-          },
-          "location_type": "block",
-          "location_property": "_id",
-          "type": "ancestor_location"
-        },
-        "is_primary_key": false,
-        "is_nullable": true,
-        "column_id": "block_id",
-        "type": "expression"
-      },
-      {
-        "display_name": "District ID",
-        "transform": {},
-        "datatype": "string",
-        "expression": {
-          "location_id": {
-            "type": "named",
-            "name": "user_location_id"
-          },
-          "location_type": "district",
-          "location_property": "_id",
-          "type": "ancestor_location"
-        },
-        "is_primary_key": false,
-        "is_nullable": true,
-        "column_id": "district_id",
-        "type": "expression"
-      },
-      {
         "display_name": "State ID",
         "transform": {},
         "datatype": "string",
@@ -201,7 +165,7 @@
         }
       },
       {
-        "column_id": "counselling_session_conducted",
+        "column_id": "check_ag_given_meal",
         "datatype": "small_integer",
         "type": "expression",
         "expression": {
@@ -210,7 +174,7 @@
             "type": "root_doc",
               "expression": {
             "type": "property_path",
-            "property_path": ["form", "counselling_session_conducted"]
+            "property_path": ["form", "check_ag_given_meal"]
           }
 
           },
