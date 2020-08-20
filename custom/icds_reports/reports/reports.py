@@ -6,7 +6,7 @@ from corehq.apps.reports.filters.select import YearFilter
 from corehq.apps.reports.standard import CustomProjectReport
 from custom.icds_reports.asr_sqldata import ASRIdentification, ASROperationalization, ASRPopulation, Annual, \
     DisabledChildren, Infrastructure, Equipment
-from custom.icds_reports.filters import ICDSMonthFilter, IcdsLocationFilter, IcdsRestrictedLocationFilter
+from custom.icds_reports.filters import ICDSMonthFilter, IcdsLocationFilter, IcdsASRLocationFilter
 from custom.icds_reports.mpr_sqldata import MPRIdentification, MPRSectors, MPRPopulation, MPRBirthsAndDeaths, \
     MPRAWCDetails, MPRSupplementaryNutrition, MPRUsingSalt, MPRProgrammeCoverage, MPRPreschoolEducation, \
     MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, \
@@ -52,7 +52,7 @@ class ASRReport(IcdsBaseReport):
     slug = 'asr_report'
     name = 'ASR'
 
-    fields = [IcdsRestrictedLocationFilter]
+    fields = [IcdsASRLocationFilter]
 
     @property
     def data_provider_classes(self):
