@@ -4,13 +4,15 @@ import pytz
 
 from corehq.apps.domain.models import Domain
 from corehq.apps.hqwebapp.crispy import CSS_FIELD_CLASS, CSS_LABEL_CLASS
-from corehq.apps.locations.models import SQLLocation
+from corehq.apps.locations.models import SQLLocation, LocationType
 from corehq.apps.reports.filters.base import BaseSingleOptionFilter
 from corehq.apps.reports.filters.fixtures import AsyncLocationFilter
 from corehq.apps.reports.filters.select import MonthFilter, YearFilter
 from custom.common.filters import RestrictedAsyncLocationFilter
 from memoized import memoized
 from django.db.models import Q
+from collections import defaultdict
+
 
 def location_hierarchy_config(domain, location_types=None):
     location_types = location_types or ['state', 'district', 'block']
@@ -40,19 +42,16 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         return None
 
     def location_transform(locations):
-        loc_dict = dict()
+        loc_dict = defaultdict(lambda: [])
         for loc in locations:
             if not show_test and loc.metadata.get('is_test_location', 'real') == 'test':
                 continue
             parent_id = loc.parent_id
-            if parent_id in loc_dict:
-                loc_dict[parent_id].append(loc)
-            else:
-                loc_dict[parent_id] = [loc]
+            loc_dict[parent_id].append(loc)
 
         return loc_dict
 
-    location_types = ['state', 'district', 'block', 'supervisor', 'awc']
+    location_types = [loc_type.name for loc_type in LocationType.objects.by_domain(domain)]
     accessible_location = SQLLocation.objects.accessible_to_user(domain, user)
     location_level = 0
     lineage = []
@@ -117,7 +116,7 @@ class IcdsLocationFilter(AsyncLocationFilter):
         return load_restricted_locs(self.domain, loc_id, user=self.request.couch_user, show_test=show_test)
 
 
-class IcdsRestrictedLocationFilter(IcdsLocationFilter):
+class IcdsASRLocationFilter(IcdsLocationFilter):
 
     @property
     def location_hierarchy_config(self):
