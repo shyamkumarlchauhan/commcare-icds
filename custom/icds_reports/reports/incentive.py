@@ -29,13 +29,13 @@ class IncentiveReport(object):
                 month=self.month, block_id=self.location
             ).order_by('-supervisor_name', 'awc_name')
         data = data.values(
-                'state_name', 'district_name', 'block_name', 'supervisor_name', 'awc_name', 'aww_name',
+                'state_name', 'district_name', 'block_name', 'supervisor_name', 'awc_name', 'aww_name', 'awc_site_code',
                 'contact_phone_number', 'wer_weighed', 'wer_eligible', 'awc_num_open', 'valid_visits',
                 'expected_visits', 'is_launched', 'visit_denominator', 'awh_eligible', 'incentive_eligible'
             )
 
         headers = [
-                'State', 'District', 'Block', 'Supervisor', 'AWC', 'AWW Name', 'AWW Contact Number',
+                'State', 'District', 'Block', 'Supervisor', 'AWC', 'AWW Name', 'AWC Site Code', 'AWW Contact Number',
                 'Home Visits Conducted', 'Weighing Efficiency', 'AWW Eligible for Incentive',
                 'Number of Days AWC was Open', 'AWH Eligible for Incentive'
             ]
@@ -92,6 +92,7 @@ class IncentiveReport(object):
 
                 row_data.extend([
                     _format_infrastructure_data(row['aww_name']),
+                    _format_infrastructure_data(row['awc_site_code']),
                     _format_infrastructure_data(row['contact_phone_number']),
                     home_visit_conducted,
                     weighing_efficiency,
