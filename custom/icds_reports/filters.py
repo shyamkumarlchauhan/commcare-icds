@@ -42,8 +42,17 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         return None
 
     def location_transform(locations):
+        """
+        It returns a dict of locations mapped with their parents.
+        :param locations: list of locations(list of SQLLocation objects)
+        :return: {
+        None: [loc1, loc2, loc3],  # None signifies No parent. i.e locs are root locations
+        loc1.id: [loc5, loc6, loc7],
+        }
+        """
         loc_dict = defaultdict(lambda: [])
         for loc in locations:
+            # do not include test locations
             if not show_test and loc.metadata.get('is_test_location', 'real') == 'test':
                 continue
             parent_id = loc.parent_id
@@ -60,11 +69,14 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         location_level = location_types.index(location.location_type.name)
         lineage = location.get_ancestors()
         all_ancestors = [loc.id for loc in lineage]
-        # to prevent all unnecessary decendent from being pulled
+        # Only pull locations out of all accessible locations which are either root
+        # or has one of the ancestors as parent
         accessible_location = accessible_location.filter(Q(parent_id__in=all_ancestors)| Q(parent_id__isnull=True))
 
+    # Only pull locations which are above or at level of location selected
     accessible_location = accessible_location.filter(
         location_type__name__in=location_types[:location_level + 1])
+
     parent_child_dict = location_transform(set(accessible_location).union(set(lineage)))
     locations_list = [loc_to_json(loc) for loc in parent_child_dict[None]]
 
@@ -73,6 +85,8 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
     if selected_loc_id:
         json_at_level = locations_list
         for loc in lineage:
+            # Get the ancestor_dict out of all present at the level
+            # which needs to be drilled down
             ancestor_loc_dict = _get_ancestor_loc_dict(json_at_level, loc)
 
             # could not find the ancestor at the level,
