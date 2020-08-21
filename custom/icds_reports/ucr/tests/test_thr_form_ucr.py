@@ -21,7 +21,8 @@ class TestTHRForms(BaseFormsTest):
                 "ccs_record_case_id": "ef8a946d-3f6a-4715-b743-68d55b86a230",
                 "child_health_case_id": "cccd8d00-851c-4524-ab12-811ac98d1fe9",
                 "days_ration_given_child": 22,
-                "days_ration_given_mother": None
+                "days_ration_given_mother": None,
+                "photo_thr_packets_distributed": None
             }])
 
     def test_without_child_form(self):
@@ -34,5 +35,6 @@ class TestTHRForms(BaseFormsTest):
                 "ccs_record_case_id": "ecf7d5cc-123d-41d2-a0d7-edf722895d13",
                 "child_health_case_id": None,
                 "days_ration_given_child": None,
-                "days_ration_given_mother": 22
+                "days_ration_given_mother": 22,
+                "photo_thr_packets_distributed": None
             }])

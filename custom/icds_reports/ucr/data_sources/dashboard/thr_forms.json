@@ -186,6 +186,18 @@
           "type": "property_name",
           "property_name": "days_ration_given_child"
         }
+      },
+      {
+        "column_id": "photo_thr_packets_distributed",
+        "datatype": "string",
+        "expression": {
+          "type": "property_path",
+          "property_path": [
+            "form",
+            "photo_thr_packets_distributed"
+          ]
+        },
+        "type": "expression"
       }
     ],
     "named_expressions": {
