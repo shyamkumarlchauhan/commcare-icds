@@ -25,7 +25,28 @@ def location_hierarchy_config(domain, location_types=None):
 
 
 def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=False):
+    """
+    Returns a dict of a set of locations based on location selected and accessible locations.
+    1. User with full organisation access:
+       a) with no location selected: use root locations.
+       b) with a location selected: along with root locations
+         include the hierarchal path uptil the selected location from the root. For example :
+           if loc2 is selected and hierarchy is loc1>loc2>loc3 then it will return
+            [{ name:loc1,
+               children: [{ name: loc2
+                          }]
+             },
+             { name: loc5 }
+            ]
+    2. User with limited access(only locations under user access are included)
+       a) with no location selected: By default selected location is user's primary location and
+                                     rest is same as point 1.b
+       b) with a location selected: Same as Point 1.b
 
+    Basic logic is: Start with all root locations, put all children of location
+                    which is drilled(based on user permission) but drill only the  location
+                    which lies in hierarchy of selected location.
+    """
     def loc_to_json(loc):
         return {
             'name': loc.name,
@@ -35,9 +56,9 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
             'can_edit': True
         }
 
-    def _get_ancestor_loc_dict(location_list, location):
+    def _get_ancestor_loc_dict(location_list, location_id):
         for parent_location in location_list:
-            if parent_location['uuid'] == location.location_id:
+            if parent_location['uuid'] == location_id:
                 return parent_location
         return None
 
@@ -69,9 +90,10 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         location_level = location_types.index(location.location_type.name)
         lineage = location.get_ancestors()
         all_ancestors = [loc.id for loc in lineage]
-        # Only pull locations out of all accessible locations which are either root
-        # or has one of the ancestors as parent
-        accessible_location = accessible_location.filter(Q(parent_id__in=all_ancestors)| Q(parent_id__isnull=True))
+        # No need to pull the locations whose parents or they themselves do not present in the
+        # hierarchy of the location selected. Also check for parent_id null in case root location
+        # is selected
+        accessible_location = accessible_location.filter(Q(parent_id__in=all_ancestors) | Q(parent_id__isnull=True))
 
     # Only pull locations which are above or at level of location selected
     accessible_location = accessible_location.filter(
@@ -87,7 +109,7 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         for loc in lineage:
             # Get the ancestor_dict out of all present at the level
             # which needs to be drilled down
-            ancestor_loc_dict = _get_ancestor_loc_dict(json_at_level, loc)
+            ancestor_loc_dict = _get_ancestor_loc_dict(json_at_level, loc.location_id)
 
             # could not find the ancestor at the level,
             # user should not have reached at this point to try and access an ancestor that is not permitted
