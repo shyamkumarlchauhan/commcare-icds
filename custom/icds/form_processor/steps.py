@@ -2,7 +2,7 @@ import xml2json
 
 from abc import ABC, abstractmethod
 
-from custom.icds.data_vault import new_vault_entry, save_vault_entries
+from custom.icds.data_vault import new_vault_entry
 from custom.icds.form_processor.consts import (
     AADHAAR_XFORM_SUBMISSION_PATTERNS,
 )
@@ -25,17 +25,8 @@ class VaultPatternExtractor(FormProcessingStep):
         self._patterns = patterns
 
     def __call__(self, context):
-        return self._process(context)
-
-    def _process(self, context):
-        new_xml = self._replace_values(context.instance_xml)
-        context.instance_xml = new_xml
-
-    def _replace_values(self, xml):
-        vault_entries = self._replace_matches(xml)
-        if vault_entries:
-            save_vault_entries(vault_entries)
-        return xml
+        vault_entries = self._replace_matches(context.instance_xml)
+        context.supplementary_models.extend(vault_entries)
 
     def _replace_matches(self, xml):
         vault_entries = {}
