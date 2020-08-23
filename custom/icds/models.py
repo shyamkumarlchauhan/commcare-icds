@@ -1,3 +1,4 @@
+import secrets
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -185,6 +186,22 @@ class HostedCCZCustomSupportingFile(models.Model):
 
     def __str__(self):
         return str(self.file) + "@" + str(self.link)
+
+
+def _default_key():
+    return secrets.token_urlsafe(16)
+
+
+class VaultEntry(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    key = models.CharField(max_length=25, default=_default_key)
+    value = models.CharField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['key'])
+        ]
 
 
 def delete_ccz_for_link(sender, instance, **kwargs):
