@@ -35,6 +35,8 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
         FormProcessorTestUtils.delete_all_cases(self.domain)
         super(SubmissionSQLTransactionsTest, self).tearDown()
 
+    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
+           ["http://commcarehq.org/test/submit"])
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
@@ -54,11 +56,47 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
             f"<secret_case_property>vault:{vault_entry.key}"
             f"</secret_case_property>" in saved_form_xml)
 
+    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
+        domain: [DummyVaultPatternExtractor]
+    })
+    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
+           {domain: [VaultEntry]})
+    def test_no_whitelisted_submit_with_vault_entries(self):
+        self.assertEqual(VaultEntry.objects.count(), 0)
+        form_xml = self.get_xml('form_with_vault_item')
+        result = submit_form_locally(form_xml, domain=self.domain)
+        self.assertEqual(VaultEntry.objects.count(), 1)
+        vault_entry = VaultEntry.objects.first()
+        self.assertEqual(vault_entry.value, "0123456789")
+
+        saved_form_xml = result.xform.get_xml().decode('utf-8')
+        self.assertFalse("0123456789" in saved_form_xml)
+        self.assertTrue(
+            f"<secret_case_property>vault:{vault_entry.key}"
+            f"</secret_case_property>" in saved_form_xml)
+
+    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
+           ["http://google.com/test/submit"])
+    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
+        domain: [DummyVaultPatternExtractor]
+    })
+    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
+           {domain: [VaultEntry]})
+    def test_non_whitelisted_submit_with_vault_entries(self):
+        self.assertEqual(VaultEntry.objects.count(), 0)
+        form_xml = self.get_xml('form_with_vault_item')
+        result = submit_form_locally(form_xml, domain=self.domain)
+        self.assertEqual(VaultEntry.objects.count(), 0)
+        saved_form_xml = result.xform.get_xml().decode('utf-8')
+        self.assertTrue("0123456789" in saved_form_xml)
+
 
 @use_sql_backend
 class FundamentalCaseTestsSQL(FundamentalBaseTests):
     domain = "icds-cas"
 
+    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
+           ["http://commcarehq.org/case"])
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
@@ -85,6 +123,8 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
         vault_entry = VaultEntry.objects.last()
         self.assertEqual(vault_entry.value, "7777777777")
 
+    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
+           ["http://commcarehq.org/case"])
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
