@@ -2,6 +2,7 @@ from datetime import datetime
 import uuid
 
 from django.test import TestCase
+from mock import patch
 
 from corehq.form_processor.tests.utils import (
     use_sql_backend,
@@ -16,6 +17,8 @@ from corehq.form_processor.tests.test_basics import (
     FundamentalBaseTests,
 )
 from corehq.apps.receiverwrapper.util import submit_form_locally
+
+from custom.icds.form_processor.tests.utils import DummyVaultPatternExtractor
 from custom.icds.models import VaultEntry
 
 
@@ -32,6 +35,9 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
         FormProcessorTestUtils.delete_all_cases(self.domain)
         super(SubmissionSQLTransactionsTest, self).tearDown()
 
+    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
+        domain: [DummyVaultPatternExtractor]
+    })
     def test_submit_with_vault_items(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
@@ -51,6 +57,9 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
 class FundamentalCaseTestsSQL(FundamentalBaseTests):
     domain = "icds-cas"
 
+    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
+        domain: [DummyVaultPatternExtractor]
+    })
     def test_failed_form_with_case_with_secret(self):
         case_id = uuid.uuid4().hex
         modified_on = datetime.utcnow()
@@ -72,6 +81,9 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
         vault_entry = VaultEntry.objects.last()
         self.assertEqual(vault_entry.value, "7777777777")
 
+    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
+        domain: [DummyVaultPatternExtractor]
+    })
     def test_successful_form_with_case_with_secret(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         case_id = uuid.uuid4().hex
