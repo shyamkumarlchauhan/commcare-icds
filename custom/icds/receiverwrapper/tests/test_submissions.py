@@ -30,7 +30,6 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
 
     def tearDown(self):
         FormProcessorTestUtils.delete_all_xforms(self.domain)
-        FormProcessorTestUtils.delete_all_ledgers(self.domain)
         FormProcessorTestUtils.delete_all_cases(self.domain)
         super(SubmissionSQLTransactionsTest, self).tearDown()
 
