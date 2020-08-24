@@ -49,6 +49,7 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
         self.assertEqual(VaultEntry.objects.count(), 1)
         vault_entry = VaultEntry.objects.first()
         self.assertEqual(vault_entry.value, "0123456789")
+        self.assertEqual(vault_entry.form_id, result.xform.form_id)
 
         saved_form_xml = result.xform.get_xml().decode('utf-8')
         self.assertFalse("0123456789" in saved_form_xml)

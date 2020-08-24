@@ -197,11 +197,16 @@ class VaultEntry(models.Model):
     key = models.CharField(max_length=25, default=_default_key)
     value = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
+    form_id = models.CharField(max_length=255, db_index=True, default=None)
 
     class Meta:
         indexes = [
             models.Index(fields=['key'])
         ]
+
+    def save(self, *args, **kwargs):
+        self.form_id = kwargs.pop('xform').form_id
+        super(VaultEntry, self).save(*args, **kwargs)
 
 
 def delete_ccz_for_link(sender, instance, **kwargs):
