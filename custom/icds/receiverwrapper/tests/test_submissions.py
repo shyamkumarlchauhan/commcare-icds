@@ -18,7 +18,6 @@ from corehq.form_processor.tests.test_basics import (
 )
 from corehq.apps.receiverwrapper.util import submit_form_locally
 
-from custom.icds.form_processor.tests.utils import DummyVaultPatternExtractor
 from custom.icds.models import VaultEntry
 
 
@@ -35,66 +34,50 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
         FormProcessorTestUtils.delete_all_cases(self.domain)
         super(SubmissionSQLTransactionsTest, self).tearDown()
 
-    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
-           ["http://commcarehq.org/test/submit"])
-    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
-        domain: [DummyVaultPatternExtractor]
-    })
     def test_submit_with_vault_items(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
         result = submit_form_locally(form_xml, domain=self.domain)
         self.assertEqual(VaultEntry.objects.count(), 1)
         vault_entry = VaultEntry.objects.first()
-        self.assertEqual(vault_entry.value, "0123456789")
+        self.assertEqual(vault_entry.value, "123456789012")
         self.assertEqual(vault_entry.form_id, result.xform.form_id)
 
         saved_form_xml = result.xform.get_xml().decode('utf-8')
-        self.assertFalse("0123456789" in saved_form_xml)
+        self.assertFalse("123456789012" in saved_form_xml)
         self.assertTrue(
-            f"<secret_case_property>vault:{vault_entry.key}"
-            f"</secret_case_property>" in saved_form_xml)
+            f"<aadhar_number>vault:{vault_entry.key}"
+            f"</aadhar_number>" in saved_form_xml)
 
-    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
-        domain: [DummyVaultPatternExtractor]
-    })
+    @patch('custom.icds.form_processor.steps.AADHAAR_FORMS_XMLNSES', [])
     def test_no_whitelisted_submit_with_vault_entries(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
         result = submit_form_locally(form_xml, domain=self.domain)
         self.assertEqual(VaultEntry.objects.count(), 1)
         vault_entry = VaultEntry.objects.first()
-        self.assertEqual(vault_entry.value, "0123456789")
+        self.assertEqual(vault_entry.value, "123456789012")
 
         saved_form_xml = result.xform.get_xml().decode('utf-8')
-        self.assertFalse("0123456789" in saved_form_xml)
+        self.assertFalse("123456789012" in saved_form_xml)
         self.assertTrue(
-            f"<secret_case_property>vault:{vault_entry.key}"
-            f"</secret_case_property>" in saved_form_xml)
+            f"<aadhar_number>vault:{vault_entry.key}"
+            f"</aadhar_number>" in saved_form_xml)
 
-    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
-           ["http://google.com/test/submit"])
-    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
-        domain: [DummyVaultPatternExtractor]
-    })
+    @patch('custom.icds.form_processor.steps.AADHAAR_FORMS_XMLNSES', ["http://google.com/test/submit"])
     def test_non_whitelisted_submit_with_vault_entries(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
         result = submit_form_locally(form_xml, domain=self.domain)
         self.assertEqual(VaultEntry.objects.count(), 0)
         saved_form_xml = result.xform.get_xml().decode('utf-8')
-        self.assertTrue("0123456789" in saved_form_xml)
+        self.assertTrue("123456789012" in saved_form_xml)
 
 
 @use_sql_backend
 class FundamentalCaseTestsSQL(FundamentalBaseTests):
     domain = "icds-cas"
 
-    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
-           ["http://commcarehq.org/case"])
-    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
-        domain: [DummyVaultPatternExtractor]
-    })
     def test_failed_form_with_case_with_secret(self):
         case_id = uuid.uuid4().hex
         modified_on = datetime.utcnow()
@@ -106,7 +89,7 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
             case_name='this is a very long case name that exceeds the '
                       '255 char limit' * 5,
             date_modified=modified_on, date_opened=modified_on, update={
-                'dynamic': '123', 'secret_case_property': '7777777777'
+                'dynamic': '123', 'aadhar_number': '123456789012'
             },
             domain=self.domain,
         )
@@ -114,13 +97,8 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
             self.casedb.get_case(case_id)
         self.assertEqual(VaultEntry.objects.count(), 1)
         vault_entry = VaultEntry.objects.last()
-        self.assertEqual(vault_entry.value, "7777777777")
+        self.assertEqual(vault_entry.value, "123456789012")
 
-    @patch('custom.icds.form_processor.tests.utils.WHITELISTED_XMLNS',
-           ["http://commcarehq.org/case"])
-    @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
-        domain: [DummyVaultPatternExtractor]
-    })
     def test_successful_form_with_case_with_secret(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         case_id = uuid.uuid4().hex
@@ -131,15 +109,15 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
             case_type='demo',
             case_name='secret_case', date_modified=modified_on,
             date_opened=modified_on, update={
-                'dynamic': '123', 'secret_case_property': '0123456789'
+                'dynamic': '123', 'aadhar_number': '123456789012'
             },
             domain=self.domain,
         )
         case = self.casedb.get_case(case_id)
         self.assertEqual(VaultEntry.objects.count(), 1)
         vault_entry = VaultEntry.objects.last()
-        self.assertEqual(vault_entry.value, "0123456789")
-        self.assertEqual(case.get_case_property('secret_case_property'),
+        self.assertEqual(vault_entry.value, "123456789012")
+        self.assertEqual(case.get_case_property('aadhar_number'),
                          f"vault:{vault_entry.key}")
 
         # update case
@@ -147,13 +125,13 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
             False, case_id, user_id='user2', owner_id='owner2',
             case_name='update_secret_case', date_modified=modified_on,
             date_opened=modified_on, update={
-                'secret_case_property': '9876543210'
+                'aadhar_number': '123456789013'
             },
             domain=self.domain,
         )
         case = self.casedb.get_case(case_id)
         self.assertEqual(VaultEntry.objects.count(), 2)
         vault_entry = VaultEntry.objects.last()
-        self.assertEqual(vault_entry.value, "9876543210")
-        self.assertEqual(case.get_case_property('secret_case_property'),
+        self.assertEqual(vault_entry.value, "123456789013")
+        self.assertEqual(case.get_case_property('aadhar_number'),
                          f"vault:{vault_entry.key}")

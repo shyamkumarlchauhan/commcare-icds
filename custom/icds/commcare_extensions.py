@@ -13,6 +13,7 @@ from corehq.apps.userreports.extension_points import (
     static_ucr_report_paths,
 )
 from corehq.extensions.extension_points import domain_specific_urls
+from corehq.form_processor.extension_points import get_form_submission_context_class
 from corehq.tabs.extension_points import (
     uitab_dropdown_items,
     uitab_sidebar_items, uitab_classes,
@@ -25,6 +26,8 @@ from custom.icds_core.const import (
     ManageHostedCCZ_urlname,
     SMSUsageReport_urlname,
 )
+
+from custom.icds.form_processor.submission_post import ICDSSubmissionFormContext
 
 
 @uitab_dropdown_items.extend(domains=["icds-cas"])
@@ -158,3 +161,8 @@ def icds_tabs():
     return [
         HostedCCZTab,
     ]
+
+
+@get_form_submission_context_class.extend()
+def icds_form_submission_context_class():
+    return ICDSSubmissionFormContext

@@ -1,7 +1,5 @@
 import xml2json
 
-from abc import ABC, abstractmethod
-
 from custom.icds.data_vault import new_vault_entry
 from custom.icds.form_processor.consts import (
     AADHAAR_XFORM_SUBMISSION_PATTERNS,
@@ -9,32 +7,23 @@ from custom.icds.form_processor.consts import (
 )
 
 
-class FormProcessingStep(ABC):
-    @abstractmethod
-    def __call__(self, context):
-        """
-        Process the form context object. Return an instance of
-        FormProcessingResult to terminate the processing or None
-        To allow processing to continue to the next step
-        :param context: form context
-        """
-        pass
-
-
-class VaultPatternExtractor(FormProcessingStep):
+class AadhaarNumberExtractor(object):
     """
-    Extract based on tag of xml nodes containing text that matches a regex.
-    Pattern example: {'secret_case_property': re.compile(r'^\d{10}$')}
-    to match any node 'secret_case_property' with text that is 10 digits
-    """
-    def __init__(self, patterns, xmlns_whitelist=None):
-        self._patterns = patterns
-        self._xmlns_whitelist = xmlns_whitelist or []
+     Extract based on tag of xml nodes containing text that matches a regex.
+     Pattern example: {'aadhar_number': re.compile(r'^\d{12}$')}
+     to match any node 'aadhar_number' with text that is 12 digits
+     """
+    def __init__(self):
+        self._patterns = AADHAAR_XFORM_SUBMISSION_PATTERNS
+        self._xmlns_whitelist = AADHAAR_FORMS_XMLNSES
 
     def __call__(self, context):
-        if self._should_process(context.instance_xml):
-            vault_entries = self._replace_matches(context.instance_xml)
-            context.supplementary_models.extend(vault_entries)
+        instance_xml = context.get_instance_xml()
+        if self._should_process(instance_xml):
+            vault_entries = self._replace_matches(instance_xml)
+            if vault_entries:
+                context.supplementary_models.extend(vault_entries)
+                context.update_instance(instance_xml)
 
     def _should_process(self, xml):
         if not self._xmlns_whitelist:
@@ -58,13 +47,3 @@ class VaultPatternExtractor(FormProcessingStep):
             if tag_name == tag and tag_value_regex.match(text):
                 return True
         return False
-
-
-class AadhaarNumberExtractor(VaultPatternExtractor):
-    identifier = "AadhaarNumber"
-
-    def __init__(self):
-        super(AadhaarNumberExtractor, self).__init__(
-            patterns=AADHAAR_XFORM_SUBMISSION_PATTERNS,
-            xmlns_whitelist=AADHAAR_FORMS_XMLNSES
-        )
