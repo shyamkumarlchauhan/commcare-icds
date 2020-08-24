@@ -154,10 +154,13 @@ function LocationFilterController($rootScope, $scope, $location, $uibModal, loca
     vm.allUserLocationId = allUserLocationId;
     vm.animationsEnabled = true;
 
+    // if user is not a national level user and locationid is either '' or undefined, then this function returns false,
+    // then selectedLocationId will become userLocationId and the same is updated in the url params also
     function locationIdIsNullOrEmpty() {
         var emptyValues = ['undefined', 'null'];
         if (!haveAccessToAllLocations) {
             emptyValues.push('');
+            emptyValues.push(void(0));
         }
         return emptyValues.indexOf($location.search()['location_id']) === -1;
     }
@@ -169,8 +172,8 @@ function LocationFilterController($rootScope, $scope, $location, $uibModal, loca
     vm.hierarchy = [];
     vm.currentLevel = 0;
     vm.maxLevel = 0;
-    vm.location_id = $location.search()['location_id'] !== 'undefined' &&
-        $location.search()['location_id'] !== 'null' ? $location.search()['location_id'] : vm.selectedLocationId;
+    vm.location_id = vm.selectedLocationId;
+    $location.search('location_id', vm.location_id);
 
     var ALL_OPTION = {
         name: 'All',
