@@ -22,6 +22,11 @@ class FormProcessingStep(ABC):
 
 
 class VaultPatternExtractor(FormProcessingStep):
+    """
+    Extract based on tag of xml nodes containing text that matches a regex.
+    Pattern example: {'secret_case_property': re.compile(r'^\d{10}$')}
+    to match any node 'secret_case_property' with text that is 10 digits
+    """
     def __init__(self, patterns, xmlns_whitelist=None):
         self._patterns = patterns
         self._xmlns_whitelist = xmlns_whitelist or []
