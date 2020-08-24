@@ -9,7 +9,8 @@ from custom.icds_reports.asr_sqldata import ASRIdentification, ASROperationaliza
 from custom.icds_reports.filters import ICDSMonthFilter, IcdsLocationFilter, IcdsRestrictedLocationFilter
 from custom.icds_reports.mpr_sqldata import MPRIdentification, MPRSectors, MPRPopulation, MPRBirthsAndDeaths, \
     MPRAWCDetails, MPRSupplementaryNutrition, MPRUsingSalt, MPRProgrammeCoverage, MPRPreschoolEducation, \
-    MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, MPRMonitoringBeta, MPRVhndBeta
+    MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, MPRMonitoringBeta, \
+    MPRVhndBeta, MPRReferralServicesBeta
 from custom.icds_reports.mpr_sqldata import MPROperationalization
 from custom.icds_reports.reports import IcdsBaseReport
 
@@ -39,7 +40,7 @@ class MPRReport(IcdsBaseReport):
             MPRGrowthMonitoring,
             MPRImmunizationCoverage,
             MPRVhnd if not self.icds_pre_release_features() else MPRVhndBeta,
-            MPRReferralServices,
+            MPRReferralServices if not self.icds_pre_release_features() else MPRReferralServicesBeta,
             MPRMonitoring if not self.icds_pre_release_features() else MPRMonitoringBeta
         ]
 

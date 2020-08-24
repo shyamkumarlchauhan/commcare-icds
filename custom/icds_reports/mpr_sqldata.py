@@ -2282,6 +2282,104 @@ class MPRReferralServices(ICDSMixin, MPRData):
         )
 
 
+class MPRReferralServicesBeta(MPRReferralServices):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        (
+            'e. Fever/offensive discharge after delivery',
+            'referred_fever_discharge',
+            {
+                'columns': ('referred_fever_discharge',),
+                'func': truediv,
+                'second_value': 'location_number',
+                'format': 'percent'
+            },
+            {
+                'columns': ('referred_fever_discharge_all',),
+                'func': truediv,
+                'second_value': 'location_number',
+            },
+            {
+                'columns': ('fever_discharge_reached_count',),
+                'func': truediv,
+                'second_value': 'location_number',
+            }
+        ),
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            referred_premature=F('num_premature_referral_awcs'),
+            referred_premature_all=F('total_premature_referrals'),
+            premature_reached_count=F('total_premature_reached_facility'),
+
+            referred_sepsis=F('num_premature_referral_awcs'),
+            referred_sepsis_all=F('total_premature_referrals'),
+            sepsis_reached_count=F('total_premature_reached_facility'),
+
+            referred_diarrhoea=F('num_premature_referral_awcs'),
+            referred_diarrhoea_all=F('total_premature_referrals'),
+            diarrhoea_reached_count=F('total_premature_reached_facility'),
+
+            referred_pneumonia=F('num_premature_referral_awcs'),
+            referred_pneumonia_all=F('total_premature_referrals'),
+            pneumonia_reached_count=F('total_premature_reached_facility'),
+
+            referred_fever_child=F('num_premature_referral_awcs'),
+            referred_fever_child_all=F('total_premature_referrals'),
+            fever_child_reached_count=F('total_premature_reached_facility'),
+
+            referred_severely_underweight=F('num_premature_referral_awcs'),
+            referred_severely_underweight_all=F('total_premature_referrals'),
+            sev_underweight_reached_count=F('total_premature_reached_facility'),
+
+            referred_other_child=F('num_premature_referral_awcs'),
+            referred_other_child_all=F('total_premature_referrals'),
+            other_child_reached_count=F('total_premature_reached_facility'),
+
+            referred_bleeding=F('num_premature_referral_awcs'),
+            referred_bleeding_all=F('total_premature_referrals'),
+            bleeding_reached_count=F('total_premature_reached_facility'),
+
+            referred_convulsions=F('num_premature_referral_awcs'),
+            referred_convulsions_all=F('total_premature_referrals'),
+            convulsions_reached_count=F('total_premature_reached_facility'),
+
+            referred_prolonged_labor=F('num_premature_referral_awcs'),
+            referred_prolonged_labor_all=F('total_premature_referrals'),
+            prolonged_labor_reached_count=F('total_premature_reached_facility'),
+
+            referred_abortion_complications=F('num_premature_referral_awcs'),
+            referred_abortion_complications_all=F('total_premature_referrals'),
+            abort_comp_reached_count=F('total_premature_reached_facility'),
+
+            referred_fever_discharge=F('num_premature_referral_awcs'),
+            referred_fever_discharge_all=F('total_premature_referrals'),
+            fever_discharge_reached_count=F('total_premature_reached_facility'),
+
+            referred_other=F('num_premature_referral_awcs'),
+            referred_other_all=F('total_premature_referrals'),
+            other_reached_count=F('total_premature_reached_facility'),
+
+        ).first()
+
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+
+        print(data)
+        return {key: value if value else 0 for key, value in data.items()}
+
+
+
+
 class MPRMonitoring(ICDSMixin, MPRData):
 
     title = '12. Monitoring and Supervision During the Month'

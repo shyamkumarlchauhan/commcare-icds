@@ -40,6 +40,10 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
         return get_table_name(self.domain, 'static-visitorbook_forms')
 
     @property
+    def person_case_ucr_table(self):
+        return get_table_name(self.domain, 'static-person_cases_v3')
+
+    @property
     def awc_vhnd_ucr_table(self):
         return get_table_name(self.domain, 'static-vhnd_form')
 
@@ -163,6 +167,130 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             'next_month_start_date': next_month_start
         }
 
+        yield f"""
+        
+        UPDATE  "{self.temporary_tablename}" agg_mpr
+        SET
+            num_premature_referral_awcs = CASE WHEN ut.total_premature_referrals>0 THEN 1 ELSE 0 END,
+            total_premature_referrals = ut.total_premature_referrals,
+            total_premature_reached_facility = ut.total_premature_reached_facility,
+
+            num_sepsis_referral_awcs = CASE WHEN ut.total_sepsis_referrals>0 THEN 1 ELSE 0 END,
+            total_sepsis_referrals = ut.total_sepsis_referrals,
+            total_sepsis_reached_facility = ut.total_sepsis_reached_facility,
+
+            num_diarrhoea_referral_awcs = CASE WHEN ut.total_diarrhoea_referrals>0 THEN 1 ELSE 0 END,
+            total_diarrhoea_referrals = ut.total_diarrhoea_referrals,
+            total_diarrhoea_reached_facility = ut.total_diarrhoea_reached_facility,
+
+            num_pneumonia_referral_awcs = CASE WHEN ut.total_pneumonia_referrals>0 THEN 1 ELSE 0 END,
+            total_pneumonia_referrals = ut.total_pneumonia_referrals,
+            total_pneumonia_reached_facility = ut.total_pneumonia_reached_facility,
+
+            num_fever_referral_awcs = CASE WHEN ut.total_fever_referrals>0 THEN 1 ELSE 0 END,
+            total_fever_referrals = ut.total_fever_referrals,
+            total_fever_reached_facility = ut.total_fever_reached_facility,
+
+            num_severely_underweight_referral_awcs = CASE WHEN ut.total_severely_underweight_referrals>0 THEN 1 ELSE 0 END,
+            total_severely_underweight_referrals = ut.total_severely_underweight_referrals,
+            total_severely_underweight_reached_facility = ut.total_severely_underweight_reached_facility,
+
+            num_other_child_referral_awcs = CASE WHEN ut.total_other_child_referrals>0 THEN 1 ELSE 0 END,
+            total_other_child_referrals = ut.total_other_child_referrals,
+            total_other_child_reached_facility = ut.total_other_child_reached_facility,
+
+            num_bleeding_referral_awcs = CASE WHEN ut.total_bleeding_referrals>0 THEN 1 ELSE 0 END,
+            total_bleeding_referrals = ut.total_bleeding_referrals,
+            total_bleeding_reached_facility = ut.total_bleeding_reached_facility,
+
+            num_convulsions_referral_awcs = CASE WHEN ut.total_convulsions_referrals>0 THEN 1 ELSE 0 END,
+            total_convulsions_referrals = ut.total_convulsions_referrals,
+            total_convulsions_reached_facility = ut.total_convulsions_reached_facility,
+
+            num_prolonged_labor_referral_awcs = CASE WHEN ut.total_prolonged_labor_referrals>0 THEN 1 ELSE 0 END,
+            total_prolonged_labor_referrals = ut.total_prolonged_labor_referrals,
+            total_prolonged_labor_reached_facility = ut.total_prolonged_labor_reached_facility,
+
+            num_abortion_complications_referral_awcs = CASE WHEN ut.total_abortion_complications_referrals>0 THEN 1 ELSE 0 END,
+            total_abortion_complications_referrals = ut.total_abortion_complications_referrals,
+            total_abortion_complications_reached_facility = ut.total_abortion_complications_reached_facility,
+
+            num_fever_discharge_referral_awcs = CASE WHEN ut.total_fever_discharge_referrals>0 THEN 1 ELSE 0 END,
+            total_fever_discharge_referrals = ut.total_fever_discharge_referrals,
+            total_fever_discharge_reached_facility = ut.total_fever_discharge_reached_facility,
+
+            num_other_referral_awcs = CASE WHEN ut.total_other_referrals>0 THEN 1 ELSE 0 END,
+            total_other_referrals = ut.total_other_referrals,
+            total_other_reached_facility = ut.total_other_reached_facility
+        FROM (
+            SELECT
+                state_id,
+                awc_id,
+                SUM(CASE WHEN referral_health_problem='premature' THEN 1 ELSE 0 END) as total_premature_referrals,
+                SUM(CASE WHEN referral_health_problem='premature' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_premature_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='sepsis' THEN 1 ELSE 0 END) as total_sepsis_referrals,
+                SUM(CASE WHEN referral_health_problem='sepsis' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_sepsis_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='diarrhoea' THEN 1 ELSE 0 END) as total_diarrhoea_referrals,
+                SUM(CASE WHEN referral_health_problem='diarrhoea' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_diarrhoea_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='pneumonia' THEN 1 ELSE 0 END) as total_pneumonia_referrals,
+                SUM(CASE WHEN referral_health_problem='pneumonia' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_pneumonia_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='fever_child' THEN 1 ELSE 0 END) as total_fever_referrals,
+                SUM(CASE WHEN referral_health_problem='fever_child' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_fever_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='severely_underweight' THEN 1 ELSE 0 END) as total_severely_underweight_referrals,
+                SUM(CASE WHEN referral_health_problem='severely_underweight' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_severely_underweight_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='other_child' THEN 1 ELSE 0 END) as total_other_child_referrals,
+                SUM(CASE WHEN referral_health_problem='other_child' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_child_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='bleeding' THEN 1 ELSE 0 END) as total_bleeding_referrals,
+                SUM(CASE WHEN referral_health_problem='bleeding' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_bleeding_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='convulsions' THEN 1 ELSE 0 END) as total_convulsions_referrals,
+                SUM(CASE WHEN referral_health_problem='convulsions' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_convulsions_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='prolonged_labor' THEN 1 ELSE 0 END) as total_prolonged_labor_referrals,
+                SUM(CASE WHEN referral_health_problem='prolonged_labor' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_prolonged_labor_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem='abortion_complications' THEN 1 ELSE 0 END) as total_abortion_complications_referrals,
+                SUM(CASE WHEN referral_health_problem='abortion_complications' AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_abortion_complications_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem in ('fever', 'offensive_discharge') THEN 1 ELSE 0 END) as total_fever_discharge_referrals,
+                SUM(CASE WHEN referral_health_problem in ('fever', 'offensive_discharge') AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_fever_discharge_reached_facility,
+
+                SUM(CASE WHEN referral_health_problem in ('swelling', 'blurred_vision', 'other') THEN 1 ELSE 0 END) as total_other_referrals,
+                SUM(CASE WHEN referral_health_problem in ('swelling', 'blurred_vision', 'other') AND
+                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_reached_facility
+            FROM "{self.person_case_ucr_table}" ucr
+            WHERE last_referral_date>=%(start_date)s and last_referral_date<%(next_month_start_date)s
+            GROUP BY state_id, awc_id
+        ) ut
+        
+        WHERE agg_mpr.month=%(start_date)s AND
+            agg_mpr.awc_id=ut.awc_id AND
+            agg_mpr.state_id=ut.state_id AND
+            agg_mpr.aggregation_level=5
+        """, {
+            'start_date': self.month,
+            'next_month_start_date': next_month_start
+        }
+
     def update_queries(self):
 
         yield f"""
@@ -220,6 +348,45 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             ('vhnd_with_due_list_prep_immunization',),
             ('vhnd_with_due_list_prep_vita_a',),
             ('vhnd_with_due_list_prep_antenatal_checkup',),
+            ('num_premature_referral_awcs',),
+            ('total_premature_referrals',),
+            ('total_premature_reached_facility',),
+            ('num_sepsis_referral_awcs',),
+            ('total_sepsis_referrals',),
+            ('total_sepsis_reached_facility',),
+            ('num_diarrhoea_referral_awcs',),
+            ('total_diarrhoea_referrals',),
+            ('total_diarrhoea_reached_facility',),
+            ('num_pneumonia_referral_awcs',),
+            ('total_pneumonia_referrals',),
+            ('total_pneumonia_reached_facility',),
+            ('num_fever_referral_awcs',),
+            ('total_fever_referrals',),
+            ('total_fever_reached_facility',),
+            ('num_severely_underweight_referral_awcs',),
+            ('total_severely_underweight_referrals',),
+            ('total_severely_underweight_reached_facility',),
+            ('num_other_child_referral_awcs',),
+            ('total_other_child_referrals',),
+            ('total_other_child_reached_facility',),
+            ('num_bleeding_referral_awcs',),
+            ('total_bleeding_referrals',),
+            ('total_bleeding_reached_facility',),
+            ('num_convulsions_referral_awcs',),
+            ('total_convulsions_referrals',),
+            ('total_convulsions_reached_facility',),
+            ('num_prolonged_labor_referral_awcs',),
+            ('total_prolonged_labor_referrals',),
+            ('total_prolonged_labor_reached_facility',),
+            ('num_abortion_complications_referral_awcs',),
+            ('total_abortion_complications_referrals',),
+            ('total_abortion_complications_reached_facility',),
+            ('num_fever_discharge_referral_awcs',),
+            ('total_fever_discharge_referrals',),
+            ('total_fever_discharge_reached_facility',),
+            ('num_other_referral_awcs',),
+            ('total_other_referrals',),
+            ('total_other_reached_facility',),
             ('state_is_test', 'MAX(state_is_test)'),
             ('district_is_test', column_value_as_per_agg_level(aggregation_level, 1,'MAX(district_is_test)', "0")),
             ('block_is_test', column_value_as_per_agg_level(aggregation_level, 2,'MAX(block_is_test)', "0")),
