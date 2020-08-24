@@ -204,10 +204,6 @@ class VaultEntry(models.Model):
             models.Index(fields=['key'])
         ]
 
-    def save(self, *args, **kwargs):
-        self.form_id = kwargs.pop('xform').form_id
-        super(VaultEntry, self).save(*args, **kwargs)
-
 
 def delete_ccz_for_link(sender, instance, **kwargs):
     for hosted_ccz in HostedCCZ.objects.filter(link=instance):

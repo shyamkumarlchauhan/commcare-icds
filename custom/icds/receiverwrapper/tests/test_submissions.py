@@ -40,8 +40,6 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
-    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
-           {domain: [VaultEntry]})
     def test_submit_with_vault_items(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
@@ -60,8 +58,6 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
-    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
-           {domain: [VaultEntry]})
     def test_no_whitelisted_submit_with_vault_entries(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
@@ -81,8 +77,6 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
-    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
-           {domain: [VaultEntry]})
     def test_non_whitelisted_submit_with_vault_entries(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
@@ -101,8 +95,6 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
-    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
-           {domain: [VaultEntry]})
     def test_failed_form_with_case_with_secret(self):
         case_id = uuid.uuid4().hex
         modified_on = datetime.utcnow()
@@ -129,8 +121,6 @@ class FundamentalCaseTestsSQL(FundamentalBaseTests):
     @patch('corehq.form_processor.submission_post.XFORM_PRE_PROCESSORS', {
         domain: [DummyVaultPatternExtractor]
     })
-    @patch('corehq.form_processor.backends.sql.processor.XFORM_TRACKED_MODELS',
-           {domain: [VaultEntry]})
     def test_successful_form_with_case_with_secret(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         case_id = uuid.uuid4().hex
