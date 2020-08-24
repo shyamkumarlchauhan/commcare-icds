@@ -131,6 +131,12 @@ class ChildHealthMonthlyView(models.Model):
     dob = models.DateField(blank=True, null=True)
     sex = models.TextField(blank=True, null=True)
     month = models.DateField(blank=True, null=True)
+    resident = models.TextField(blank=True, null=True)
+    caste = models.TextField(blank=True, null=True)
+    disabled = models.TextField(blank=True, null=True)
+    minority = models.TextField(blank=True, null=True)
+    num_rations_distributed = models.IntegerField(blank=True, null=True)
+    pse_eligible = models.IntegerField(blank=True, null=True)
     age_in_months = models.IntegerField(
         blank=True, null=True, help_text="age in months at the end of the month"
     )

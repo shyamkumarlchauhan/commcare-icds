@@ -8,6 +8,11 @@ from custom.icds_reports.sqldata.base_identification import BaseIdentification
 from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization
 from custom.icds_reports.sqldata.base_populations import BasePopulation
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
+from datetime import date
+from custom.icds_reports.models.views import ChildHealthMonthlyView, CcsRecordMonthlyView
+from custom.icds_reports.utils import get_location_filter
+from django.db.models.aggregates import Sum
+from django.db.models import Case, When, Value
 
 
 class MPRIdentification(BaseIdentification):
@@ -872,6 +877,503 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
             }
         ]
 
+
+class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
+
+    title = '6. Programme Coverage'
+    slug = 'programme_coverage'
+    has_sections = True
+
+    @property
+    def headers(self):
+        return DataTablesHeader(
+            DataTablesColumn('Category'),
+            DataTablesColumnGroup(
+                _('6-35 months'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys'))
+            ),
+            DataTablesColumnGroup(
+                _('3-71 months'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys'))
+            ),
+            DataTablesColumnGroup(
+                _('All Children (6-71 months)'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys')),
+                DataTablesColumn(_('Total'))
+            ),
+            DataTablesColumn(_('Pregnant Women')),
+            DataTablesColumn(_('Lactating mothers'))
+        )
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        del filters['aggregation_level']
+        filters['resident'] = 'yes'
+        data = dict()
+        child_data = ChildHealthMonthlyView.objects.filter(**filters).values('month').annotate(
+            thr_rations_female_st=Sum(Case(When(age_tranche__in=['12', '24', '36'], caste='st', sex='F',
+                                                num_rations_distributed__gte=25,
+                                                then='valid_in_month',
+                                                ), default=Value(0))),
+            thr_rations_male_st=Sum(Case(When(age_tranche__in=['12', '24', '36'], caste='st', sex='M',
+                                              num_rations_distributed__gte=25,
+                                              then='valid_in_month',
+                                              ), default=Value(0))),
+            thr_rations_female_st_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], caste='st', sex='F',
+                                                  lunch_count__gte=25,
+                                                  then='valid_in_month',
+                                                  ), default=Value(0))),
+            thr_rations_male_st_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], caste='st', sex='M',
+                                                lunch_count__gte=25,
+                                                then='valid_in_month',
+                                                ), default=Value(0))),
+            thr_rations_female_sc=Sum(Case(When(age_tranche__in=['12', '24', '36'], caste='sc', sex='F',
+                                                num_rations_distributed__gte=25,
+                                                then='valid_in_month',
+                                                ), default=Value(0))),
+            thr_rations_male_sc=Sum(Case(When(age_tranche__in=['12', '24', '36'], caste='sc', sex='M',
+                                              num_rations_distributed__gte=25,
+                                              then='valid_in_month',
+                                              ), default=Value(0))),
+            thr_rations_female_sc_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], caste='sc', sex='F',
+                                                  lunch_count__gte=25,
+                                                  then='valid_in_month',
+                                                  ), default=Value(0))),
+            thr_rations_male_sc_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], caste='sc', sex='M',
+                                                lunch_count__gte=25,
+                                                then='valid_in_month',
+                                                ), default=Value(0))),
+            thr_rations_female_others=Sum(Case(When(age_tranche__in=['12', '24', '36'], caste='other', sex='F',
+                                                    num_rations_distributed__gte=25,
+                                                    then='valid_in_month',
+                                                    ), default=Value(0))),
+            thr_rations_male_others=Sum(Case(When(age_tranche__in=['12', '24', '36'], caste='other', sex='M',
+                                                  num_rations_distributed__gte=25,
+                                                  then='valid_in_month',
+                                                  ), default=Value(0))),
+            thr_rations_female_others_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], caste='other', sex='F',
+                                                      lunch_count__gte=25,
+                                                      then='valid_in_month',
+                                                      ), default=Value(0))),
+            thr_rations_male_others_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], caste='other', sex='M',
+                                                    lunch_count__gte=25,
+                                                    then='valid_in_month',
+                                                    ), default=Value(0))),
+            thr_rations_female_disabled=Sum(Case(When(age_tranche__in=['12', '24', '36'], disabled='yes', sex='F',
+                                                      num_rations_distributed__gte=25,
+                                                      then='valid_in_month',
+                                                      ), default=Value(0))),
+            thr_rations_male_disabled=Sum(Case(When(age_tranche__in=['12', '24', '36'], disabled='yes', sex='M',
+                                                    num_rations_distributed__gte=25,
+                                                    then='valid_in_month',
+                                                    ), default=Value(0))),
+            thr_rations_female_disabled_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], disabled='yes', sex='F',
+                                                        lunch_count__gte=25,
+                                                        then='valid_in_month',
+                                                        ), default=Value(0))),
+            thr_rations_male_disabled_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], disabled='yes', sex='M',
+                                                      lunch_count__gte=25,
+                                                      then='valid_in_month',
+                                                      ), default=Value(0))),
+            thr_rations_female_minority=Sum(Case(When(age_tranche__in=['12', '24', '36'], minority='yes', sex='F',
+                                                      num_rations_distributed__gte=25,
+                                                      then='valid_in_month',
+                                                      ), default=Value(0))),
+            thr_rations_male_minority=Sum(Case(When(age_tranche__in=['12', '24', '36'], minority='yes', sex='M',
+                                                    num_rations_distributed__gte=25,
+                                                    then='valid_in_month',
+                                                    ), default=Value(0))),
+            thr_rations_female_minority_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], minority='yes', sex='F',
+                                                        lunch_count__gte=25,
+                                                        then='valid_in_month',
+                                                        ), default=Value(0))),
+            thr_rations_male_minority_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], minority='yes', sex='M',
+                                                      lunch_count__gte=25,
+                                                      then='valid_in_month',
+                                                      ), default=Value(0))),
+            child_count_female=Sum(Case(When(age_tranche__in=['12', '24', '36'], minority='yes', sex='F',
+                                             then='valid_in_month',
+                                             ), default=Value(0))),
+            child_count_male=Sum(Case(When(age_tranche__in=['12', '24', '36'], minority='yes', sex='M',
+                                           then='valid_in_month',
+                                           ), default=Value(0))),
+            child_count_female_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], minority='yes', sex='F',
+                                               then='valid_in_month',
+                                               ), default=Value(0))),
+            child_count_male_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], minority='yes', sex='M',
+                                             then='valid_in_month',
+                                             ), default=Value(0))),
+            thr_rations_absent_female=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='F',
+                                                    lunch_count=0,
+                                                    then='valid_in_month',
+                                                    ), default=Value(0))),
+            thr_rations_absent_male=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='M',
+                                                  lunch_count=0,
+                                                  then='valid_in_month',
+                                                  ), default=Value(0))),
+            thr_rations_absent_female_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], thr_eligible=1, sex='F',
+                                                      num_rations_distributed=0,
+                                                      then='valid_in_month',
+                                                      ), default=Value(0))),
+            thr_rations_absent_male_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], thr_eligible=1, sex='M',
+                                                    num_rations_distributed=0,
+                                                    then='valid_in_month',
+                                                    ), default=Value(0))),
+            thr_rations_partial_female=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='F',
+                                                     lunch_count__gt=0,
+                                                     then='valid_in_month',
+                                                     ), default=Value(0))),
+            thr_rations_partial_male=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='M',
+                                                   lunch_count__gt=0,
+                                                   then='valid_in_month',
+                                                   ), default=Value(0))),
+            thr_rations_partial_female_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], thr_eligible=1, sex='F',
+                                                       num_rations_distributed__gt=0,
+                                                       then='valid_in_month',
+                                                       ), default=Value(0))),
+            thr_rations_partial_male_1=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='M',
+                                                     num_rations_distributed__gt=0,
+                                                     then='valid_in_month',
+                                                     ), default=Value(0))),
+            thr_total_rations_female=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='F',
+                                                     then='lunch_count',
+                                                     ), default=Value(0))),
+            thr_total_rations_male=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='F',
+                                                   then='lunch_count',
+                                                   ), default=Value(0))),
+            thr_total_rations_female_1=Sum(Case(When(age_tranche__in=['12', '24', '36'], thr_eligible=1, sex='F',
+                                                   then='num_rations_distributed',
+                                                   ), default=Value(0))),
+            thr_total_rations_male_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], thr_eligible=1, sex='F',
+                                                 then='num_rations_distributed',
+                                                 ), default=Value(0))),
+        )
+        child_data = child_data.first()
+
+        del filters['resident']
+        mother_data = CcsRecordMonthlyView.objects.filter(**filters).values('month').annotate(
+            thr_rations_pregnant_st=Sum(Case(When(pregnant=1, caste='st', resident='yes',
+                                                  num_rations_distributed__gte=25,
+                                                  then='pregnant',
+                                                  ), default=Value(0))),
+            thr_rations_lactating_st=Sum(Case(When(lactating=1, caste='st', resident='yes',
+                                                   num_rations_distributed__gte=25,
+                                                   then='lactating',
+                                                   ), default=Value(0))),
+            thr_rations_pregnant_sc=Sum(Case(When(pregnant=1, caste='sc', resident='yes',
+                                                  num_rations_distributed__gte=25,
+                                                  then='pregnant',
+                                                  ), default=Value(0))),
+            thr_rations_lactating_sc=Sum(Case(When(lactating=1, caste='sc', resident='yes',
+                                                   num_rations_distributed__gte=25,
+                                                   then='lactating',
+                                                   ), default=Value(0))),
+            thr_rations_pregnant_others=Sum(Case(When(pregnant=1, caste='other', resident='yes',
+                                                      num_rations_distributed__gte=25,
+                                                      then='pregnant',
+                                                      ), default=Value(0))),
+            thr_rations_lactating_others=Sum(Case(When(lactating=1, caste='other', resident='yes',
+                                                       num_rations_distributed__gte=25,
+                                                       then='lactating',
+                                                       ), default=Value(0))),
+            thr_rations_pregnant_disabled=Sum(Case(When(pregnant=1, disabled=1, resident='yes',
+                                                        num_rations_distributed__gte=25,
+                                                        then='pregnant',
+                                                        ), default=Value(0))),
+            thr_rations_lactating_disabled=Sum(Case(When(lactating=1, disabled=1, resident='yes',
+                                                         num_rations_distributed__gte=25,
+                                                         then='lactating',
+                                                         ), default=Value(0))),
+            thr_rations_pregnant_minority=Sum(Case(When(pregnant=1, minority=1, resident='yes',
+                                                        num_rations_distributed__gte=25,
+                                                        then='pregnant',
+                                                        ), default=Value(0))),
+            thr_rations_lactating_minority=Sum(Case(When(lactating=1, minority=1, resident='yes',
+                                                         num_rations_distributed__gte=25,
+                                                         then='lactating',
+                                                         ), default=Value(0))),
+            thr_rations_absent_pregnant=Sum(Case(When(pregnant=1, resident='yes',
+                                                      num_rations_distributed=0,
+                                                      then='pregnant',
+                                                      ), default=Value(0))),
+            thr_rations_absent_lactating=Sum(Case(When(lactating=1, resident='yes',
+                                                      num_rations_distributed=0,
+                                                      then='lactating',
+                                                      ), default=Value(0))),
+            thr_rations_partial_pregnant=Sum(Case(When(pregnant=1, resident='yes',
+                                                      num_rations_distributed__gt=0,
+                                                      then='pregnant',
+                                                      ), default=Value(0))),
+            thr_rations_partial_lactating=Sum(Case(When(lactating=1, resident='yes',
+                                                       num_rations_distributed__gt=0,
+                                                       then='lactating',
+                                                       ), default=Value(0))),
+            thr_total_rations_pregnant=Sum(Case(When(pregnant=1, resident='yes',
+                                                       then='num_rations_distributed',
+                                                       ), default=Value(0))),
+            thr_total_rations_lactating=Sum(Case(When(lactating=1, resident='yes',
+                                                     then='num_rations_distributed',
+                                                     ), default=Value(0))),
+            thr_rations_migrant_pregnant=Sum(Case(When(pregnant=1, resident='no',
+                                                     then='num_rations_distributed',
+                                                     ), default=Value(0))),
+            thr_rations_migrant_lactating=Sum(Case(When(lactating=1, resident='no',
+                                                       then='num_rations_distributed',
+                                                       ), default=Value(0))),
+            pregnant=Sum(Case(When(pregnant=1, resident='yes',
+                                   then='pregnant',
+                                   ), default=Value(0))),
+            lactating=Sum(Case(When(lactating=1, resident='yes',
+                                    then='lactating',
+                                    ), default=Value(0))),
+        ).first()
+
+        filters['resident'] = 'no'
+
+        child_migrant_data = ChildHealthMonthlyView.objects.filter(**filters).values('month').annotate(
+            thr_rations_migrant_female=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='F',
+                                                     then='lunch_count',
+                                                     ), default=Value(0))),
+            thr_rations_migrant_male=Sum(Case(When(age_tranche__in=['12', '24', '36'], pse_eligible=1, sex='M',
+                                                   then='lunch_count',
+                                                   ), default=Value(0))),
+            thr_rations_migrant_female_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], thr_eligible=1, sex='F',
+                                                       then='num_rations_distributed',
+                                                       ), default=Value(0))),
+            thr_rations_migrant_male_1=Sum(Case(When(age_tranche__in=['48', '60', '72'], thr_eligible=1, sex='M',
+                                                     then='num_rations_distributed',
+                                                     ), default=Value(0))),
+        ).first()
+
+        if child_data:
+            data.update(child_data)
+        if child_migrant_data:
+            data.update(child_migrant_data)
+        if mother_data:
+            data.update(mother_data)
+
+        return data
+
+    @property
+    def row_config(self):
+        return [
+            {
+                'title': "a. Supplementary Nutrition beneficiaries (number of those among "
+                         "residents who were given supplementary nutrition for 25+ days "
+                         "during the reporting month)",
+                'slug': 'programme_coverage_1',
+                'rows_config': (
+                    (
+                        _('ST'),
+                        'thr_rations_female_st',
+                        'thr_rations_male_st',
+                        'thr_rations_female_st_1',
+                        'thr_rations_male_st_1',
+                        {
+                            'columns': ('thr_rations_female_st', 'thr_rations_female_st_1'),
+                            'alias': 'rations_female_st'
+                        },
+                        {
+                            'columns': ('thr_rations_male_st', 'thr_rations_male_st_1'),
+                            'alias': 'rations_male_st'
+                        },
+                        {
+                            'columns': ('rations_female_st', 'rations_male_st'),
+                            'alias': 'all_rations_st'
+                        },
+                        'thr_rations_pregnant_st',
+                        'thr_rations_lactating_st'
+                    ),
+                    (
+                        _('SC'),
+                        'thr_rations_female_sc',
+                        'thr_rations_male_sc',
+                        'thr_rations_female_sc_1',
+                        'thr_rations_male_sc_1',
+                        {
+                            'columns': ('thr_rations_female_sc', 'thr_rations_female_sc_1'),
+                            'alias': 'rations_female_sc'
+                        },
+                        {
+                            'columns': ('thr_rations_male_sc', 'thr_rations_male_sc_1'),
+                            'alias': 'rations_male_sc'
+                        },
+                        {
+                            'columns': ('rations_female_sc', 'rations_male_sc'),
+                            'alias': 'all_rations_sc'
+                        },
+                        'thr_rations_pregnant_sc',
+                        'thr_rations_lactating_sc'
+                    ),
+                    (
+                        _('Other'),
+                        'thr_rations_female_others',
+                        'thr_rations_male_others',
+                        'thr_rations_female_others_1',
+                        'thr_rations_male_others_1',
+                        {
+                            'columns': ('thr_rations_female_others', 'thr_rations_female_others_1'),
+                            'alias': 'rations_female_others'
+                        },
+                        {
+                            'columns': ('thr_rations_male_others', 'thr_rations_male_others_1'),
+                            'alias': 'rations_male_others'
+                        },
+                        {
+                            'columns': ('rations_female_others', 'rations_male_others'),
+                            'alias': 'all_rations_others'
+                        },
+                        'thr_rations_pregnant_others',
+                        'thr_rations_lactating_others'
+                    ),
+                    (
+                        _('All Categories (Total)'),
+                        ('thr_rations_female_st', 'thr_rations_female_sc', 'thr_rations_female_others'),
+                        ('thr_rations_male_st', 'thr_rations_male_sc', 'thr_rations_male_others'),
+                        ('thr_rations_female_st_1', 'thr_rations_female_sc_1', 'thr_rations_female_others_1'),
+                        ('thr_rations_male_st_1', 'thr_rations_male_sc_1', 'thr_rations_male_others_1'),
+                        ('rations_female_st', 'rations_female_sc', 'rations_female_others'),
+                        ('rations_male_st', 'rations_male_sc', 'rations_male_others'),
+                        ('all_rations_st' 'all_rations_sc', 'all_rations_others'),
+                        ('thr_rations_pregnant_st', 'thr_rations_pregnant_sc', 'thr_rations_pregnant_others'),
+                        ('thr_rations_lactating_st', 'thr_rations_lactating_sc', 'thr_rations_lactating_others'),
+                    ),
+                    (
+                        _('Disabled'),
+                        'thr_rations_female_disabled',
+                        'thr_rations_male_disabled',
+                        'thr_rations_female_disabled_1',
+                        'thr_rations_male_disabled_1',
+                        ('thr_rations_female_disabled', 'thr_rations_female_disabled_1'),
+                        ('thr_rations_male_disabled', 'thr_rations_male_disabled_1'),
+                        ('thr_rations_female_disabled', 'thr_rations_female_disabled_1',
+                         'thr_rations_male_disabled', 'thr_rations_male_disabled_1'),
+                        'thr_rations_pregnant_disabled',
+                        'thr_rations_lactating_disabled'
+                    ),
+                    (
+                        _('Minority'),
+                        'thr_rations_female_minority',
+                        'thr_rations_male_minority',
+                        'thr_rations_female_minority_1',
+                        'thr_rations_male_minority_1',
+                        ('thr_rations_female_minority', 'thr_rations_female_minority_1'),
+                        ('thr_rations_male_minority', 'thr_rations_male_minority_1'),
+                        ('thr_rations_female_minority', 'thr_rations_female_minority_1',
+                         'thr_rations_male_minority', 'thr_rations_male_minority_1'),
+                        'thr_rations_pregnant_minority',
+                        'thr_rations_lactating_minority'
+                    ),
+                )
+            },
+            {
+                'title': 'b. Feeding Efficiency',
+                'slug': 'programme_coverage_2',
+                'rows_config': (
+                    (
+                        _('I. Population Total'),
+                        'child_count_female',
+                        'child_count_male',
+                        'child_count_female_1',
+                        'child_count_male_1',
+                        ('child_count_female', 'child_count_female_1'),
+                        ('child_count_male', 'child_count_male_1'),
+                        ('child_count_female', 'child_count_female_1',
+                         'child_count_male', 'child_count_male_1'),
+                        'pregnant',
+                        'lactating'
+                    ),
+                    (
+                        _('II. Usual absentees during the month'),
+                        'thr_rations_absent_female',
+                        'thr_rations_absent_male',
+                        'thr_rations_absent_female_1',
+                        'thr_rations_absent_male_1',
+                        ('thr_rations_absent_female', 'thr_rations_absent_female_1'),
+                        ('thr_rations_absent_male', 'thr_rations_absent_male_1'),
+                        ('thr_rations_absent_female', 'thr_rations_absent_female_1',
+                         'thr_rations_absent_male', 'thr_rations_absent_male_1'),
+                        'thr_rations_absent_pregnant',
+                        'thr_rations_absent_lactating'
+                    ),
+                    (
+                        _('III. Total present for at least one day during the month'),
+                        'thr_rations_partial_female',
+                        'thr_rations_partial_male',
+                        'thr_rations_partial_female_1',
+                        'thr_rations_partial_male_1',
+                        {
+                            'columns': ('thr_rations_partial_female', 'thr_rations_partial_female_1'),
+                            'alias': 'total_rations_partial_female',
+                        },
+                        {
+                            'columns': ('thr_rations_partial_male', 'thr_rations_partial_male_1'),
+                            'alias': 'total_rations_partial_male'
+                        },
+                        {
+                            'columns': ('total_rations_partial_female', 'total_rations_partial_male'),
+                            'alias': 'all_rations_partial'
+                        },
+                        'thr_rations_partial_pregnant',
+                        'thr_rations_partial_lactating'
+                    ),
+                    (
+                        _('V. Actual TPFD'),
+                        'thr_total_rations_female',
+                        'thr_total_rations_male',
+                        'thr_total_rations_female_1',
+                        'thr_total_rations_male_1',
+                        {
+                            'columns': ('thr_total_rations_female', 'thr_total_rations_female_1'),
+                            'alias': 'total_thr_total_rations_female'
+                        },
+                        {
+                            'columns': ('thr_total_rations_male', 'thr_total_rations_male_1'),
+                            'alias': 'total_thr_total_rations_male'
+                        },
+                        {
+                            'columns': ('total_thr_total_rations_female', 'total_thr_total_rations_male'),
+                            'alias': 'total_thr_total_rations'
+                        },
+                        'thr_total_rations_pregnant',
+                        'thr_total_rations_lactating'
+                    ),
+                )
+            },
+            {
+                'title': 'c. Temporary Residents who received supplementary food during the month',
+                'slug': 'programme_coverage_3',
+                'rows_config': (
+                    (
+                        _('Number of temporary residents who received supplementary food'),
+                        'thr_rations_migrant_female',
+                        'thr_rations_migrant_male',
+                        'thr_rations_migrant_female_1',
+                        'thr_rations_migrant_male_1',
+                        {
+                            'columns': ('thr_rations_migrant_female', 'thr_rations_migrant_female_1'),
+                            'alias': 'rations_migrant_female'
+                        },
+                        {
+                            'columns': ('thr_rations_migrant_male', 'thr_rations_migrant_male_1'),
+                            'alias': 'rations_migrant_male'
+                        },
+                        {
+                            'columns': ('rations_migrant_female', 'rations_migrant_male'),
+                            'alias': 'rations_migrant'
+                        },
+                        'thr_rations_migrant_pregnant',
+                        'thr_rations_migrant_lactating'
+                    ),
+                )
+            }
+        ]
 
 class MPRPreschoolEducation(ICDSMixin, MPRData):
 
