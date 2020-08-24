@@ -62,8 +62,8 @@ class BaseOperationalizationBeta(BaseOperationalization):
             return [
                 [
                     'No. of AWCs',
-                    awc_data.num_awcs if awc_data else None,
-                    awc_data.num_launched_awcs if awc_data else None,
-                    awc_data.awc_num_open if awc_data else None
+                    awc_data.get('num_awcs', 0) if awc_data else None,
+                    awc_data.get('num_launched_awcs', 0) if awc_data else None,
+                    awc_data.get('awc_num_open', 0) if awc_data else None
                 ]
             ]

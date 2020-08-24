@@ -51,6 +51,6 @@ class BasePopulationBeta(ICDSMixin):
             return [
                 [
                     "Total Population of the project:",
-                    awc_data.cases.person if awc_data else 0
+                    awc_data.get('cases_person', 0) if awc_data else 0
                 ]
             ]
