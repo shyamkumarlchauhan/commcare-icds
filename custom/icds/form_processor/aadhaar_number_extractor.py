@@ -19,7 +19,7 @@ class AadhaarNumberExtractor(object):
 
     def __call__(self, context):
         instance_xml = context.get_instance_xml()
-        if self._should_process(instance_xml):
+        if instance_xml and self._should_process(instance_xml):
             vault_entries = self._replace_matches(instance_xml)
             if vault_entries:
                 context.supplementary_models.extend(vault_entries)
