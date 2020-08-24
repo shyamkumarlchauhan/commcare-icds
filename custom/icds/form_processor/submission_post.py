@@ -1,6 +1,6 @@
 from corehq.form_processor.submission_context import SubmissionFormContext
 
-from custom.icds.form_processor.steps import AadhaarNumberExtractor
+from custom.icds.form_processor.aadhaar_number_extractor import AadhaarNumberExtractor
 
 
 class ICDSSubmissionFormContext(SubmissionFormContext):
