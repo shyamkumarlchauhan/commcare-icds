@@ -27,7 +27,7 @@ from custom.icds_core.const import (
     SMSUsageReport_urlname,
 )
 
-from custom.icds.form_processor.submission_post import ICDSSubmissionFormContext
+from custom.icds.form_processor.submission_context import ICDSSubmissionFormContext
 
 
 @uitab_dropdown_items.extend(domains=["icds-cas"])
