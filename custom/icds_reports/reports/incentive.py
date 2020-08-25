@@ -62,6 +62,7 @@ class IncentiveReport(object):
                     AWC_NOT_LAUNCHED,
                     AWC_NOT_LAUNCHED,
                     AWC_NOT_LAUNCHED,
+                    AWC_NOT_LAUNCHED,
                     AWC_NOT_LAUNCHED
                 ])
             else:
@@ -100,9 +101,7 @@ class IncentiveReport(object):
                     num_open,
                     awh_eligible_for_incentive
                 ])
-
             excel_rows.append(row_data)
-
         return [
             [
                 'AWW Performance Report',
