@@ -13,6 +13,8 @@ from .complementary_forms import ComplementaryFormsAggregationDistributedHelper
 from .complementary_forms_ccs_record import ComplementaryFormsCcsRecordAggregationDistributedHelper
 from .daily_attendance import DailyAttendanceAggregationDistributedHelper
 from .daily_feeding_forms_child_health import DailyFeedingFormsChildHealthAggregationDistributedHelper
+from .daily_thr_ccs_record import DailyTHRCCSRecordHelper
+from .daily_thr_child_health import DailyTHRChildHealthHelper
 from .delivery_forms import DeliveryFormsAggregationDistributedHelper
 from .growth_monitoring_forms import GrowthMonitoringFormsAggregationDistributedHelper
 from .inactive_awws import InactiveAwwsAggregationDistributedHelper
@@ -74,5 +76,7 @@ __all__ = (
     'BiharApiDemographicsHelper',
     'ChildVaccineHelper',
     'AggMprAwcHelper',
-    'SamMamFormAggregationDistributedHelper'
+    'SamMamFormAggregationDistributedHelper',
+    'DailyTHRCCSRecordHelper',
+    'DailyTHRChildHealthHelper'
 )

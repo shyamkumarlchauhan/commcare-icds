@@ -29,7 +29,9 @@ from custom.icds_reports.const import (
     AGG_AVAILING_SERVICES_TABLE,
     CHILD_VACCINE_TABLE,
     AGG_MPR_AWC_TABLE,
-    AGG_SAM_MAM_TABLE
+    AGG_SAM_MAM_TABLE,
+    AGG_DAILY_CCS_RECORD_THR_TABLE,
+    AGG_DAILY_CHILD_HEALTH_THR_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers.distributed import (
     AggAwcDailyAggregationDistributedHelper,
@@ -69,6 +71,9 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     AggMprAwcHelper,
     SamMamFormAggregationDistributedHelper
 )
+from custom.icds_reports.utils.aggregation_helpers.distributed.daily_thr_ccs_record import DailyTHRCCSRecordHelper
+from custom.icds_reports.utils.aggregation_helpers.distributed.daily_thr_child_health import DailyTHRChildHealthHelper
+
 
 def get_cursor(model):
     db = router.db_for_write(model)
@@ -1252,6 +1257,56 @@ class AggregateCcsRecordTHRForms(models.Model, AggregateMixin):
         unique_together = ('supervisor_id', 'case_id', 'month')  # pkey
 
     _agg_helper_cls = THRFormsCcsRecordAggregationDistributedHelper
+    _agg_atomic = False
+
+
+class AggregateDailyChildHealthTHRForms(models.Model, AggregateMixin):
+    # partitioned based on these fields
+    doc_id = models.TextField()
+    state_id = models.CharField(max_length=40)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    case_id = models.CharField(max_length=40, primary_key=True)
+
+    latest_time_end_processed = models.DateTimeField(
+        help_text="The latest form.meta.timeEnd that has been processed for this case"
+    )
+
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        db_table = AGG_DAILY_CHILD_HEALTH_THR_TABLE
+        unique_together = ('supervisor_id', 'case_id', 'month', 'latest_time_end_processed')  # pkey
+
+    _agg_helper_cls = DailyTHRChildHealthHelper
+    _agg_atomic = False
+
+
+class AggregateDailyCcsRecordTHRForms(models.Model, AggregateMixin):
+    # partitioned based on these fields
+    doc_id = models.TextField()
+    state_id = models.CharField(max_length=40)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    case_id = models.CharField(max_length=40, primary_key=True)
+
+    latest_time_end_processed = models.DateTimeField(
+        help_text="The latest form.meta.timeEnd that has been processed for this case"
+    )
+
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        db_table = AGG_DAILY_CCS_RECORD_THR_TABLE
+        unique_together = ('supervisor_id', 'case_id', 'month', 'latest_time_end_processed')  # pkey
+
+    _agg_helper_cls = DailyTHRCCSRecordHelper
     _agg_atomic = False
 
 
