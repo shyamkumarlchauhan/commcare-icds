@@ -2228,6 +2228,12 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             }).then(
                 function (response) {
                     vm.data = response.data;
+                    if (step === 'take_home_ration') {
+                        vm.thr_eligible_beneficiaries = vm.data['thr_eligible'];
+                        vm.thr_25_days = vm.data['thr_25_days'];
+                        vm.thr_pictures_count = vm.data['thr_pictures_count'];
+                        vm.thr_images = vm.data['images'];
+                    }
                     vm.message = false;
                     if (vm.data.map) {
                         vm.markers = vm.data.map.markers;
@@ -2932,6 +2938,15 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             isMobile: true,
         },
     ];
+    if (vm.haveAccessToFeatures) {
+        steps.push({
+            id: 'take_home_ration',
+            route: "/awc_reports/take_home_ration",
+            label: "Take Home Ration",
+            image: "",
+            isMobile: false,
+        })
+    }
     vm.mobileSteps = _.filter(steps, function (step) {
         return step.isMobile;
     });
