@@ -7,6 +7,8 @@ class ICDSSubmissionFormContext(SubmissionFormContext):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.supplementary_models = []
+
+    def pre_process_form(self):
         AadhaarNumberExtractor()(self)
 
     def post_process_form(self, xform):
