@@ -485,4 +485,4 @@ and they should sign off on the decision.
 ### Other types of changes
 
 For any other type of change please follow up with product and technical owners to get them documented here.
-git add .
+

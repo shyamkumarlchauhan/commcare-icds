@@ -173,6 +173,35 @@
         "type": "raw",
         "property_name": "age_at_reg"
       },
+	  {
+		"datatype": "date",
+		"type": "expression",
+		"is_nullable": true,
+		"expression": {
+			"type": "conditional",
+			"test": {
+				"type": "boolean_expression",
+				"operator": "not_eq",
+				"expression": {
+					"type": "property_name",
+					"property_name": "age_at_reg",
+					"datatype": null
+					},
+				"property_value": null
+			},
+			"expression_if_true": {
+				"type": "property_name",
+				"property_name": "dob"
+			},
+			"expression_if_false": {
+				"type": "property_name",
+				"property_name": "no_exist"
+			}
+		},
+		"column_id": "dob_at_reg",
+		"create_index": false,
+		"comment": "this field differentiates members registered or edited through HH Management from cases created through delivery form"
+	  },
       {
         "column_id": "date_death",
         "datatype": "date",
