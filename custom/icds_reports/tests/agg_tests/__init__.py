@@ -37,7 +37,7 @@ def _skip_if_nose_attr():
     return '--attr=es_test' in sys.argv
 
 
-@timelimit(480)
+@timelimit(48000)
 def setUpModule():
     if _skip_if_nose_attr():
         return
@@ -46,11 +46,11 @@ def setUpModule():
         print('============= WARNING: not running test setup because settings.USE_PARTITIONED_DATABASE is True.')
         return
 
-    global _stop_transaction_exemption
-    _stop_transaction_exemption = exempt_from_test_transactions([
-        "icds-ucr",
-        "icds-ucr-citus",
-    ])
+    # global _stop_transaction_exemption
+    # _stop_transaction_exemption = exempt_from_test_transactions([
+    #     "icds-ucr",
+    #     "icds-ucr-citus",
+    # ])
     domain = create_domain('icds-cas')
     setup_location_hierarchy(domain.name)
 
@@ -97,7 +97,7 @@ def tearDownModule():
 
     Domain.get_by_name('icds-cas').delete()
     _call_center_domain_mock.stop()
-    _stop_transaction_exemption()
+    # _stop_transaction_exemption()
 
 
 @nottest

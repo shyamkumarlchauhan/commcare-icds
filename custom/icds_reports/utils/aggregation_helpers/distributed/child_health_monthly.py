@@ -148,7 +148,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
         height_eligible = "({} AND {} <= 60)".format(valid_in_month, age_in_months)
         fully_immunized_eligible = "({} AND {} > 12)".format(valid_in_month, age_in_months)
         immunized_age_in_days = "(child_tasks.immun_one_year_date - person_cases.dob)"
-        fully_immun_before_month = "(child_tasks.immun_one_year_date < {})".format(end_month_string)
+        fully_immun_before_month_end = "(child_tasks.immun_one_year_date < {})".format(end_month_string)
         live_birth_in_month = (
             "(person_cases.dob BETWEEN {} AND {} AND"
             " del_form.still_live_birth='live')"
@@ -189,11 +189,13 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
                 "CASE WHEN {} AND child_health.lbw_open_count = 1 THEN 1 ELSE 0 END".format(born_in_month)),
             ("fully_immunized_eligible", "CASE WHEN {} THEN 1 ELSE 0 END".format(fully_immunized_eligible)),
             ("fully_immunized_on_time", "CASE WHEN {} AND {} <= 365 AND {} THEN 1 ELSE 0 END".format(
-                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month
+                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month_end
             )),
             ("fully_immunized_late", "CASE WHEN {} AND {} > 365 AND {} THEN 1 ELSE 0 END".format(
-                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month
+                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month_end
             )),
+            ("fully_immun_before_month_end", "CASE WHEN {} THEN 1 ELSE 0 END".format(
+                fully_immun_before_month_end)),
             ("has_aadhar_id",
                 "CASE WHEN person_cases.aadhar_date < {} THEN  1 ELSE 0 END".format(end_month_string)),
             ("valid_in_month", "CASE WHEN {} THEN 1 ELSE 0 END".format(valid_in_month)),
