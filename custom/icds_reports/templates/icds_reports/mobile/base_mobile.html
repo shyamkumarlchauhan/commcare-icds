@@ -15,9 +15,11 @@
        {% endcomment %}
       {% javascript_libraries underscore=True %}
     {% endblock %}
+    <link type="text/css" rel="stylesheet" media="all" href="{% static 'font-awesome/css/font-awesome.css' %}"/>
     <script src="{% statici18n LANGUAGE_CODE %}"></script>
     <script src="{% static 'hqwebapp/js/initial_page_data.js' %}"></script>
     <script src="{% static 'nic_compliance/js/encoder.js' %}"></script>
+    <script src="{% static 'hqwebapp/js/captcha.js' %}"></script>
     {% block head %}{% endblock head %}
   </head>
   <body>
