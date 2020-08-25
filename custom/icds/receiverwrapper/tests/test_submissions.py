@@ -48,7 +48,7 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
             f"<aadhar_number>vault:{vault_entry.key}"
             f"</aadhar_number>" in saved_form_xml)
 
-    @patch('custom.icds.form_processor.steps.AADHAAR_FORMS_XMLNSES', [])
+    @patch('custom.icds.form_processor.aadhaar_number_extractor.AADHAAR_FORMS_XMLNSES', [])
     def test_no_whitelisted_submit_with_vault_entries(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
@@ -63,7 +63,8 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
             f"<aadhar_number>vault:{vault_entry.key}"
             f"</aadhar_number>" in saved_form_xml)
 
-    @patch('custom.icds.form_processor.steps.AADHAAR_FORMS_XMLNSES', ["http://google.com/test/submit"])
+    @patch('custom.icds.form_processor.aadhaar_number_extractor.AADHAAR_FORMS_XMLNSES',
+           ["http://google.com/test/submit"])
     def test_non_whitelisted_submit_with_vault_entries(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
