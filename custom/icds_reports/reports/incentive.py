@@ -57,7 +57,7 @@ class IncentiveReport(object):
                 AWC_NOT_LAUNCHED = 'AWC not launched'
                 row_data.extend([
                     AWC_NOT_LAUNCHED,
-                    AWC_NOT_LAUNCHED,
+                    _format_infrastructure_data(row['awc_site_code']),
                     AWC_NOT_LAUNCHED,
                     AWC_NOT_LAUNCHED,
                     AWC_NOT_LAUNCHED,
