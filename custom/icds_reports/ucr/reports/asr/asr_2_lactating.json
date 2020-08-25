@@ -36,6 +36,13 @@
       "owner_id"
     ],
     "filters": [
+	  {
+		"display": "Date of Delivery within year",
+		"slug": "add1",
+		"type": "date",
+		"field": "add",
+		"datatype": "date"
+	  },
       {
         "compare_as_string": false,
         "datatype": "date",
