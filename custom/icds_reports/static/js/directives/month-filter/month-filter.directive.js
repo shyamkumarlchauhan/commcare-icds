@@ -8,17 +8,19 @@ function MonthModalController($location, $uibModalInstance, dateHelperService, q
     vm.monthsCopy = [];
     vm.showMessage = false;
     vm.showPPDMessage = false; // this is set to true if the selected data is less than PPD start date
+    vm.showTHRMessage = false;
     vm.quartersOfYear = window.angular.copy(quartersOfYear);
     vm.quartersOfYearDisplayed = [];
     var reportStartDates = dateHelperService.getReportStartDates();
 
     var isSDD =  $location.path().indexOf('service_delivery_dashboard') !== -1;
     var isPPD =  $location.path().indexOf('poshan_progress_dashboard') !== -1;
+    var isAwcThr =  $location.path().indexOf('awc_reports/take_home_ration') !== -1;
     var isQuarterlyDataPeriodSelected = $location.search()['data_period'] === 'quarter';
     vm.isQuarterlyDataPeriodSelected = isQuarterlyDataPeriodSelected;
     vm.isPPD = isPPD;
 
-    var startYear = dateHelperService.getStartingYear(isSDD, isPPD);
+    var startYear = dateHelperService.getStartingYear(isSDD, isPPD, isAwcThr);
 
     var currentDate = new Date();
     var maxYear = dateHelperService.checkAndGetValidDate(currentDate).getFullYear();
@@ -64,11 +66,16 @@ function MonthModalController($location, $uibModalInstance, dateHelperService, q
         vm.selectedYear = maxYear;
     }
 
+    if (isAwcThr && (fullselectedDate < reportStartDates['thr_photos'])) {
+        vm.showTHRMessage = true;
+        vm.selectedYear = maxYear;
+    }
+
 
     var customMonths = dateHelperService.getCustomAvailableMonthsForReports(vm.selectedYear,
         vm.selectedMonth,
         vm.monthsCopy,
-        isSDD, isPPD);
+        isSDD, isPPD, isAwcThr);
 
 
     vm.months = customMonths.months;
@@ -110,7 +117,7 @@ function MonthModalController($location, $uibModalInstance, dateHelperService, q
             var customMonths = dateHelperService.getCustomAvailableMonthsForReports(item.id,
                 vm.selectedMonth,
                 vm.monthsCopy,
-                isSDD, isPPD);
+                isSDD, isPPD, isAwcThr);
 
             vm.months = customMonths.months;
             vm.selectedMonth = customMonths.selectedMonth;
@@ -128,8 +135,9 @@ function MonthFilterController($scope, $location, $uibModal, storageService, dat
     // used by mobile dashboard
     var isSDD =  $location.path().indexOf('service_delivery_dashboard') !== -1;
     var isPPD =  $location.path().indexOf('poshan_progress_dashboard') !== -1;
-    vm.startYear = dateHelperService.getStartingYear(isSDD, isPPD);
-    vm.startMonth = dateHelperService.getStartingMonth(isSDD, isPPD);
+    var isAwcThr =  $location.path().indexOf('awc_reports/take_home_ration') !== -1;
+    vm.startYear = dateHelperService.getStartingYear(isSDD, isPPD, isAwcThr);
+    vm.startMonth = dateHelperService.getStartingMonth(isSDD, isPPD, isAwcThr);
     vm.maxMonth = dateHelperService.checkAndGetValidDate(new Date()).getMonth() + 1;
     vm.maxYear = dateHelperService.checkAndGetValidDate(new Date()).getFullYear();
 
@@ -149,6 +157,10 @@ function MonthFilterController($scope, $location, $uibModal, storageService, dat
     }
 
     if (isPPD && vm.selectedDate < dateHelperService.getReportStartDates()['ppd']) {
+        vm.selectedDate = dateHelperService.checkAndGetValidDate(new Date());
+    }
+
+    if (isAwcThr && vm.selectedDate < dateHelperService.getReportStartDates()['thr_photos']) {
         vm.selectedDate = dateHelperService.checkAndGetValidDate(new Date());
     }
 
@@ -232,6 +244,8 @@ function MonthFilterController($scope, $location, $uibModal, storageService, dat
         // opening date filter if selected date is less than corresponding report start date
         if ((($location.path().indexOf('service_delivery_dashboard') !== -1 &&
             selectedDate < new Date(2019, 1)) ||
+            ($location.path().indexOf('awc_reports/take_home_ration') !== -1 &&
+            selectedDate < new Date(2020, 7)) ||
             (($location.path().indexOf('poshan_progress_dashboard') !== -1 &&
             selectedDate < new Date(2019, 3)) && !isQuarterlyDataPeriodSelected)) && !isMobile) {
             vm.open();
