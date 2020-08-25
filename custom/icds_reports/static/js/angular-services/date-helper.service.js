@@ -4,6 +4,7 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
     var reportStartDates = {
         'sdd': new Date(2019, 1),
         'ppd': new Date(2019, 3),
+        'thr_photos': new Date(2020, 7),
     };
 
     var quarterlyDataAvailabilityDates = {
@@ -49,7 +50,7 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
         var formattedMonth = moment(getSelectedMonth(), 'MM').format('MMMM');
         return formattedMonth + ' ' + getSelectedYear();
     }
-    function getCustomAvailableMonthsForReports(selectedYear, selectedMonth, monthsCopy, isSDD, isPPD) {
+    function getCustomAvailableMonthsForReports(selectedYear, selectedMonth, monthsCopy, isSDD, isPPD, isAwcThr) {
         var months = monthsCopy;
 
         if (selectedYear === new Date().getFullYear()) {
@@ -65,6 +66,16 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
             });
             selectedMonth = selectedMonth <= maxMonthInCurrentYear ? selectedMonth : maxMonthInCurrentYear;
 
+            if (isAwcThr && selectedYear === 2020) {
+                months = _.filter(monthsCopy, function (month) {
+                    if (addCurrentMonth) {
+                        return (month.id <= new Date().getMonth() + 1) && (month.id >= 8);
+                    } else {
+                        return month.id <= new Date().getMonth() && (month.id >= 8);
+                    }
+                });
+                selectedMonth = ((selectedMonth <= maxMonthInCurrentYear) && (selectedMonth >= 8)) ? selectedMonth : maxMonthInCurrentYear;
+            }
         } else {
 
             // Checks if its Service delivery dashboard and the selected year is 2019 then its month list
@@ -84,6 +95,13 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
 
                 selectedMonth = selectedMonth >= reportStartDates['ppd'].getMonth() + 1 ?
                     selectedMonth : reportStartDates['ppd'].getMonth() + 1;
+            } else if (isAwcThr && selectedYear === reportStartDates['thr_photos'].getFullYear()) {
+                months = _.filter(monthsCopy, function (month) {
+                    return month.id >= reportStartDates['thr_photos'].getMonth() + 1;
+                });
+
+                selectedMonth = selectedMonth >= reportStartDates['thr_photos'].getMonth() + 1 ?
+                    selectedMonth : reportStartDates['thr_photos'].getMonth() + 1;
             }
 
             // Dashboard data is available from 2017 March
@@ -101,19 +119,23 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
         };
 
     }
-    function getStartingMonth(isSDD, isPPD) {
+    function getStartingMonth(isSDD, isPPD, isAwcThr) {
         if (isSDD) {
             return reportStartDates['sdd'].getMonth() + 1;
         } else if (isPPD) {
             return reportStartDates['ppd'].getMonth() + 1;
+        } else if (isAwcThr) {
+            return reportStartDates['thr_photos'].getMonth() + 1;
         }
         return defaultStartMonth;
     }
-    function getStartingYear(isSDD, isPPD) {
+    function getStartingYear(isSDD, isPPD, isAwcThr) {
         if (isSDD) {
             return reportStartDates['sdd'].getFullYear();
         } else if (isPPD) {
             return reportStartDates['ppd'].getFullYear();
+        } else if (isAwcThr) {
+            return reportStartDates['thr_photos'].getFullYear();
         }
         return defaultStartYear;
     }
