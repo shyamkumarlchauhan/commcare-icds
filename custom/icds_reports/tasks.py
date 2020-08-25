@@ -112,7 +112,9 @@ from custom.icds_reports.models.aggregate import (
     AggregateMigrationForms,
     AggregateAvailingServiceForms,
     BiharAPIDemographics,
-    ChildVaccines
+    ChildVaccines,
+    AggregateDailyChildHealthTHRForms,
+    AggregateDailyCcsRecordTHRForms
 
 )
 from custom.icds_reports.models.helper import IcdsFile
@@ -366,6 +368,14 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
 
             res_inactive_aww.get(disable_sync_subtasks=False)
 
+            res_daily_thr_ccs = chain(
+                icds_aggregation_task.si(date=calculation_date, func_name='_daily_thr_ccs_record'),).apply_async()
+            res_daily_thr_ccs.get(disable_sync_subtasks=False)
+
+            res_daily_thr_child = chain(
+                icds_aggregation_task.si(date=calculation_date, func_name='_daily_thr_child_health'), ).apply_async()
+            res_daily_thr_child.get(disable_sync_subtasks=False)
+
             res_awc = chain(icds_aggregation_task.si(date=calculation_date, func_name='_agg_awc_table'),
                             *res_ls_tasks
                             ).apply_async()
@@ -450,7 +460,9 @@ def icds_aggregation_task(self, date, func_name):
         '_agg_awc_table': _agg_awc_table,
         'aggregate_awc_daily': aggregate_awc_daily,
         'update_service_delivery_report': update_service_delivery_report,
-        '_aggregate_inactive_aww_agg': _aggregate_inactive_aww_agg
+        '_aggregate_inactive_aww_agg': _aggregate_inactive_aww_agg,
+        '_daily_thr_ccs_record': _daily_thr_ccs_record,
+        '_daily_thr_child_health': _daily_thr_child_health
     }[func_name]
 
     db_alias = get_icds_ucr_citus_db_alias()
@@ -2069,3 +2081,13 @@ def _agg_bihar_api_demographics(target_date):
 def update_child_vaccine_table(target_date):
     current_month = force_to_date(target_date).replace(day=1)
     ChildVaccines.aggregate(current_month)
+
+
+@track_time
+def _daily_thr_ccs_record(day):
+    AggregateDailyCcsRecordTHRForms.aggregate(force_to_date(day))
+
+
+@track_time
+def _daily_thr_child_health(day):
+    AggregateDailyChildHealthTHRForms.aggregate(force_to_date(day))
