@@ -149,6 +149,14 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
         fully_immunized_eligible = "({} AND {} > 12)".format(valid_in_month, age_in_months)
         immunized_age_in_days = "(child_tasks.immun_one_year_date - person_cases.dob)"
         fully_immun_before_month = "(child_tasks.immun_one_year_date < {})".format(end_month_string)
+        live_birth_in_month = (
+            "(person_cases.dob BETWEEN {} AND {} AND"
+            " del_form.still_live_birth='live')"
+        ).format(start_month_string, end_month_string)
+        still_birth_in_month = (
+            "(person_cases.dob BETWEEN {} AND {} AND"
+            " del_form.still_live_birth='still')"
+        ).format(start_month_string, end_month_string)
 
         columns = (
             ("awc_id", "child_health.awc_id"),
@@ -373,6 +381,9 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("child_person_case_id", "child_health.mother_id"),
             ("delivery_nature", "del_form.delivery_nature"),
             ("term_days", "(del_form.add::DATE - del_form.edd::DATE) + 280"),
+            ("live_birth", "CASE WHEN {} THEN 1 ELSE 0 END".format(live_birth_in_month)),
+            ("still_birth", "CASE WHEN {} THEN 1 ELSE 0 END".format(still_birth_in_month)),
+            ("weighed_within_3_days", "CASE WHEN del_form.birth_weight_kg is not NULL THEN 1 ELSE 0 END"),
             ("valid_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(valid_status_daily)),
             ("migration_status_daily", "CASE WHEN {} THEN 0 ELSE 1 END".format(not_migration_status_daily)),
             ("alive_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(alive_status_daily)),

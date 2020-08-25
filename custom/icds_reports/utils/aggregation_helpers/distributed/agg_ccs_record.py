@@ -91,6 +91,12 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
             ('counsel_accessible_postpartum_fp', 'sum(crm.counsel_accessible_postpartum_fp)'),
             ('has_aadhar_id', 'sum(crm.has_aadhar_id)'),
             ('aggregation_level', '5 '),
+            ('death_during_preg', "SUM(CASE WHEN crm.date_death is not null AND "
+                                  "crm.female_death_type='pregnant' THEN 1 ELSE 0 END) "),
+            ('death_during_delivery', "SUM(CASE WHEN crm.date_death is not null AND "
+                                      "crm.female_death_type='delivery' THEN 1 ELSE 0 END) "),
+            ('death_pnc', "SUM(CASE WHEN crm.date_death is not null AND "
+                          "crm.female_death_type='pnc' THEN 1 ELSE 0 END) "),
             ('valid_all_registered_in_month',
                 'sum(CASE WHEN (crm.valid_in_month=1 AND crm.open_in_month=1 AND'
                 ' (crm.pregnant_all=1 OR crm.lactating_all=1)) THEN 1 ELSE 0 END)'
@@ -245,6 +251,9 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
             ('pregnant_all_registered_in_month',),
             ('valid_visits', ),
             ('expected_visits', ),
+            ('death_during_preg',),
+            ('death_during_delivery',),
+            ('death_pnc',),
             ('state_is_test', 'MAX(state_is_test)'),
             (
                 'district_is_test',

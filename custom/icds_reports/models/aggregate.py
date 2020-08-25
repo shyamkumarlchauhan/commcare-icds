@@ -213,6 +213,7 @@ class CcsRecordMonthly(models.Model, AggregateMixin):
     new_ifa_tablets_total_bp = models.SmallIntegerField(blank=True, null=True)
     new_ifa_tablets_total_pnc = models.SmallIntegerField(blank=True, null=True)
     ifa_last_seven_days = models.PositiveSmallIntegerField(blank=True, null=True)
+    female_death_type = models.TextField(blank=True, null=True)
 
     class Meta(object):
         managed = False
@@ -376,6 +377,9 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
+    live_birth = models.SmallIntegerField(blank=True, null=True)
+    still_birth = models.SmallIntegerField(blank=True, null=True)
+    weighed_within_3_days = models.SmallIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -698,6 +702,9 @@ class AggCcsRecord(models.Model, AggregateMixin):
     pregnant_all_registered_in_month = models.IntegerField(null=True)
     valid_visits = models.IntegerField(null=True)
     expected_visits = models.IntegerField(null=True)
+    death_during_preg = models.IntegerField(null=True)
+    death_during_delivery = models.IntegerField(null=True)
+    death_pnc = models.IntegerField(null=True)
 
     class Meta:
         managed = False
@@ -779,6 +786,10 @@ class AggChildHealth(models.Model, AggregateMixin):
     zscore_grading_hfa_recorded_in_month = models.IntegerField(blank=True, null=True)
     zscore_grading_wfh_recorded_in_month = models.IntegerField(blank=True, null=True)
     lunch_count_21_days = models.IntegerField(blank=True, null=True)
+    live_birth = models.IntegerField(blank=True, null=True)
+    still_birth = models.IntegerField(blank=True, null=True)
+    weighed_within_3_days = models.IntegerField(blank=True, null=True)
+    deaths = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

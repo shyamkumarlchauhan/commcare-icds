@@ -136,6 +136,10 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('zscore_grading_hfa_recorded_in_month', "SUM(chm.zscore_grading_hfa_recorded_in_month)"),
             ('zscore_grading_wfh_recorded_in_month', "SUM(chm.zscore_grading_wfh_recorded_in_month)"),
             ('days_ration_given_child', "SUM(chm.days_ration_given_child)"),
+            ('live_birth', "SUM(chm.live_birth)"),
+            ('still_birth', "SUM(chm.still_birth)"),
+            ('weighed_within_3_days',"SUM(chm.weighed_within_3_days)"),
+            ('deaths', "SUM(CASE WHEN chm.date_death is not null THEN 1 ELSE 0 END)")
         )
         query_cols = []
         for c in columns:
@@ -305,6 +309,10 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('wasting_normal_v2', ),
             ('wasting_moderate_v2', ),
             ('wasting_severe_v2', ),
+            ('live_birth',),
+            ('still_birth',),
+            ('weighed_within_3_days',),
+            ('deaths',),
             ('zscore_grading_hfa_recorded_in_month', ),
             ('zscore_grading_wfh_recorded_in_month', ),
             ('state_is_test', 'MAX(state_is_test)'),
