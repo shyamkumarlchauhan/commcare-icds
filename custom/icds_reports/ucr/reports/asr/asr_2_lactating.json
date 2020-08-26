@@ -37,11 +37,11 @@
     ],
     "filters": [
       {
-	"display": "Date of Delivery within year",
-	"slug": "add_within_year",
-	"type": "date",
-	"field": "add",
-	"datatype": "date"
+        "display": "Date of Delivery within year",
+        "slug": "add_within_year",
+        "type": "date",
+        "field": "add",
+        "datatype": "date"
       },
       {
         "compare_as_string": false,
