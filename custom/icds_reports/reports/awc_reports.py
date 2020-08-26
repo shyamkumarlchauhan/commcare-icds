@@ -1370,7 +1370,7 @@ def get_awc_report_thr(config, month, domain, show_test=False, now_date=None):
     ).values('thr_eligible', 'thr_25_days', 'thr_distribution_image_count')
 
     ccs_image_data = DailyTHRCCSRecordView.objects.filter(
-        submitted_on__range=(selected_month, last_day_of_selected_month),
+        month=selected_month,
         submitted_on__gt=ninety_days_ago,
         awc_id=config['awc_id'],
         supervisor_id=config['supervisor_id'],
@@ -1382,7 +1382,7 @@ def get_awc_report_thr(config, month, domain, show_test=False, now_date=None):
     ).exclude(photo_thr_packets_distributed__isnull=True).exclude(photo_thr_packets_distributed__exact='')
 
     child_image_data = DailyTHRChildHealthView.objects.filter(
-        submitted_on__range=(selected_month, last_day_of_selected_month),
+        month=selected_month,
         submitted_on__gt=ninety_days_ago,
         awc_id=config['awc_id'],
         supervisor_id=config['supervisor_id'],

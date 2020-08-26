@@ -66,9 +66,9 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     BiharApiDemographicsHelper,
     AvailingServiceFormsAggregationDistributedHelper,
     ChildVaccineHelper,
+    DailyTHRCCSRecordHelper,
+    DailyTHRChildHealthHelper
 )
-from custom.icds_reports.utils.aggregation_helpers.distributed.daily_thr_ccs_record import DailyTHRCCSRecordHelper
-from custom.icds_reports.utils.aggregation_helpers.distributed.daily_thr_child_health import DailyTHRChildHealthHelper
 
 
 def get_cursor(model):
@@ -1165,7 +1165,7 @@ class AggregateCcsRecordTHRForms(models.Model, AggregateMixin):
 class AggregateDailyChildHealthTHRForms(models.Model, AggregateMixin):
     # partitioned based on these fields
     doc_id = models.TextField()
-    state_id = models.CharField(max_length=40)
+    state_id = models.TextField()
     supervisor_id = models.TextField(null=True)
     month = models.DateField(help_text="Will always be YYYY-MM-01")
 
@@ -1181,7 +1181,7 @@ class AggregateDailyChildHealthTHRForms(models.Model, AggregateMixin):
 
     class Meta(object):
         db_table = AGG_DAILY_CHILD_HEALTH_THR_TABLE
-        unique_together = ('supervisor_id', 'case_id', 'month', 'latest_time_end_processed')  # pkey
+        unique_together = ('month', 'supervisor_id', 'case_id', 'latest_time_end_processed')  # pkey
 
     _agg_helper_cls = DailyTHRChildHealthHelper
     _agg_atomic = False
@@ -1190,7 +1190,7 @@ class AggregateDailyChildHealthTHRForms(models.Model, AggregateMixin):
 class AggregateDailyCcsRecordTHRForms(models.Model, AggregateMixin):
     # partitioned based on these fields
     doc_id = models.TextField()
-    state_id = models.CharField(max_length=40)
+    state_id = models.TextField()
     supervisor_id = models.TextField(null=True)
     month = models.DateField(help_text="Will always be YYYY-MM-01")
 
@@ -1206,7 +1206,7 @@ class AggregateDailyCcsRecordTHRForms(models.Model, AggregateMixin):
 
     class Meta(object):
         db_table = AGG_DAILY_CCS_RECORD_THR_TABLE
-        unique_together = ('supervisor_id', 'case_id', 'month', 'latest_time_end_processed')  # pkey
+        unique_together = ('month', 'supervisor_id', 'case_id', 'latest_time_end_processed')  # pkey
 
     _agg_helper_cls = DailyTHRCCSRecordHelper
     _agg_atomic = False
