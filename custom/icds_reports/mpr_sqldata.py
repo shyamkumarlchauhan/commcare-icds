@@ -525,7 +525,7 @@ class MPRAWCDetailsBeta(ICDSMixin, MPRData):
                 pregnant_migrant=Sum('pregnant_temp_resident')
             ).order_by('month').first()
 
-            child_data = AggChildHealth.objects.filter(**filters).values('awc_id').annotate(
+            child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
                 live_birth_F_permanent_resident=Sum(
                     Case(
                         When(gender='F', then='live_birth_permanent_resident'), default=Value(0)
