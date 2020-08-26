@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
                 ('key', models.CharField(default=custom.icds.models._default_key, max_length=25)),
                 ('value', models.CharField(max_length=255)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
+                ('form_id', models.CharField(db_index=True, default=None, max_length=255)),
             ],
         ),
         migrations.AddIndex(
