@@ -19,14 +19,11 @@ class AadhaarNumberExtractor(object):
         self._patterns = AADHAAR_XFORM_SUBMISSION_PATTERNS
         self._xmlns_whitelist = AADHAAR_FORMS_XMLNSES
 
-    def run(self, form_processor):
+    def run(self, instance_xml):
         vault_entries = None
-        instance_xml = form_processor.get_instance_xml()
-        if instance_xml and self._should_process(instance_xml):
+        if self._should_process(instance_xml):
             vault_entries = self._replace_matches(instance_xml)
-            if vault_entries:
-                form_processor.update_instance(instance_xml)
-        return vault_entries
+        return vault_entries, instance_xml
 
     def _should_process(self, xml):
         if not self._xmlns_whitelist:
