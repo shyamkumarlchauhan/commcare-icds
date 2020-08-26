@@ -38,3 +38,17 @@ class TestTHRForms(BaseFormsTest):
                 "days_ration_given_mother": 22,
                 "photo_thr_packets_distributed": None
             }])
+
+    def test_with_image_form(self):
+        self._test_data_source_results(
+            'thr_form_v2',
+            [{
+                "doc_id": None,
+                "repeat_iteration": 0,
+                "timeend": datetime.datetime(2019, 5, 23, 9, 51, 50, 735000),
+                "ccs_record_case_id": "8179eed0-d462-4893-907b-5f551283399b",
+                "child_health_case_id": "01385ee0-3dcb-471e-831f-09543fc3459a",
+                "days_ration_given_child": 7,
+                "days_ration_given_mother": None,
+                'photo_thr_packets_distributed': '1558605103125.jpg'
+            }])
