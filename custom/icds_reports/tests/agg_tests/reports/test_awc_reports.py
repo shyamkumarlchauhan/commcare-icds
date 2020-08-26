@@ -2390,66 +2390,63 @@ class TestAWCReport(TestCase):
             'icds-cas',
             now_date=(2017, 6, 1)
         )
-        self.assertEqual(
-            data['images'],
+        images = data['images'][0] + data['images'][1]
+        self.assertCountEqual(
+            images,
             [
-                [
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_2233/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_2618/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_2632/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_2667/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_3353/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    }
-                ],
-                [
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_3593/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_5537/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_84/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": "Name 2793"
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_80/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": "Name 2828"
-                    }
-                ]
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2233/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2618/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2632/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2667/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_3353/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_3593/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_5537/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_84/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": "Name 2793"
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_80/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": "Name 2828"
+                }
             ]
         )
