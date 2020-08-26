@@ -10,7 +10,7 @@
     </meta>
 	<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="ad38211be256653bceac8e2156475667" user_id="ad38211be256653bceac8e2156475665" date_modified="2010-06-29T13:42:50" >
 	    <create>
-	        <secret_case_property>0123456789</secret_case_property>
+	        <aadhar_number>123456789012</aadhar_number>
 	        <case_name>test case name</case_name>
 	    </create>
         <update>
