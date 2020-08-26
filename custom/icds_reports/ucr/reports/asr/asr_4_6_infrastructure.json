@@ -136,12 +136,12 @@
         "sortable": false,
         "description": null,
         "format": "default",
-		"type": "array_agg_last_value",
+	"type": "array_agg_last_value",
         "column_id": "where_housed",
         "field": "where_housed",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "where_housed"
       },
       {
@@ -153,7 +153,7 @@
         "field": "provided_building",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "provided_building"
       },
       {
@@ -165,7 +165,7 @@
         "field": "other_building",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "other_building"
       },
       {
@@ -177,7 +177,7 @@
         "field": "awc_building",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "awc_building"
       },
       {
@@ -189,7 +189,7 @@
         "field": "access_physically_challenged",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "access_physically_challenged"
       },
       {
@@ -201,7 +201,7 @@
         "field": "toilet_facility",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "toilet_facility"
       },
       {
@@ -213,7 +213,7 @@
         "field": "type_toilet",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "type_toilet"
       },
       {
@@ -225,7 +225,7 @@
         "field": "source_drinking_water",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "source_drinking_water"
       },
       {
@@ -237,7 +237,7 @@
         "field": "kitchen",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "kitchen"
       },
       {
@@ -249,7 +249,7 @@
         "field": "space_storing_supplies",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "space_storing_supplies"
       },
       {
@@ -261,7 +261,7 @@
         "field": "adequate_space_pse",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "adequate_space_pse"
       },
       {
@@ -273,7 +273,7 @@
         "field": "space_pse",
         "transform": {},
         "calculate_total": false,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "space_pse"
       },
       {
@@ -285,7 +285,7 @@
         "field": "medicine_kits_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "medicine_kits_available"
       },
       {
@@ -297,7 +297,7 @@
         "field": "preschool_kit_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "preschool_kit_available"
       },
       {
@@ -309,7 +309,7 @@
         "field": "baby_scale_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "baby_scale_available"
       },
       {
@@ -321,7 +321,7 @@
         "field": "flat_scale_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "flat_scale_available"
       },
       {
@@ -333,7 +333,7 @@
         "field": "adult_scale_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "adult_scale_available"
       },
       {
@@ -345,7 +345,7 @@
         "field": "cooking_utensils_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "cooking_utensils_available"
       },
       {
@@ -357,7 +357,7 @@
         "field": "iec_bcc_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "iec_bcc_available"
       },
       {
@@ -381,7 +381,7 @@
         "field": "referral_slip_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "referral_slip_available"
       },
       {
@@ -393,7 +393,7 @@
         "field": "plates_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "plates_available"
       },
       {
@@ -405,7 +405,7 @@
         "field": "tumblers_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "tumblers_available"
       },
       {
@@ -417,7 +417,7 @@
         "field": "measure_cups_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "measure_cups_available"
       },
       {
@@ -429,7 +429,7 @@
         "field": "food_storage_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "food_storage_available"
       },
       {
@@ -441,7 +441,7 @@
         "field": "water_storage_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "water_storage_available"
       },
       {
@@ -453,7 +453,7 @@
         "field": "chair_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "chair_available"
       },
       {
@@ -465,7 +465,7 @@
         "field": "table_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "table_available"
       },
       {
@@ -477,7 +477,7 @@
         "field": "mats_available",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "mats_available"
       },
       {
@@ -489,7 +489,7 @@
         "field": "medicine_kits_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "medicine_kits_usable"
       },
       {
@@ -501,7 +501,7 @@
         "field": "preschool_kit_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "preschool_kit_usable"
       },
       {
@@ -513,7 +513,7 @@
         "field": "baby_scale_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "baby_scale_usable"
       },
       {
@@ -525,7 +525,7 @@
         "field": "flat_scale_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "flat_scale_usable"
       },
       {
@@ -537,7 +537,7 @@
         "field": "adult_scale_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "adult_scale_usable"
       },
       {
@@ -549,7 +549,7 @@
         "field": "cooking_utensils_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "cooking_utensils_usable"
       },
       {
@@ -561,7 +561,7 @@
         "field": "iec_bcc_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "iec_bcc_usable"
       },
       {
@@ -573,7 +573,7 @@
         "field": "nhed_kit_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "nhed_kit_usable"
       },
       {
@@ -585,7 +585,7 @@
         "field": "referral_slip_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "referral_slip_usable"
       },
       {
@@ -597,7 +597,7 @@
         "field": "plates_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "plates_usable"
       },
       {
@@ -609,7 +609,7 @@
         "field": "tumblers_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "tumblers_usable"
       },
       {
@@ -621,7 +621,7 @@
         "field": "measure_cups_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "measure_cups_usable"
       },
       {
@@ -633,7 +633,7 @@
         "field": "food_storage_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "food_storage_usable"
       },
       {
@@ -645,7 +645,7 @@
         "field": "water_storage_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "water_storage_usable"
       },
       {
@@ -657,7 +657,7 @@
         "field": "chair_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "chair_usable"
       },
       {
@@ -669,7 +669,7 @@
         "field": "table_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "table_usable"
       },
       {
@@ -681,7 +681,7 @@
         "field": "mats_usable",
         "transform": {},
         "calculate_total": true,
-		"order_by_col": "inserted_at",
+	"order_by_col": "inserted_at",
         "display": "mats_usable"
       }
     ],
