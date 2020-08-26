@@ -162,12 +162,13 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('zscore_grading_hfa_recorded_in_month', "SUM(chm.zscore_grading_hfa_recorded_in_month)"),
             ('zscore_grading_wfh_recorded_in_month', "SUM(chm.zscore_grading_wfh_recorded_in_month)"),
             ('days_ration_given_child', "SUM(chm.days_ration_given_child)"),
-            ('live_birth_permanent_resident', "SUM(CASE WHEN chm.resident='yes' THEN chm.live_birth ELSE 0 END)"),
-            ('live_birth_temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' "
+            ('live_birth_permanent_resident', "SUM(CASE WHEN chm.resident='yes' AND chm.valid_in_month=1 "
+                                              "THEN chm.live_birth ELSE 0 END)"),
+            ('live_birth_temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND chm.valid_in_month=1 "
                                          "THEN chm.live_birth ELSE 0 END)"),
-            ('permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.live_birth=0 THEN 1 ELSE 0 END)"),
-            ('temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND"
-                              " chm.live_birth=0 THEN 1 ELSE 0 END)"),
+            ('permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.valid_in_month=1 THEN 1 ELSE 0 END)"),
+            ('temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND "
+                              " chm.valid_in_month=1  THEN 1 ELSE 0 END)"),
             ('live_birth', "SUM(chm.live_birth)"),
             ('still_birth', "SUM(chm.still_birth)"),
             ('weighed_within_3_days',"SUM(chm.weighed_within_3_days)"),

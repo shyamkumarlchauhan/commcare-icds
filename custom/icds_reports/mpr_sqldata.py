@@ -416,7 +416,8 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             data.update(child_data)
         if mother_data:
             data.update(mother_data)
-        print(data)
+        
+        data = {key: value if value else 0 for key, value in data.items()}
         return data
 
 
@@ -516,38 +517,84 @@ class MPRAWCDetailsBeta(ICDSMixin, MPRData):
             if filters['aggregation_level'] > 1:
                 filters['aggregation_level'] -= 1
 
-            data = AggCcsRecord.objects.filter(**filters).values('awc_id').annotate(
+
+            data = dict()
+
+            ccs_data = AggCcsRecord.objects.filter(**filters).values('month').annotate(
                 pregnant_resident=Sum('pregnant_permanent_resident'),
                 pregnant_migrant=Sum('pregnant_temp_resident')
             ).order_by('month').first()
 
             child_data = AggChildHealth.objects.filter(**filters).values('awc_id').annotate(
-                live_birth_F_permanent_resident=Case(When(gender='F', then=Sum('live_birth_permanent_resident'))),
-                live_birth_M_permanent_resident=Case(When(gender='M', then=Sum('live_birth_permanent_resident'))),
-                live_birth_F_temp_resident=Case(When(gender='F', then=Sum('live_birth_temp_resident'))),
-                live_birth_M_temp_resident=Case(When(gender='M', then=Sum('live_birth_temp_resident'))),
-                child_0_3_F_permanent_resident=Case(When(gender='F',
-                                                         age_tranche__lte=36, then=Sum('permanent_resident'))),
-                child_0_3_M_permanent_resident=Case(
-                    When(gender='M', age_tranche__lte=36, then=Sum('permanent_resident'))),
-                child_0_3_F_temp_resident=Case(
-                    When(gender='F', age_tranche__lte=36, then=Sum('temp_resident'))),
-                child_0_3_M_temp_resident=Case(
-                    When(gender='M', age_tranche__lte=36, then=Sum('temp_resident'))),
-
-                child_3_6_F_permanent_resident=Case(
-                    When(gender='F', age_tranche__gt=36, then=Sum('permanent_resident'))),
-                child_3_6_M_permanent_resident=Case(
-                    When(gender='M', age_tranche__gt=36, then=Sum('permanent_resident'))),
-                child_3_6_F_temp_resident=Case(
-                    When(gender='F', age_tranche__gt=36, then=Sum('temp_resident'))),
-                child_3_6_M_temp_resident=Case(
-                    When(gender='M', age_tranche__gt=36, then=Sum('temp_resident'))),
+                live_birth_F_permanent_resident=Sum(
+                    Case(
+                        When(gender='F', then='live_birth_permanent_resident'), default=Value(0)
+                    )
+                ),
+                live_birth_M_permanent_resident=Sum(
+                    Case(
+                        When(gender='M', then='live_birth_permanent_resident'), default=Value(0)
+                    )
+                ),
+                live_birth_F_temp_resident=Sum(
+                    Case(
+                        When(gender='F', then='live_birth_temp_resident'), default=Value(0)
+                    )
+                ),
+                live_birth_M_temp_resident=Sum(
+                    Case(
+                        When(gender='M', then='live_birth_temp_resident'), default=Value(0)
+                    )
+                ),
+                child_0_3_F_permanent_resident=Sum(
+                    Case(
+                        When(gender='F', age_tranche__lte=36, then='permanent_resident'), default=Value(0)
+                    )
+                ),
+                child_0_3_M_permanent_resident=Sum(
+                    Case(
+                        When(gender='F', then='permanent_resident'), default=Value(0)
+                    )
+                ),
+                child_0_3_F_temp_resident=Sum(
+                    Case(
+                        When(gender='F', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                    )
+                ),
+                child_0_3_M_temp_resident=Sum(
+                    Case(
+                        When(gender='M', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                    )
+                ),
+                child_3_6_F_permanent_resident=Sum(
+                    Case(
+                        When(gender='F', age_tranche__gt=36,  then='permanent_resident'), default=Value(0)
+                    )
+                ),
+                child_3_6_M_permanent_resident=Sum(
+                    Case(
+                        When(gender='M', age_tranche__gt=36, then='permanent_resident'), default=Value(0)
+                    )
+                ),
+                child_3_6_F_temp_resident=Sum(
+                    Case(
+                        When(gender='F', age_tranche__gt=36,  then='temp_resident'), default=Value(0)
+                    )
+                ),
+                child_3_6_M_temp_resident=Sum(
+                    Case(
+                        When(gender='M', age_tranche__gt=36, then='temp_resident'), default=Value(0)
+                    )
+                ),
             ).order_by('month').first()
 
             if child_data:
                 data.update(child_data)
 
+            if ccs_data:
+                data.update(ccs_data)
+
+            data = {key: value if value else 0 for key, value in data.items()}
             rows = []
             for row in self.row_config:
                 row_data = []
@@ -555,6 +602,8 @@ class MPRAWCDetailsBeta(ICDSMixin, MPRData):
                     indicator_value = data.get(cell, cell if cell == '--' or idx == 0 else 0)
                     row_data.append(indicator_value if indicator_value else 0)
                 rows.append(row_data)
+
+
             return rows
 
     @property
@@ -769,6 +818,7 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 'pse_9_days',
                 'num_launched_awcs').order_by('month').first()
 
+            data = data if data else {};
             self.awc_open_count = data.get('awc_days_open', 0)
             rows = []
             for row in self.row_config:
@@ -2319,13 +2369,13 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
         pse_4 = 0
         pse_1 = 0
         if data['num_launched_awcs']:
-            pse_4 = data['num_days_4_pse_activities'] / data['num_launched_awcs']
-            pse_1 = data['num_days_1_pse_activities'] / data['num_launched_awcs']
+            pse_4 = data['num_days_4_pse_activities'] / data['num_launched_awcs'] if data['num_days_4_pse_activities']  else 0
+            pse_1 = data['num_days_1_pse_activities'] / data['num_launched_awcs'] if data['num_days_1_pse_activities'] else 0
 
         return {
             'open_four_acts_count': pse_4,
             'open_one_acts_count': pse_1,
-            'open_pse_count': data['awc_days_open']
+            'open_pse_count': data['awc_days_open'] if data['awc_days_open'] else 0
         }
 
     @property
@@ -3501,7 +3551,7 @@ class MPRImmunizationCoverageBeta(MPRImmunizationCoverage):
         immunization_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
             open_child_count=F('fully_immunized_eligible_in_month'),
             open_child_1yr_immun_complete=F('fully_immun_before_month_end')
-        )
+        ).order_by('month').first()
 
         return immunization_data if immunization_data else {}
 
