@@ -129,6 +129,24 @@ function CasExportController($window, $location, locationHierarchy, locationsSer
         return locationsService.getLocations(level, locationsCache, vm.selectedLocations, true);
     };
 
+    vm.accessToAllLocationsForLevel = function (locations) {
+        var haveAccessToAllLocationsForLevel = true;
+        window.angular.forEach(locations, function (location) {
+            if (!location.user_have_access) {
+                haveAccessToAllLocationsForLevel = false;
+            }
+        });
+        return haveAccessToAllLocationsForLevel;
+    };
+
+    vm.userLocationIdIsNull = function () {
+        return ["null", "undefined", null, undefined].indexOf(vm.userLocationId) !== -1;
+    };
+
+    vm.preventShowingAllOption = function (locations) {
+        return !vm.userLocationIdIsNull() && !vm.accessToAllLocationsForLevel(locations);
+    };
+
     vm.isLocationDisabled = function (level) {
         return locationsService.isLocationDisabled(level, vm);
     };
