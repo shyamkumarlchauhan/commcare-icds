@@ -1,13 +1,13 @@
 import lxml.etree
 import xml2json
 
-from corehq.form_processor.submission_post import SubmissionPostFormProcessor
+from corehq.form_processor.submission_post import FormXmlProcessor
 
 from custom.icds.data_vault import save_vault_entries
 from custom.icds.form_processor.aadhaar_number_extractor import AadhaarNumberExtractor
 
 
-class ICDSSubmissionPostFormProcessor(SubmissionPostFormProcessor):
+class ICDSFormXmlProcessor(FormXmlProcessor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.vault_entries = []

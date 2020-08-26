@@ -27,7 +27,7 @@ from custom.icds_core.const import (
     SMSUsageReport_urlname,
 )
 
-from custom.icds.form_processor.submission_post import ICDSSubmissionPostFormProcessor
+from custom.icds.form_processor.submission_post import ICDSFormXmlProcessor
 
 
 @uitab_dropdown_items.extend(domains=["icds-cas"])
@@ -165,4 +165,4 @@ def icds_tabs():
 
 @get_submission_post_form_processor_class.extend()
 def icds_form_submission_context_class():
-    return ICDSSubmissionPostFormProcessor
+    return ICDSFormXmlProcessor
