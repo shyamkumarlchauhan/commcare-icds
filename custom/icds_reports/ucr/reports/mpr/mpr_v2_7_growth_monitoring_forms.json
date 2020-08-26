@@ -151,17 +151,17 @@
         "description": null,
         "visible": true
       },
-	  {
-		"display": "Child health case id",
-		"column_id": "child_health_case_id",
-		"type": "field",
-		"field": "child_health_case_id",
-		"aggregation": "simple",
-		"transform": {},
-		"calculate_total": false,
-		"description": null,
-		"visible": true
-	  },
+      {
+	"display": "Child health case id",
+	"column_id": "child_health_case_id",
+	"type": "field",
+	"field": "child_health_case_id",
+	"aggregation": "simple",
+	"transform": {},
+	"calculate_total": false,
+	"description": null,
+	"visible": true
+      },
       {
         "sortable": false,
         "description": null,
@@ -185,115 +185,115 @@
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"column_id": "M_resident_weighed_count",
-		"field": "M_resident_weighed_count",
-		"order_by_col": "inserted_at",
-		"transform": {},
-		"calculate_total": false,
-		"display": "M_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"column_id": "M_resident_weighed_count",
+	"field": "M_resident_weighed_count",
+	"order_by_col": "inserted_at",
+	"transform": {},
+	"calculate_total": false,
+	"display": "M_resident_weighed_count",
+	"visible": true
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "F_resident_weighed_count",
-		"field": "F_resident_weighed_count",
-		"calculate_total": false,
-		"display": "F_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "F_resident_weighed_count",
+	"field": "F_resident_weighed_count",
+	"calculate_total": false,
+	"display": "F_resident_weighed_count",
+	"visible": true
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "M_mod_resident_weighed_count",
-		"field": "M_mod_resident_weighed_count",
-		"calculate_total": false,
-		"display": "M_mod_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "M_mod_resident_weighed_count",
+	"field": "M_mod_resident_weighed_count",
+	"calculate_total": false,
+	"display": "M_mod_resident_weighed_count",
+	"visible": true
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "F_mod_resident_weighed_count",
-		"field": "F_mod_resident_weighed_count",
-		"calculate_total": false,
-		"display": "F_mod_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "F_mod_resident_weighed_count",
+	"field": "F_mod_resident_weighed_count",
+	"calculate_total": false,
+	"display": "F_mod_resident_weighed_count",
+	"visible": true
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "M_sev_resident_weighed_count",
-		"field": "M_sev_resident_weighed_count",
-		"transform": {},
-		"calculate_total": false,
-		"display": "M_sev_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "M_sev_resident_weighed_count",
+	"field": "M_sev_resident_weighed_count",
+	"transform": {},
+	"calculate_total": false,
+	"display": "M_sev_resident_weighed_count",
+	"visible": true
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "F_sev_resident_weighed_count",
-		"field": "F_sev_resident_weighed_count",
-		"transform": {},
-		"calculate_total": false,
-		"display": "F_sev_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "F_sev_resident_weighed_count",
+	"field": "F_sev_resident_weighed_count",
+	"transform": {},
+	"calculate_total": false,
+	"display": "F_sev_resident_weighed_count",
+	"visible": true
       },
       {
-		"sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "F_norm_resident_weighed_count",
-		"field": "F_norm_resident_weighed_count",
-		"transform": {},
-		"calculate_total": false,
-		"display": "F_norm_resident_weighed_count",
-		"visible": true
+	"sortable": false,
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "F_norm_resident_weighed_count",
+	"field": "F_norm_resident_weighed_count",
+	"transform": {},
+	"calculate_total": false,
+	"display": "F_norm_resident_weighed_count",
+	"visible": true
       },
       {
         "sortable": false,
-		"description": null,
-		"format": "default",
-		"type": "array_agg_last_value",
-		"order_by_col": "inserted_at",
-		"column_id": "M_norm_resident_weighed_count",
-		"field": "M_norm_resident_weighed_count",
-		"calculate_total": false,
-		"display": "M_norm_resident_weighed_count",
-		"visible": true
+	"description": null,
+	"format": "default",
+	"type": "array_agg_last_value",
+	"order_by_col": "inserted_at",
+	"column_id": "M_norm_resident_weighed_count",
+	"field": "M_norm_resident_weighed_count",
+	"calculate_total": false,
+	"display": "M_norm_resident_weighed_count",
+	"visible": true
       }
     ],
     "sort_expression": [
-	  {
-		"field": "month",
-		"order": "DESC"
-	  },
-	  {
-		"field": "child_health_case_id",
-		"order": "DESC"
-	  }
-	],
+      {
+	"field": "month",
+	"order": "DESC"
+      },
+      {
+	"field": "child_health_case_id",
+	"order": "DESC"
+      }
+    ],
     "configured_charts": []
   }
 }
