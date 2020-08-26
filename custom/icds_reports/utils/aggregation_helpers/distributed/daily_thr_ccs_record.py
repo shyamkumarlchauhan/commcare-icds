@@ -66,7 +66,7 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
                     photo_thr_packets_distributed
                   FROM "{ucr_tablename}"
                   WHERE timeend >= %(current_month_start)s AND timeend < %(next_month_start)s AND
-                        ccs_record_case_id IS NOT NULL
+                        ccs_record_case_id IS NOT NULL AND days_ration_given_mother IS NOT NULL
                 )
                 """.format(
             ucr_tablename=self.ucr_tablename,
@@ -76,7 +76,7 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
     def indexes(self):
         return [
             f"""CREATE INDEX IF NOT EXISTS thr_ccs_record_daily_idx
-                ON "{self.tablename}" (month, state_id, case_id)
+                ON "{self.tablename}" (month, state_id, case_id, supervisor_id)
             """
         ]
 

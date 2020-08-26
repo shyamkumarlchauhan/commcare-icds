@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='AggregateDailyCcsRecordTHRForms',
             fields=[
                 ('doc_id', models.TextField()),
-                ('state_id', models.CharField(max_length=40)),
+                ('state_id', models.TextField()),
                 ('supervisor_id', models.TextField(null=True)),
                 ('month', models.DateField(help_text='Will always be YYYY-MM-01')),
                 ('case_id', models.CharField(max_length=40, primary_key=True, serialize=False)),
@@ -32,13 +32,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='aggregatedailyccsrecordthrforms',
-            unique_together=set([('supervisor_id', 'case_id', 'month', 'latest_time_end_processed')]),
+            unique_together=set([('month', 'supervisor_id', 'case_id', 'latest_time_end_processed')]),
         ),
         migrations.CreateModel(
             name='AggregateDailyChildHealthTHRForms',
             fields=[
                 ('doc_id', models.TextField()),
-                ('state_id', models.CharField(max_length=40)),
+                ('state_id', models.TextField()),
                 ('supervisor_id', models.TextField(null=True)),
                 ('month', models.DateField(help_text='Will always be YYYY-MM-01')),
                 ('case_id', models.CharField(max_length=40, primary_key=True, serialize=False)),
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='aggregatedailychildhealththrforms',
-            unique_together=set([('supervisor_id', 'case_id', 'month', 'latest_time_end_processed')]),
+            unique_together=set([('month', 'supervisor_id', 'case_id', 'latest_time_end_processed')]),
         ),
     ]
     operations.extend(get_composite_primary_key_migrations(['aggregatedailyccsrecordthrforms']))
@@ -62,4 +62,6 @@ class Migration(migrations.Migration):
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CCS_RECORD_THR_TABLE}', 'supervisor_id')"),
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CHILD_HEALTH_THR_TABLE}', 'supervisor_id')"),
     ]
+
+    operations.extend(get_view_migrations())
 

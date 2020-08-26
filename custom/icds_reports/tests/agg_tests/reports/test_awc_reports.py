@@ -2396,7 +2396,19 @@ class TestAWCReport(TestCase):
                 [
                     {
                         "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                                 "thr_form_2233/image1.jpg",
+                        "date": "01/05/2017",
+                        "person_name": None
+                    },
+                    {
+                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
                                  "thr_form_2618/image1.jpg",
+                        "date": "01/05/2017",
+                        "person_name": None
+                    },
+                    {
+                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                                 "thr_form_2632/image1.jpg",
                         "date": "01/05/2017",
                         "person_name": None
                     },
@@ -2408,19 +2420,7 @@ class TestAWCReport(TestCase):
                     },
                     {
                         "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_5537/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
                                  "thr_form_3353/image1.jpg",
-                        "date": "01/05/2017",
-                        "person_name": None
-                    },
-                    {
-                        "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_2632/image1.jpg",
                         "date": "01/05/2017",
                         "person_name": None
                     }
@@ -2428,13 +2428,13 @@ class TestAWCReport(TestCase):
                 [
                     {
                         "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_2233/image1.jpg",
+                                 "thr_form_3593/image1.jpg",
                         "date": "01/05/2017",
                         "person_name": None
                     },
                     {
                         "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
-                                 "thr_form_3593/image1.jpg",
+                                 "thr_form_5537/image1.jpg",
                         "date": "01/05/2017",
                         "person_name": None
                     },
