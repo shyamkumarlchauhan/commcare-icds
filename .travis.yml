@@ -11,7 +11,7 @@ before_install:
   - sudo mv -v docker-compose /usr/local/bin/
 install:
   # checkout the commcare-hq code from it's own repo
-  - git clone https://github.com/dimagi/commcare-hq.git $HOME/commcare --depth=1
+  - git clone https://github.com/dimagi/commcare-hq.git $HOME/commcare
   - cd $HOME/commcare && git fetch origin $TRAVIS_PULL_REQUEST_BRANCH && git checkout $TRAVIS_PULL_REQUEST_BRANCH || echo "Branch $TRAVIS_PULL_REQUEST_BRANCH not found in commcare repo. Defaulting to 'master'"
   - git submodule update --init --recursive
   - mkdir -p $HOME/commcare/extensions/icds && mv $TRAVIS_BUILD_DIR/* $HOME/commcare/extensions/icds
