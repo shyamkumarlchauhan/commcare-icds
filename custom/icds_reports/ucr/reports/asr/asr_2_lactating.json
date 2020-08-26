@@ -38,7 +38,7 @@
     "filters": [
 	  {
 		"display": "Date of Delivery within year",
-		"slug": "add1",
+		"slug": "add_within_year",
 		"type": "date",
 		"field": "add",
 		"datatype": "date"
