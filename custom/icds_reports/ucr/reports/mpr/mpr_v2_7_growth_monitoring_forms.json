@@ -259,7 +259,7 @@
         "visible": true
       },
       {
-	"sortable": false,
+        "sortable": false,
         "description": null,
         "format": "default",
         "type": "array_agg_last_value",

@@ -149,25 +149,25 @@
         "column_id": "state_id"
       },
       {
-       "display_name": "Child health case id",
-       "column_id": "child_health_case_id",
-       "datatype": "string",
-       "type": "expression",
-       "expression": {
-         "type": "root_doc",
-	 "expression": {
-	   "type": "property_path",
-	   "property_path": [
-	     "form",
-	     "case_child_health_0",
-	     "case",
-	     "@case_id"
-	   ],
-	   "datatype": null
-	 }
-       },
-       "is_nullable": true,
-       "create_index": true
+        "display_name": "Child health case id",
+        "column_id": "child_health_case_id",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "root_doc",
+          "expression": {
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "case_child_health_0",
+              "case",
+              "@case_id"
+            ],
+            "datatype": null
+          }
+        },
+        "is_nullable": true,
+        "create_index": true
       },
       {
         "display_name": null,
