@@ -1,6 +1,6 @@
 hqDefine("icds_reports/js/base", function () {
     $(function () {
-        $(document).on('change', '#fieldset_location_async select', function (e) {
+        $(document).on('change', '#fieldset_location_async select, #fieldset_month select, #fieldset_year select', function (e) {
             e.stopPropagation();
             var applyBtn = $('#apply-filters');
 
