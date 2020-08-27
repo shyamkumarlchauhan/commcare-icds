@@ -29,7 +29,7 @@ class AadhaarNumberExtractor(object):
 
     def _should_process(self, xml):
         if not self._xmlns_whitelist:
-            return True
+            return False
         tag, xmlns = xml2json.get_tag_and_xmlns(xml)
         return not xmlns or xmlns in self._xmlns_whitelist
 

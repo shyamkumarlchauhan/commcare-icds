@@ -4,6 +4,7 @@ import uuid
 from django.test import TestCase
 from mock import patch
 
+from corehq.apps.hqcase.utils import SYSTEM_FORM_XMLNS
 from corehq.form_processor.tests.utils import (
     use_sql_backend,
     FormProcessorTestUtils,
@@ -33,6 +34,8 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
         FormProcessorTestUtils.delete_all_cases(self.domain)
         super(SubmissionSQLTransactionsTest, self).tearDown()
 
+    @patch('custom.icds.form_processor.aadhaar_number_extractor.AADHAAR_FORMS_XMLNSES',
+           ['http://commcarehq.org/test/submit'])
     def test_submit_with_vault_items(self):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
@@ -52,15 +55,9 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
         self.assertEqual(VaultEntry.objects.count(), 0)
         form_xml = self.get_xml('form_with_vault_item')
         result = submit_form_locally(form_xml, domain=self.domain)
-        self.assertEqual(VaultEntry.objects.count(), 1)
-        vault_entry = VaultEntry.objects.first()
-        self.assertEqual(vault_entry.value, "123456789012")
-
+        self.assertEqual(VaultEntry.objects.count(), 0)
         saved_form_xml = result.xform.get_xml().decode('utf-8')
-        self.assertFalse("123456789012" in saved_form_xml)
-        self.assertTrue(
-            f"<aadhar_number>vault:{vault_entry.key}"
-            f"</aadhar_number>" in saved_form_xml)
+        self.assertTrue("123456789012" in saved_form_xml)
 
     @patch('custom.icds.form_processor.aadhaar_number_extractor.AADHAAR_FORMS_XMLNSES',
            ["http://google.com/test/submit"])
@@ -74,6 +71,8 @@ class SubmissionSQLTransactionsTest(TestCase, TestFileMixin):
 
 
 @use_sql_backend
+@patch('custom.icds.form_processor.aadhaar_number_extractor.AADHAAR_FORMS_XMLNSES',
+       [SYSTEM_FORM_XMLNS])
 class FundamentalCaseTestsSQL(FundamentalBaseTests):
     domain = "icds-cas"
 
