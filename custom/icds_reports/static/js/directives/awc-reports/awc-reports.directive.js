@@ -1932,16 +1932,6 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
         ],
     };
 
-    if (vm.haveAccessToFeatures) {
-        vm.awcReportTableData['beneficiary'].push(
-        {
-            'mData': 'beneficiary_status',
-            'heading': 'Status',
-            'class': 'medium-col',
-            'value': renderBeneficairyStatus
-        })
-    }
-
     vm.dtColumns = [];
     if (vm.awcReportTableData[vm.step] && !isMobile) {
         for (var i = 0; i < vm.awcReportTableData[vm.step].length; i++) {
