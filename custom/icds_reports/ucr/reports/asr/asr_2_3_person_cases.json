@@ -37,11 +37,11 @@
     ],
     "filters": [
      {
-	"display": "Opened on",
-	"slug": "opened_on",
-	"type": "date",
-	"field": "opened_on",
-	"datatype": "date"
+        "display": "Opened on",
+        "slug": "opened_on",
+        "type": "date",
+        "field": "opened_on",
+        "datatype": "date"
       },
       {
         "display": "Date of Birth",
