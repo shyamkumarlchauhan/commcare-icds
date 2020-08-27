@@ -9,40 +9,42 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
     helper_key = 'daily-thr-ccs-record'
     ucr_data_source_id = 'static-dashboard_thr_forms'
     tablename = AGG_DAILY_CCS_RECORD_THR_TABLE
-    temporary_tablename = 'temp_daily_thr_ccs_record'
 
     def __init__(self, month):
         self.month = transform_day_to_month(month)
         self.next_month_start = self.month + relativedelta(months=1)
         self.current_month_start = self.month
 
+    @property
+    def monthly_tablename(self):
+        return f"{self.tablename}_{month_formatter(self.month)}"
+
     def aggregate(self, cursor):
-        create_temp_query = self.create_temporary_table()
-        drop_temp_query = self.drop_temporary_table()
+        create_table_query = self.create_table_query()
+        drop_table_query = self.drop_table_query()
         agg_query, agg_params = self.aggregation_query()
         index_queries = self.indexes()
+        add_partition_query = self.add_partition_table__query()
 
-        cursor.execute(drop_temp_query)
-        cursor.execute(create_temp_query)
+        cursor.execute(drop_table_query)
+        cursor.execute(create_table_query)
         cursor.execute(agg_query, agg_params)
 
         for query in index_queries:
             cursor.execute(query)
 
-        for i, query in enumerate(self.aggregation_queries()):
-            cursor.execute(query)
-        cursor.execute(drop_temp_query)
+        cursor.execute(add_partition_query)
 
-    def create_temporary_table(self):
+    def drop_table_query(self):
         return f"""
-                    CREATE UNLOGGED TABLE "{self.temporary_tablename}" (LIKE {self.tablename});
-                    SELECT create_distributed_table('{self.temporary_tablename}', 'supervisor_id');
-                """
+                DROP TABLE IF EXISTS "{self.monthly_tablename}"
+            """
 
-    def drop_temporary_table(self):
+    def create_table_query(self):
         return f"""
-                    DROP TABLE IF EXISTS "{self.temporary_tablename}";
-                """
+            CREATE TABLE "{self.monthly_tablename}" (LIKE {self.tablename});
+            SELECT create_distributed_table('{self.monthly_tablename}', 'supervisor_id');
+        """
 
     def aggregation_query(self):
         query_params = {
@@ -52,7 +54,7 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
         }
 
         return """
-                INSERT INTO "{temp_tablename}" (
+                INSERT INTO "{monthly_tablename}" (
                   doc_id, state_id, supervisor_id, month, case_id, latest_time_end_processed,
                   photo_thr_packets_distributed
                 ) (
@@ -70,7 +72,7 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
                 )
                 """.format(
             ucr_tablename=self.ucr_tablename,
-            temp_tablename=self.temporary_tablename,
+            monthly_tablename=self.monthly_tablename,
         ), query_params
 
     def indexes(self):
@@ -80,14 +82,8 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
             """
         ]
 
-    def aggregation_queries(self):
-        return [
-            """DROP TABLE IF EXISTS "local_tmp_agg_app";"""
-            """CREATE TABLE "local_tmp_agg_app" AS SELECT * FROM "{temporary_tablename}";""".format(
-                temporary_tablename=self.temporary_tablename
-            ),
-            """DELETE FROM "{tablename}" WHERE month = '{current_month}';""".format(tablename=self.tablename,
-                                                                                          current_month=self.month),
-            """INSERT INTO "{tablename}" SELECT * from "local_tmp_agg_app";""".format(tablename=self.tablename),
-            """DROP TABLE "local_tmp_agg_app";"""
-        ]
+    def add_partition_table__query(self):
+        return f"""
+            ALTER TABLE "{self.tablename}" ATTACH PARTITION "{self.monthly_tablename}"
+            FOR VALUES IN ('{month_formatter(self.month)}')
+        """
