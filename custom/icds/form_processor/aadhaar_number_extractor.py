@@ -2,6 +2,7 @@ import xml2json
 
 from custom.icds.data_vault import (
     new_vault_entry,
+    save_vault_entries,
 )
 from custom.icds.form_processor.consts import (
     AADHAAR_XFORM_SUBMISSION_PATTERNS,
@@ -20,10 +21,11 @@ class AadhaarNumberExtractor(object):
         self._xmlns_whitelist = AADHAAR_FORMS_XMLNSES
 
     def run(self, instance_xml):
-        vault_entries = None
         if self._should_process(instance_xml):
             vault_entries = self._replace_matches(instance_xml)
-        return vault_entries, instance_xml
+            if vault_entries:
+                save_vault_entries(vault_entries)
+        return instance_xml
 
     def _should_process(self, xml):
         if not self._xmlns_whitelist:
@@ -47,4 +49,3 @@ class AadhaarNumberExtractor(object):
             if tag_name == tag and tag_value_regex.match(text):
                 return True
         return False
-

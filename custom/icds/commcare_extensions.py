@@ -12,7 +12,7 @@ from corehq.apps.userreports.extension_points import (
     static_ucr_data_source_paths,
     static_ucr_report_paths,
 )
-from corehq.form_processor.extension_points import get_submission_post_form_processor_class
+from corehq.form_processor.extension_points import get_form_pre_processor
 from corehq.extensions.extension_points import domain_specific_urls
 from corehq.tabs.extension_points import (
     uitab_dropdown_items,
@@ -27,7 +27,7 @@ from custom.icds_core.const import (
     SMSUsageReport_urlname,
 )
 
-from custom.icds.form_processor.submission_post import ICDSFormXmlProcessor
+from custom.icds.form_processor.utils import pre_process_form
 
 
 @uitab_dropdown_items.extend(domains=["icds-cas"])
@@ -163,6 +163,6 @@ def icds_tabs():
     ]
 
 
-@get_submission_post_form_processor_class.extend()
-def icds_form_submission_context_class():
-    return ICDSFormXmlProcessor
+@get_form_pre_processor.extend()
+def icds_form_pre_processor():
+    return pre_process_form

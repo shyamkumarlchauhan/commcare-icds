@@ -197,7 +197,6 @@ class VaultEntry(models.Model):
     key = models.CharField(max_length=25, default=_default_key)
     value = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True)
-    form_id = models.CharField(max_length=255, db_index=True, default=None)
 
     class Meta:
         indexes = [
