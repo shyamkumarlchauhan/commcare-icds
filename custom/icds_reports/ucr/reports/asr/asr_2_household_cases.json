@@ -37,11 +37,11 @@
     ],
     "filters": [
       {
-	"display": "Household Registration Date",
-	"slug": "hh_reg_date",
-	"type": "date",
-	"field": "hh_reg_date",
-	"datatype": "date"
+        "display": "Household Registration Date",
+        "slug": "hh_reg_date",
+        "type": "date",
+        "field": "hh_reg_date",
+        "datatype": "date"
       },
       {
         "compare_as_string": false,
