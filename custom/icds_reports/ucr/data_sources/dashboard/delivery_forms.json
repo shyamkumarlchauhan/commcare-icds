@@ -459,6 +459,15 @@
             "low_birth_weight"
           ]
         }
+      },
+      {
+        "column_id": "timestart",
+        "datatype": "datetime",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "meta", "timeStart"]
+        }
       }
     ],
     "named_expressions": {
