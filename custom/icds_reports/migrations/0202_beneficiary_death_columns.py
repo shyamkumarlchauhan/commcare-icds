@@ -369,6 +369,4 @@ class Migration(migrations.Migration):
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN permanent_resident integer"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN temp_resident integer"),
     ]
-
-    operations.extend(get_view_migrations())
     operations.extend(get_composite_primary_key_migrations(['aggmprawc']))

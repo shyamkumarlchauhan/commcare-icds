@@ -67,7 +67,7 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     BiharApiDemographicsHelper,
     AvailingServiceFormsAggregationDistributedHelper,
     ChildVaccineHelper,
-    AggMprAwcHelper
+    AggMprAwcHelper,
     DailyTHRCCSRecordHelper,
     DailyTHRChildHealthHelper
 )
