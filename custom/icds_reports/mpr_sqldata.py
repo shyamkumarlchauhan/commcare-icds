@@ -235,6 +235,7 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
     def custom_data(self, selected_location, domain):
         filters = get_location_filter(selected_location.location_id, domain)
         filters['aggregation_level'] = 5
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
         data = dict()
         child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
             live_F_resident_birth_count=Sum(

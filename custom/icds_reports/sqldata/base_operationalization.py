@@ -45,6 +45,15 @@ class BaseOperationalization(ICDSMixin):
 class BaseOperationalizationBeta(BaseOperationalization):
 
     @property
+    def headers(self):
+        return DataTablesHeader(
+            DataTablesColumn('', sortable=False),
+            DataTablesColumn('Sanctioned', sortable=False),
+            DataTablesColumn('Launched', sortable=False),
+            DataTablesColumn('AWCs open for at least 1 day in the month', sortable=False)
+        )
+
+    @property
     def rows(self):
 
         if self.config['location_id']:
