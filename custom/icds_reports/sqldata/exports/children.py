@@ -454,28 +454,80 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                              AliasColumn('cf_in_month'),
                                              slug='cf_in_month'))
         agg_columns.insert(50, DatabaseColumn('No.of children (6-24) months of age enrolled with ICDS-CAS',
-                                             AliasColumn('cf_eligible'),
-                                             slug='cf_eligible'))
+                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              [
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_24",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  ),
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_12",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  )
+                                              ],
+                                              slug='cf_eligible'
+                                              ))
 
         agg_columns.insert(52, DatabaseColumn('No.of children receiving complementary feeding with adequate diet diversity',
                                              AliasColumn('cf_diet_diversity'),
                                              slug='cf_diet_diversity'))
         agg_columns.insert(53, DatabaseColumn('Total number of children (6 months - 2 yrs) of age enrolled with ICDS-CAS',
-                                             AliasColumn('cf_eligible'),
-                                             slug='cf_eligible'))
+                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              [
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_24",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  ),
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_12",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  )
+                                              ],
+                                              slug='cf_eligible'
+                                              ))
 
         agg_columns.insert(55, DatabaseColumn('No. of children initiated complementary feeding with adequate diet quantity',
                                              AliasColumn('cf_diet_quantity'),
                                              slug='cf_diet_quantity'))
         agg_columns.insert(56, DatabaseColumn('No.of children (6-24) months of age enrolled with ICDS-CAS',
-                                             AliasColumn('cf_eligible'),
-                                             slug='cf_eligible'))
+                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              [
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_24",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  ),
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_12",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  )
+                                              ],
+                                              slug='cf_eligible'
+                                              ))
 
         agg_columns.insert(58, DatabaseColumn('Total Number of children receiving complementary feeding '
                                               'with appropriate handwashing before feeding',
                                              AliasColumn('cf_handwashing'),
                                              slug='cf_handwashing'))
         agg_columns.insert(59, DatabaseColumn('No.of children (6-24) months of age enrolled with ICDS-CAS',
-                                             AliasColumn('cf_eligible'),
-                                             slug='cf_eligible'))
+                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              [
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_24",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  ),
+                                                  SumWhen(
+                                                      whens=[["age_tranche = :age_12",
+                                                              'valid_in_month']],
+                                                      alias='valid_in_month'
+                                                  )
+                                              ],
+                                              slug='cf_eligible'
+                                              ))
         return columns + agg_columns
