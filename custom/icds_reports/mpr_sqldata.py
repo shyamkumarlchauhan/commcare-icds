@@ -452,7 +452,6 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             data.update(mother_death_data)
 
         data = {key: value if value else 0 for key, value in data.items()}
-        print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         return data
 
 
@@ -3164,13 +3163,13 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
 
     def get_child_gm_data(self, filters):
         child_data = AggChildHealth.objects.filter(**filters).values('gender').annotate(
-            weighed=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+            weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
                                   then='nutrition_status_weighed',
                                   ), default=Value(0))),
-            weighed_1=Sum(Case(When(age_tranche__in=['24', '36'],
+            weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
                                     then='nutrition_status_weighed',
                                     ), default=Value(0))),
-            weighed_2=Sum(Case(When(age_tranche__in=['48', '60'],
+            weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
                                     then='nutrition_status_weighed',
                                     ), default=Value(0))),
             child_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
@@ -3182,13 +3181,13 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
             child_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
                                         then='valid_in_month',
                                         ), default=Value(0))),
-            sub_weight=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+            sub_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
                                      then='nutrition_status_normal',
                                      ), default=Value(0))),
-            sub_weight_1=Sum(Case(When(age_tranche__in=['24', '36'],
+            sub_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
                                        then='nutrition_status_normal',
                                        ), default=Value(0))),
-            sub_weight_2=Sum(Case(When(age_tranche__in=['48', '60'],
+            sub_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
                                        then='nutrition_status_normal',
                                        ), default=Value(0))),
             mod_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
@@ -3329,18 +3328,18 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
             (
                 'a. Normal (Green)',
                 'Num',
-                'F_mod_weighed_count',
-                'M_mod_weighed_count',
-                'F_mod_weighed_count_1',
-                'M_mod_weighed_count_1',
-                'F_mod_weighed_count_2',
-                'M_mod_weighed_count_2',
+                'F_sub_weighed_count',
+                'M_sub_weighed_count',
+                'F_sub_weighed_count_1',
+                'M_sub_weighed_count_1',
+                'F_sub_weighed_count_2',
+                'M_sub_weighed_count_2',
                 {
-                    'columns': ('F_mod_weighed_count', 'F_mod_weighed_count_1', 'F_mod_weighed_count_2'),
+                    'columns': ('F_sub_weighed_count', 'F_sub_weighed_count_1', 'F_sub_weighed_count_2'),
                     'alias': 'all_F_sub_weight'
                 },
                 {
-                    'columns': ('M_mod_weighed_count', 'M_mod_weighed_count_1', 'M_mod_weighed_count_2'),
+                    'columns': ('M_sub_weighed_count', 'M_sub_weighed_count_1', 'M_sub_weighed_count_2'),
                     'alias': 'all_M_sub_weight'
                 },
                 {
@@ -3352,32 +3351,32 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
                 '',
                 '%',
                 {
-                    'columns': ('F_mod_weighed_count',),
+                    'columns': ('F_sub_weighed_count',),
                     'func': truediv,
                     'second_value': 'F_weighed_count',
                 },
                 {
-                    'columns': ('M_mod_weighed_count',),
+                    'columns': ('M_sub_weighed_count',),
                     'func': truediv,
                     'second_value': 'M_weighed_count',
                 },
                 {
-                    'columns': ('F_mod_weighed_count_1',),
+                    'columns': ('F_sub_weighed_count_1',),
                     'func': truediv,
                     'second_value': 'F_weighed_count_1',
                 },
                 {
-                    'columns': ('M_mod_weighed_count_1',),
+                    'columns': ('M_sub_weighed_count_1',),
                     'func': truediv,
                     'second_value': 'M_weighed_count_1',
                 },
                 {
-                    'columns': ('F_mod_weighed_count_2',),
+                    'columns': ('F_sub_weighed_count_2',),
                     'func': truediv,
                     'second_value': 'F_weighed_count_2',
                 },
                 {
-                    'columns': ('M_mod_weighed_count_2',),
+                    'columns': ('M_sub_weighed_count_2',),
                     'func': truediv,
                     'second_value': 'M_weighed_count_2',
                 },
