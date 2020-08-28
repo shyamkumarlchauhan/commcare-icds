@@ -266,6 +266,69 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             'next_month_start_date': next_month_start
         }
 
+        yield f"""
+        UPDATE  "{self.temporary_tablename}" agg_mpr
+            SET 
+            mother_death_permanent_resident = ut.female_dead_resident,
+            mother_death_temp_resident = ut.female_dead_migrant,
+            pregnancy_death_permanent_resident = ut.pregnancy_dead_resident,
+            pregnancy_death_temp_resident = ut.pregnancy_dead_migrant,
+            delivery_death_permanent_resident = ut.delivery_dead_resident,
+            delivery_death_temp_resident = ut.delivery_dead_migrant,
+            pnc_death_permanent_resident = ut.pnc_dead_resident,
+            pnc_death_temp_resident = ut.pnc_dead_migrant
+        FROM (
+        SELECT
+            supervisor_id,
+            awc_id,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.age_at_death_yrs >= 11) AS female_dead_resident,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident is distinct from 1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.age_at_death_yrs >= 11) AS female_dead_migrant,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.female_death_type='pregnant') AS pregnancy_dead_resident,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident IS DISTINCT FROM 1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.female_death_type='pregnant') AS pregnancy_dead_migrant,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.female_death_type='delivery') AS delivery_dead_resident,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.female_death_type='delivery') AS delivery_dead_migrant,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.female_death_type='pnc') AS pnc_dead_resident,
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+                                AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
+                                AND ucr.female_death_type='pnc') AS pnc_dead_migrant
+
+        FROM "{self.person_case_ucr_table}" ucr LEFT JOIN "{migration_table}" agg_migration ON (
+                ucr.doc_id = agg_migration.person_case_id AND
+                agg_migration.month = %(start_date)s AND
+                ucr.supervisor_id = agg_migration.supervisor_id
+             ) LEFT JOIN "{availing_services_table}" agg_availing ON (
+                ucr.doc_id = agg_availing.person_case_id AND
+                agg_availing.month = %(start_date)s AND
+                ucr.supervisor_id = agg_availing.supervisor_id
+             )
+        WHERE (opened_on <= %(end_date)s AND
+              (closed_on IS NULL OR closed_on >= %(start_date)s)) AND 
+              (agg_availing.is_registered IS DISTINCT FROM 0 OR agg_availing.registration_date::date >= %(start_date)s) AND 
+              (agg_migration.is_migrated IS DISTINCT FROM 1 OR agg_migration.migration_date::date >= %(start_date)s)
+        GROUP BY supervisor_id, awc_id
+        ) ut
+        WHERE 
+            agg_mpr.supervisor_id=ut.supervisor_id AND
+            agg_mpr.awc_id=ut.awc_id AND
+            agg_mpr.aggregation_level=5 AND
+            agg_mpr.month=%(start_date)s
+        """
+
+
     def update_queries(self):
         yield f"""
             DROP TABLE IF EXISTS "local_tmp_agg_sdr";
@@ -361,6 +424,14 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             ('num_other_referral_awcs',),
             ('total_other_referrals',),
             ('total_other_reached_facility',),
+            ('mother_death_permanent_resident',),
+            ('mother_death_temp_resident',),
+            ('pregnancy_death_permanent_resident',),
+            ('pregnancy_death_temp_resident',),
+            ('delivery_death_permanent_resident',),
+            ('delivery_death_temp_resident',),
+            ('pnc_death_permanent_resident',),
+            ('pnc_death_temp_resident',),
             ('state_is_test', 'MAX(state_is_test)'),
             ('district_is_test', column_value_as_per_agg_level(aggregation_level, 1, 'MAX(district_is_test)', "0")),
             ('block_is_test', column_value_as_per_agg_level(aggregation_level, 2, 'MAX(block_is_test)', "0")),

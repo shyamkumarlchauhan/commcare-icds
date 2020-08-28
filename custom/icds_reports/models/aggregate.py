@@ -383,6 +383,8 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     still_birth = models.SmallIntegerField(blank=True, null=True)
     weighed_within_3_days = models.SmallIntegerField(blank=True, null=True)
     fully_immun_before_month_end = models.SmallIntegerField(blank=True, null=True)
+    birth_status_in_month = models.TextField(blank=True, null=True)
+    mother_resident_status = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -813,6 +815,19 @@ class AggChildHealth(models.Model, AggregateMixin):
     live_birth_temp_resident = models.IntegerField(blank=True, null=True)
     permanent_resident = models.IntegerField(blank=True, null=True)
     temp_resident = models.IntegerField(blank=True, null=True)
+    still_birth_permanent_resident = models.IntegerField(blank=True, null=True)
+    still_birth_temp_resident = models.IntegerField(blank=True, null=True)
+    weighed_in_3_days_permanent_resident = models.IntegerField(blank=True, null=True)
+    weighed_in_3_days_temp_resident = models.IntegerField(blank=True, null=True)
+    neonatal_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    neonatal_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    post_neonatal_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    post_neonatal_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    total_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    total_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    lbw_permanent_resident = models.IntegerField(blank=True, null=True)
+    lbw_temp_resident = models.IntegerField(blank=True, null=True)
+
     class Meta:
         managed = False
         db_table = 'agg_child_health'
@@ -2065,6 +2080,15 @@ class AggMPRAwc(models.Model, AggregateMixin):
     num_other_referral_awcs = models.IntegerField(null=True)
     total_other_referrals = models.IntegerField(null=True)
     total_other_reached_facility = models.IntegerField(null=True)
+
+    mother_death_permanent_resident = models.IntegerField(null=True)
+    mother_death_temp_resident = models.IntegerField(null=True)
+    pregnancy_death_permanent_resident = models.IntegerField(null=True)
+    pregnancy_death_temp_resident = models.IntegerField(null=True)
+    delivery_death_permanent_resident = models.IntegerField(null=True)
+    delivery_death_temp_resident = models.IntegerField(null=True)
+    pnc_death_permanent_resident = models.IntegerField(null=True)
+    pnc_death_temp_resident = models.IntegerField(null=True)
 
     class Meta(object):
         db_table = AGG_MPR_AWC_TABLE

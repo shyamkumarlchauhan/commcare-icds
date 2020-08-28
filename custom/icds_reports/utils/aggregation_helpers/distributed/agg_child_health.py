@@ -31,6 +31,8 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
         return get_agg_child_temp_tablename()
 
     def staging_queries(self):
+        death_eligible = ("chm.date_death is not null AND chm.dob is not null "
+                          "AND date_trunc('month', chm.date_death)::DATE=chm.month")
         columns = (
             ('state_id', 'awc_loc.state_id'),
             ('district_id', 'awc_loc.district_id'),
@@ -162,17 +164,48 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('zscore_grading_hfa_recorded_in_month', "SUM(chm.zscore_grading_hfa_recorded_in_month)"),
             ('zscore_grading_wfh_recorded_in_month', "SUM(chm.zscore_grading_wfh_recorded_in_month)"),
             ('days_ration_given_child', "SUM(chm.days_ration_given_child)"),
-            ('live_birth_permanent_resident', "SUM(CASE WHEN chm.resident='yes' AND chm.valid_in_month=1 "
-                                              "THEN chm.live_birth ELSE 0 END)"),
-            ('live_birth_temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND chm.valid_in_month=1 "
-                                         "THEN chm.live_birth ELSE 0 END)"),
             ('permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.valid_in_month=1 THEN 1 ELSE 0 END)"),
             ('temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND "
                               " chm.valid_in_month=1  THEN 1 ELSE 0 END)"),
             ('live_birth', "SUM(chm.live_birth)"),
             ('still_birth', "SUM(chm.still_birth)"),
-            ('weighed_within_3_days',"SUM(chm.weighed_within_3_days)"),
-            ('deaths', "SUM(CASE WHEN chm.date_death is not null THEN 1 ELSE 0 END)")
+            ('deaths', "SUM(CASE WHEN chm.date_death is not null THEN 1 ELSE 0 END)"),
+            ('live_birth_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status='yes' AND "
+                                              "chm.birth_status_in_month='live' THEN 1 ELSE 0 END)"),
+            ('live_birth_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' "
+                                         "AND chm.birth_status_in_month='live' THEN 1 ELSE 0 END)"),
+            ('still_birth_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status='yes' AND "
+                                               "chm.birth_status_in_month='still' THEN 1 ELSE 0 END)"),
+            ('still_birth_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' "
+                                          "AND chm.birth_status_in_month='still' THEN 1 ELSE 0 END)"),
+            ('weighed_in_3_days_permanent_resident', "SUM(CASE WHEN  chm.mother_resident_status='yes' AND "
+                                                     "chm.weighed_within_3_days=1 THEN 1 ELSE 0 END)"),
+            ('weighed_in_3_days_temp_resident', "SUM(CASE WHEN  chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                                "chm.weighed_within_3_days=1 THEN 1 ELSE 0 END)"),
+            ('neonatal_deaths_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status='yes' AND "
+                                                   f"{death_eligible} AND chm.date_death-chm.dob<=28 THEN 1 ELSE 0 END)"),
+            ('neonatal_deaths_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                              f"{death_eligible} AND chm.date_death-chm.dob<=28 THEN 1 ELSE 0 END)"),
+            ('post_neonatal_deaths_permanent_resident',
+             "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+             f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 29 and 364 "
+             f" THEN 1 ELSE 0 END)"),
+            (
+            'post_neonatal_deaths_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                                  f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 29 and 364 "
+                                                  f" THEN 1 ELSE 0 END)"),
+            ('total_deaths_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                                f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 365 and 1826 "
+                                                f"THEN 1 ELSE 0 END)"),
+            ('total_deaths_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                           f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 365 and 1826 "
+                                           f"THEN 1 ELSE 0 END)"),
+            ('lbw_permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.birth_status_in_month='live' AND "
+                                       " chm.weighed_within_3_days is not null THEN "
+                                       "chm.low_birth_weight_born_in_month ELSE 0 END)"),
+            ('lbw_temp_resident', "SUM(CASE WHEN chm.resident is distinct from 'yes' AND "
+                                  "chm.birth_status_in_month='live' AND chm.weighed_within_3_days is not null THEN "
+                                  "chm.low_birth_weight_born_in_month ELSE 0 END)"),
         )
         query_cols = []
         for c in columns:
@@ -350,6 +383,18 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('temp_resident',),
             ('live_birth_permanent_resident',),
             ('live_birth_temp_resident',),
+            ('still_birth_permanent_resident',),
+            ('still_birth_temp_resident',),
+            ('weighed_in_3_days_permanent_resident',),
+            ('weighed_in_3_days_temp_resident',),
+            ('neonatal_deaths_permanent_resident',),
+            ('neonatal_deaths_temp_resident',),
+            ('post_neonatal_deaths_permanent_resident',),
+            ('post_neonatal_deaths_temp_resident',),
+            ('total_deaths_permanent_resident',),
+            ('total_deaths_temp_resident',),
+            ('lbw_permanent_resident',),
+            ('lbw_temp_resident',),
             ('zscore_grading_hfa_normal', ),
             ('zscore_grading_hfa_moderate', ),
             ('zscore_grading_hfa_severe', ),

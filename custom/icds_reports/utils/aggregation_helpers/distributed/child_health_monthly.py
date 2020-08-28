@@ -385,14 +385,17 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("term_days", "(del_form.add::DATE - del_form.edd::DATE) + 280"),
             ("live_birth", "CASE WHEN {} THEN 1 ELSE 0 END".format(live_birth_in_month)),
             ("still_birth", "CASE WHEN {} THEN 1 ELSE 0 END".format(still_birth_in_month)),
-            ("weighed_within_3_days", "CASE WHEN del_form.birth_weight_kg is not NULL THEN 1 ELSE 0 END"),
             ("valid_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(valid_status_daily)),
             ("migration_status_daily", "CASE WHEN {} THEN 0 ELSE 1 END".format(not_migration_status_daily)),
             ("alive_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(alive_status_daily)),
             ("duplicate_status_daily", "CASE WHEN NOT {} AND person_cases.reason_closure in ('dupe_reg',"
                                        "'incorrect_reg') THEN 1 ELSE 0 END".format(open_status_daily)),
             ("seeking_services_status_daily",
-             "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily))
+             "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily)),
+            ("birth_status_in_month",
+             "CASE WHEN {} THEN del_form.still_live_birth ELSE NULL END".format(born_in_month)),
+            ("weighed_within_3_days", "CASE WHEN {} THEN del_form.birth_weight_kg ELSE NULL END".format(born_in_month)),
+            ("mother_resident_status", "del_form.mother_resident_status")
         )
         yield """
         INSERT INTO "{child_tablename}" (
