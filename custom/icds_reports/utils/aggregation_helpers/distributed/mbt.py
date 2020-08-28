@@ -152,7 +152,9 @@ class CcsMbtDistributedHelper(MBTDistributedHelper):
                 'migration_status',
                 'where_born',
                 'num_children_del',
-                'still_live_birth'
+                'still_live_birth',
+                'bpl_apl',
+                'religion',
                 )
 
 
@@ -423,3 +425,11 @@ class AwcMbtDistributedHelper(MBTDistributedHelper):
             state_id=self.state_id,
             month=self.month
         )
+
+class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
+    helper_key = 'birth-mbt'
+
+    @property
+    def base_class(self):
+        from custom.icds_reports.models import AggAwc
+        return AggAwc
