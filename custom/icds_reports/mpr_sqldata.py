@@ -105,7 +105,7 @@ class MPRBirthsAndDeaths(ICDSMixin, MPRData):
                 ICDSDataTableColumn(_('Boys'), sortable=False, span=1),
             ),
             DataTablesColumnGroup(
-                _('Among Permanent Residents'),
+                _('Among Temporary Residents'),
                 ICDSDataTableColumn(_('Girls/Women'), sortable=False, span=1),
                 ICDSDataTableColumn(_('Boys'), sortable=False, span=1),
             )
@@ -263,7 +263,7 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             live_M_resident_birth_count=Sum(
                 Case(
                     When(
-                        gender='M', then='live_birth_temp_resident'
+                        gender='M', then='live_birth_permanent_resident'
                     ),
                     default=Value(0)
                 )
@@ -287,7 +287,7 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             still_F_resident_birth_count=Sum(
                 Case(
                     When(
-                        gender='F', then='live_birth_permanent_resident'
+                        gender='F', then='still_birth_permanent_resident'
                     ),
                     default=Value(0)
                 )
@@ -295,7 +295,7 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             still_M_resident_birth_count=Sum(
                 Case(
                     When(
-                        gender='M', then='live_birth_temp_resident'
+                        gender='M', then='still_birth_permanent_resident'
                     ),
                     default=Value(0)
                 )
@@ -303,7 +303,7 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             still_F_migrant_birth_count=Sum(
                 Case(
                     When(
-                        gender='F', then='live_birth_temp_resident'
+                        gender='F', then='still_birth_temp_resident'
                     ),
                     default=Value(0)
                 )
@@ -311,7 +311,7 @@ class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
             still_M_migrant_birth_count=Sum(
                 Case(
                     When(
-                        gender='M', then='live_birth_temp_resident'
+                        gender='M', then='still_birth_temp_resident'
                     ),
                     default=Value(0)
                 )
