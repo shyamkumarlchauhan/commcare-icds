@@ -175,6 +175,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed.mbt import (
     AwcMbtDistributedHelper,
     CcsMbtDistributedHelper,
     ChildHealthMbtDistributedHelper,
+    BirthPreparednessMbtDistributedHelper,
+    DeliveryChildMbtDistributedHelper,
 )
 
 celery_task_logger = logging.getLogger('celery.task')
@@ -1710,7 +1712,7 @@ def create_all_mbt(month, state_ids):
 
 @task(queue='icds_dashboard_reports_queue')
 def create_mbt_for_month(state_id, month):
-    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper)
+    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper, BirthPreparednessMbtDistributedHelper, DeliveryChildMbtDistributedHelper)
     for helper_class in helpers:
         helper = helper_class(state_id, month)
         # run on primary DB to avoid "conflict with recovery" errors
