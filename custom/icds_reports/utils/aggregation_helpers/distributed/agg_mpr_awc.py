@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
 from corehq.apps.userreports.util import get_table_name
-from custom.icds_reports.const import AGG_MPR_AWC_TABLE
+from custom.icds_reports.const import AGG_MPR_AWC_TABLE, AGG_MIGRATION_TABLE, AGG_AVAILING_SERVICES_TABLE
 from custom.icds_reports.utils.aggregation_helpers import month_formatter, get_child_health_temp_tablename
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import AggregationPartitionedHelper
 
@@ -306,27 +306,30 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
                                 AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
                                 AND ucr.female_death_type='pnc') AS pnc_dead_migrant
 
-        FROM "{self.person_case_ucr_table}" ucr LEFT JOIN "{migration_table}" agg_migration ON (
+        FROM "{self.person_case_ucr_table}" ucr LEFT JOIN "{AGG_MIGRATION_TABLE}" agg_migration ON (
                 ucr.doc_id = agg_migration.person_case_id AND
                 agg_migration.month = %(start_date)s AND
                 ucr.supervisor_id = agg_migration.supervisor_id
-             ) LEFT JOIN "{availing_services_table}" agg_availing ON (
+             ) LEFT JOIN "{AGG_AVAILING_SERVICES_TABLE}" agg_availing ON (
                 ucr.doc_id = agg_availing.person_case_id AND
                 agg_availing.month = %(start_date)s AND
                 ucr.supervisor_id = agg_availing.supervisor_id
              )
-        WHERE (opened_on <= %(end_date)s AND
+        WHERE (opened_on < %(next_month_start_date)s AND
               (closed_on IS NULL OR closed_on >= %(start_date)s)) AND 
               (agg_availing.is_registered IS DISTINCT FROM 0 OR agg_availing.registration_date::date >= %(start_date)s) AND 
               (agg_migration.is_migrated IS DISTINCT FROM 1 OR agg_migration.migration_date::date >= %(start_date)s)
         GROUP BY supervisor_id, awc_id
         ) ut
-        WHERE 
+        WHERE
             agg_mpr.supervisor_id=ut.supervisor_id AND
             agg_mpr.awc_id=ut.awc_id AND
             agg_mpr.aggregation_level=5 AND
             agg_mpr.month=%(start_date)s
-        """
+        """, {
+            'start_date': self.month,
+            'next_month_start_date': next_month_start
+        }
 
 
     def update_queries(self):
