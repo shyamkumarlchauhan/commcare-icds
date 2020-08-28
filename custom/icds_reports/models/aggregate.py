@@ -378,6 +378,9 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
+    birth_status_in_month = models.TextField(blank=True, null=True)
+    weighed_within_3_days = models.SmallIntegerField(blank=True, null=True)
+    mother_resident_status = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -781,6 +784,20 @@ class AggChildHealth(models.Model, AggregateMixin):
     zscore_grading_hfa_recorded_in_month = models.IntegerField(blank=True, null=True)
     zscore_grading_wfh_recorded_in_month = models.IntegerField(blank=True, null=True)
     lunch_count_21_days = models.IntegerField(blank=True, null=True)
+    live_birth_permanent_resident = models.IntegerField(blank=True, null=True)
+    live_birth_temp_resident = models.IntegerField(blank=True, null=True)
+    still_birth_permanent_resident = models.IntegerField(blank=True, null=True)
+    still_birth_temp_resident = models.IntegerField(blank=True, null=True)
+    weighed_in_3_days_permanent_resident = models.IntegerField(blank=True, null=True)
+    weighed_in_3_days_temp_resident = models.IntegerField(blank=True, null=True)
+    neonatal_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    neonatal_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    post_neonatal_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    post_neonatal_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    total_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    total_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    lbw_permanent_resident = models.IntegerField(blank=True, null=True)
+    lbw_temp_resident = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1967,6 +1984,14 @@ class AggMPRAwc(models.Model, AggregateMixin):
     vhnd_with_due_list_prep_immunization = models.IntegerField(null=True)
     vhnd_with_due_list_prep_vita_a = models.IntegerField(null=True)
     vhnd_with_due_list_prep_antenatal_checkup = models.IntegerField(null=True)
+    mother_death_permanent_resident = models.IntegerField(null=True)
+    mother_death_temp_resident = models.IntegerField(null=True)
+    pregnancy_death_permanent_resident = models.IntegerField(null=True)
+    pregnancy_death_temp_resident = models.IntegerField(null=True)
+    delivery_death_permanent_resident = models.IntegerField(null=True)
+    delivery_death_temp_resident = models.IntegerField(null=True)
+    pnc_death_permanent_resident = models.IntegerField(null=True)
+    pnc_death_temp_resident = models.IntegerField(null=True)
 
     class Meta(object):
         db_table = AGG_MPR_AWC_TABLE
