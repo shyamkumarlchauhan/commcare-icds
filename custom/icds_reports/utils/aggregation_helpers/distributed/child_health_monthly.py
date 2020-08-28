@@ -379,7 +379,10 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("duplicate_status_daily", "CASE WHEN NOT {} AND person_cases.reason_closure in ('dupe_reg',"
                                        "'incorrect_reg') THEN 1 ELSE 0 END".format(open_status_daily)),
             ("seeking_services_status_daily",
-             "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily))
+             "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily)),
+            ("birth_status_in_month", "CASE WHEN {} THEN del_form.still_live_birth ELSE NULL END".format(born_in_month)),
+            ("weighed_within_3_days", "CASE WHEN {} THEN del_form.birth_weight_kg ELSE NULL END".format(born_in_month)),
+            ("mother_resident_status", "del_form.mother_resident_status")
         )
         yield """
         INSERT INTO "{child_tablename}" (
