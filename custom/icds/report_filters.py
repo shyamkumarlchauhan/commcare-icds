@@ -5,8 +5,8 @@ from custom.icds_core.const import CPMU_ROLE_NAME
 from corehq.apps.es.users import location as location_filter
 
 
-def filter_emwf_options_test_users(request, domain, user_query):
-    if request.couch_user.get_role(domain).name == CPMU_ROLE_NAME:
+def filter_users_in_test_locations(couch_user, domain, user_query):
+    if couch_user.get_role(domain).name == CPMU_ROLE_NAME:
         # filtering out users who are in test locations for CPMU
         test_location_ids = find_test_location_ids(domain)
         user_query = user_query.filter(
