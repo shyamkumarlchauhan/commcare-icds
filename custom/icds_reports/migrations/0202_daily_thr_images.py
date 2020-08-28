@@ -59,18 +59,8 @@ class Migration(migrations.Migration):
     operations.extend(get_composite_primary_key_migrations(['aggregatedailychildhealththrforms']))
 
     operations += [
-        migrations.RunSQL(
-            f"ALTER TABLE {AGG_DAILY_CCS_RECORD_THR_TABLE} RENAME TO {AGG_DAILY_CCS_RECORD_THR_TABLE}_old"),
-        migrations.RunSQL(
-            f"CREATE TABLE {AGG_DAILY_CCS_RECORD_THR_TABLE} (LIKE {AGG_DAILY_CCS_RECORD_THR_TABLE}_old INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES) PARTITION BY LIST (month)"),
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CCS_RECORD_THR_TABLE}', 'supervisor_id')"),
-        migrations.RunSQL(f"DROP TABLE {AGG_DAILY_CCS_RECORD_THR_TABLE}_old"),
-        migrations.RunSQL(
-            f"ALTER TABLE {AGG_DAILY_CHILD_HEALTH_THR_TABLE} RENAME TO {AGG_DAILY_CHILD_HEALTH_THR_TABLE}_old"),
-        migrations.RunSQL(
-            f"CREATE TABLE {AGG_DAILY_CHILD_HEALTH_THR_TABLE} (LIKE {AGG_DAILY_CHILD_HEALTH_THR_TABLE}_old INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES) PARTITION BY LIST (month)"),
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CHILD_HEALTH_THR_TABLE}', 'supervisor_id')"),
-        migrations.RunSQL(f"DROP TABLE {AGG_DAILY_CHILD_HEALTH_THR_TABLE}_old"),
     ]
 
     operations.extend(get_view_migrations())
