@@ -426,10 +426,36 @@ class AwcMbtDistributedHelper(MBTDistributedHelper):
             month=self.month
         )
 
+
 class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
-    helper_key = 'birth-mbt'
+    helper_key = 'birth-preparedness-mbt'
 
     @property
-    def base_class(self):
-        from custom.icds_reports.models import AggAwc
-        return AggAwc
+    def birth_preparedness_ucr_tablename(self):
+        return get_table_name(self.domain, 'static-dashboard_birth_preparedness_forms')
+
+    def query(self):
+        return """
+        COPY(
+            SELECT * FROM {birth_preparedness_ucr}
+        ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
+        """.format(
+            birth_preparedness_ucr=self.birth_preparedness_ucr_tablename
+        )
+
+
+class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
+    helper_key = 'delivery-child-mbt'
+
+    @property
+    def child_delivery_ucr_tablename(self):
+        return get_table_name(self.domain, 'static-child_delivery_forms')
+
+    def query(self):
+        return """
+        COPY(
+            SELECT * FROM {child_delivery_ucr}
+        ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
+        """.format(
+            birth_preparedness_ucr=self.child_delivery_ucr_tablename
+        )
