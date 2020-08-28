@@ -7,7 +7,6 @@ from corehq.apps.es.users import location as location_filter
 
 def filter_users_in_test_locations(couch_user, domain, user_query):
     if couch_user.get_role(domain).name == CPMU_ROLE_NAME:
-        # filtering out users who are in test locations for CPMU
         test_location_ids = find_test_location_ids(domain)
         user_query = user_query.filter(
             filters.NOT(
