@@ -66,7 +66,7 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
 
         column_names = ", ".join([col[0] for col in columns])
         calculations = ", ".join([col[1] for col in columns])
-
+        daily_attendance = 'daily_attendance'
         yield f"""
                 INSERT INTO "{self.temporary_tablename}" (
                     {column_names}
@@ -134,7 +134,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                 SUM(CASE WHEN pse_eligible=1 AND pse_days_attended>=21 THEN 1 ELSE 0 END) as pse_21_days,
                 SUM(CASE WHEN pse_eligible=1 AND pse_days_attended BETWEEN 21 AND 24 THEN 1 ELSE 0 END) as pse_21_24_days,
                 SUM(CASE WHEN pse_eligible=1 AND pse_days_attended>=25 THEN 1 ELSE 0 END) as pse_25_days,
-
                 SUM(CASE WHEN pse_eligible=1 AND lunch_count=0 THEN 1 ELSE 0 END) as lunch_0_days,
                 SUM(CASE WHEN pse_eligible=1 AND lunch_count BETWEEN 1 AND 7 THEN 1 ELSE 0 END) as lunch_1_7_days,
                 SUM(CASE WHEN pse_eligible=1 AND lunch_count BETWEEN 8 AND 14 THEN 1 ELSE 0 END) as lunch_8_14_days,
@@ -142,7 +141,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                 SUM(CASE WHEN pse_eligible=1 AND lunch_count>=21 THEN 1 ELSE 0 END) as lunch_21_days,
                 SUM(CASE WHEN pse_eligible=1 AND lunch_count BETWEEN 21 AND 24 THEN 1 ELSE 0 END) as lunch_21_24_days,
                 SUM(CASE WHEN pse_eligible=1 AND lunch_count>=25 THEN 1 ELSE 0 END) as lunch_25_days,
-
                 SUM(thr_eligible) as thr_eligible,
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed=0 THEN 1 ELSE 0 END) as thr_0_days,
                 SUM(CASE WHEN thr_eligible=1 AND
@@ -152,10 +150,8 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                 SUM(CASE WHEN thr_eligible=1 AND
                     num_rations_distributed BETWEEN 15 AND 20 THEN 1 ELSE 0 END) as thr_15_20_days,
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed>=21 THEN 1 ELSE 0 END) as thr_21_days,
-
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed BETWEEN 21 AND 24 THEN 1 ELSE 0 END) as thr_21_24_days,
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed>=25 THEN 1 ELSE 0 END) as thr_25_days,
-
                 SUM(CASE WHEN age_tranche::integer <=36 THEN valid_in_month ELSE 0 END ) as children_0_3,
                 SUM(CASE WHEN age_tranche::integer BETWEEN 37 AND 60
                     THEN valid_in_month ELSE 0 END ) as children_3_5,
@@ -202,7 +198,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
             lw_thr_21_days = ut.lw_thr_21_days,
             lw_thr_21_24_days = ut.lw_thr_21_24_days,
             lw_thr_25_days = ut.lw_thr_25_days
-
         FROM (
             SELECT
                 supervisor_id,
@@ -210,7 +205,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                 month,
                 SUM(thr_eligible) as mother_thr_eligible,
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed=0 THEN 1 ELSE 0 END) as mother_thr_0_days,
-
                 SUM(CASE WHEN pregnant=1 THEN thr_eligible ELSE 0 END) as pw_thr_eligible,
                 SUM(CASE WHEN thr_eligible=1 AND pregnant=1 AND num_rations_distributed=0
                     THEN 1 ELSE 0 END) as pw_thr_0_days,
@@ -241,7 +235,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                     THEN 1 ELSE 0 END) as lw_thr_21_24_days,
                 SUM(CASE WHEN thr_eligible=1 AND lactating=1 AND num_rations_distributed>=25
                     THEN 1 ELSE 0 END) as lw_thr_25_days,
-
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed BETWEEN 1 AND 7 THEN 1 ELSE 0 END) as mother_thr_1_7_days,
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed BETWEEN 8 AND 14 THEN 1 ELSE 0 END) as mother_thr_8_14_days,
                 SUM(CASE WHEN thr_eligible=1 AND num_rations_distributed BETWEEN 15 AND 20 THEN 1 ELSE 0 END) as mother_thr_15_20_days,
@@ -284,6 +277,40 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
         """, {
             'start_date': self.month,
             'next_month_start_date': next_month_start
+        }
+
+        yield f"""
+        UPDATE "{self.temporary_tablename}" agg_sdr SET
+            breakfast_served = ut.breakfast_served,
+            hcm_served = ut.hcm_served,
+            thr_served = ut.thr_served,
+            pse_provided = ut.pse_provided,
+            breakfast_21_days = ut.breakfast_21_days,
+            hcm_21_days = ut.hcm_21_days,
+            pse_16_days = ut.pse_16_days,
+            breakfast_9_days = ut.breakfast_9_days,
+            hcm_9_days = ut.hcm_9_days,
+            pse_9_days = ut.pse_9_days
+        FROM (
+            SELECT
+                awc_id,
+                supervisor_id,
+                sum(open_bfast_count) AS breakfast_served,
+                sum(open_hotcooked_count) AS hcm_served,
+                sum(days_thr_provided_count) as thr_served,
+                sum(open_pse_count) as pse_provided,
+                CASE WHEN (sum(open_bfast_count) >=21) THEN 1 ELSE 0 END AS breakfast_21_days,
+                CASE WHEN (sum(open_hotcooked_count) >=21) THEN 1 ELSE 0 END AS hcm_21_days,
+                CASE WHEN (sum(open_pse_count) >=16) THEN 1 ELSE 0 END AS pse_16_days,
+                CASE WHEN (sum(open_bfast_count) <=9) THEN 1 ELSE 0 END AS breakfast_9_days,
+                CASE WHEN (sum(open_hotcooked_count) <=9) THEN 1 ELSE 0 END AS hcm_9_days,
+                CASE WHEN (sum(open_pse_count) <=9) THEN 1 ELSE 0 END AS pse_9_days
+            FROM "{daily_attendance}"
+            WHERE month = %(start_date)s GROUP BY awc_id, month, supervisor_id
+        ) ut
+        WHERE ut.awc_id = agg_sdr.awc_id and agg_sdr.supervisor_id=ut.supervisor_id;
+        """, {
+            'start_date': self.month,
         }
 
     def update_queries(self):
@@ -353,6 +380,18 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
             ('suposhan_diwas_count',),
             ('coming_of_age_count',),
             ('public_health_message_count',),
+            ('awc_days_open',),
+            ('awc_num_open',),
+            ('breakfast_served',),
+            ('hcm_served',),
+            ('thr_served',),
+            ('pse_provided',),
+            ('breakfast_21_days',),
+            ('hcm_21_days',),
+            ('pse_16_days',),
+            ('breakfast_9_days',),
+            ('hcm_9_days',),
+            ('pse_9_days',),
             ('state_is_test', 'MAX(state_is_test)'),
             ('district_is_test', column_value_as_per_agg_level(aggregation_level, 1,'MAX(district_is_test)', "0")),
             ('block_is_test', column_value_as_per_agg_level(aggregation_level, 2,'MAX(block_is_test)', "0")),
