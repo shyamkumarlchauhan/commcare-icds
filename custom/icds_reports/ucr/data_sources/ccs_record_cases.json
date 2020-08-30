@@ -1272,12 +1272,6 @@
         "property_name": "location_reassignment_last_supervisor_id"
       },
       {
-        "datatype": "string",
-        "column_id": "bpl_apl",
-        "type": "raw",
-        "property_name": "hh_bpl_apl"
-      },
-      {
         "display_name": null,
         "transform": {},
         "datatype": "string",
