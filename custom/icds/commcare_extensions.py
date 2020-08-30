@@ -161,7 +161,7 @@ def icds_tabs():
     ]
 
 
-@user_query_mutators.extend()
+@user_query_mutators.extend(domains=["icds-cas"])
 def icds_emwf_options_user_query_mutators(domain):
     from custom.icds.report_filters import filter_users_in_test_locations
     return [
