@@ -437,10 +437,13 @@ class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
     def query(self):
         return """
         COPY(
-            SELECT * FROM {birth_preparedness_ucr}
+            SELECT * FROM "{birth_preparedness_ucr}" t
+            WHERE t.state_id='{state_id}' and t.month='{month}' 
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
         """.format(
-            birth_preparedness_ucr=self.birth_preparedness_ucr_tablename
+            birth_preparedness_ucr=self.birth_preparedness_ucr_tablename,
+            state_id=self.state_id,
+            month=self.month
         )
 
 
@@ -454,8 +457,11 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
     def query(self):
         return """
         COPY(
-            SELECT * FROM {child_delivery_ucr}
+            SELECT * FROM "{child_delivery_ucr}"
+            WHERE t.state_id='{state_id}' and t.month='{month}'
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
         """.format(
-            birth_preparedness_ucr=self.child_delivery_ucr_tablename
+            birth_preparedness_ucr=self.child_delivery_ucr_tablename,
+            state_id=self.state_id,
+            month=self.month
         )
