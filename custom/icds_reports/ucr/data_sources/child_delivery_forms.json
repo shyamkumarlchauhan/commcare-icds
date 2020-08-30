@@ -698,91 +698,129 @@
         "column_id": "lbw_M_migrant_birth_count"
       },
       {
-        "column_id": "timestart",
-        "datatype": "datetime",
-        "type": "expression",
+        "display_name": null,
+        "datatype": "date",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "meta", "timeStart"]
-        }
+          "expression": {
+            "datatype": "date",
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "meta",
+              "timeStart"
+            ]
+          },
+          "type": "root_doc"
+        },
+        "is_primary_key": false,
+        "transform": {},
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "timeStart"
       },
       {
-        "column_id": "timeend",
-        "datatype": "datetime",
-        "type": "expression",
+        "display_name": null,
+        "datatype": "date",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "meta", "timeEnd"]
-        }
+          "expression": {
+            "datatype": "date",
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "meta",
+              "timeEnd"
+            ]
+          },
+          "type": "root_doc"
+        },
+        "is_primary_key": false,
+        "transform": {},
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "timeend"
       },
       {
-        "column_id": "case_load_ccs_record0",
         "datatype": "string",
-        "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "case_load_ccs_record0", "case", "@case_id"]
-        }
+          "expression": {
+            "datatype": "string",
+            "type": "property_path",
+            "property_path": ["form", "case_load_ccs_record0", "case", "@case_id"]
+          },
+          "type": "root_doc"
+        },
+        "is_primary_key": false,
+        "type": "expression",
+        "column_id": "case_load_ccs_record0"
       },
       {
-        "column_id": "where_born",
         "datatype": "small_integer",
-        "type": "expression",
         "expression": {
-          "type": "switch",
-          "switch_on": {
-            "type": "property_path",
-            "property_path": ["form", "where_born"]
-          },
-          "cases": {
-            "home": {
-              "type": "constant",
-              "constant": 1
+          "expression": {
+            "datatype": "small_integer",
+            "type": "switch",
+            "switch_on": {
+              "type": "property_path",
+              "property_path": ["form", "where_born"]
             },
-            "hospital": {
-              "type": "constant",
-              "constant": 2
+            "cases": {
+              "home": {
+                "type": "constant",
+                "constant": 1
+              },
+              "hospital": {
+                "type": "constant",
+                "constant": 2
+              },
+              "transit": {
+                "type": "constant",
+                "constant": 3
+              }
             },
-            "transit": {
+            "default": {
               "type": "constant",
-              "constant": 3
+              "constant": 0
             }
           },
-          "default": {
-            "type": "constant",
-            "constant": 0
-          }
-        }
+          "type": "root_doc"
+        },
+        "type": "expression",
+        "column_id": "where_born"
       },
       {
-        "column_id": "which_hospital",
         "datatype": "small_integer",
-        "type": "expression",
         "expression": {
-          "type": "switch",
-          "switch_on": {
-            "type": "property_path",
-            "property_path": ["form", "which_hospital"]
-          },
-          "cases": {
-            "block_phc": {
-              "type": "constant",
-              "constant": 1
+          "expression": {
+            "datatype": "small_integer",
+            "type": "switch",
+            "switch_on": {
+              "type": "property_path",
+              "property_path": ["form", "which_hospital"]
             },
-            "district_hospital": {
-              "type": "constant",
-              "constant": 2
+            "cases": {
+              "block_phc": {
+                "type": "constant",
+                "constant": 1
+              },
+              "district_hospital": {
+                "type": "constant",
+                "constant": 2
+              },
+              "private": {
+                "type": "constant",
+                "constant": 3
+              }
             },
-            "private": {
+            "default": {
               "type": "constant",
-              "constant": 3
+              "constant": 0
             }
           },
-          "default": {
-            "type": "constant",
-            "constant": 0
-          }
-        }
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "which_hospital"
       },
       {
         "column_id": "breastfed_at_birth",
@@ -826,61 +864,90 @@
         }
       },
       {
-        "column_id": "unscheduled_visit",
         "datatype": "small_integer",
-        "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "unscheduled_visit"]
-        }
+          "expression": {
+            "type": "property_path",
+            "datatype": "small_integer",
+            "property_path": ["form", "unscheduled_visit"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "unscheduled_visit"
       },
       {
-        "column_id": "days_visit_late",
         "datatype": "small_integer",
-        "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "days_visit_late"]
-        }
+          "expression": {
+            "type": "property_path",
+            "datatype": "small_integer",
+            "property_path": ["form", "days_visit_late"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "days_visit_late"
       },
       {
-        "column_id": "next_visit",
         "datatype": "date",
-        "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "next_due"]
-        }
+          "expression": {
+            "datatype": "small_integer",
+            "type": "property_path",
+            "property_path": ["form", "next_due"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "next_visit"
       },
       {
-        "column_id": "num_children_del",
         "datatype": "small_integer",
-        "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": ["form", "num_children_del"]
-        }
+          "expression": {
+            "datatype": "small_integer",
+            "type": "property_path",
+            "property_path": ["form", "num_children_del"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "num_children_del"
       },
       {
-        "column_id": "username",
         "datatype": "string",
-        "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": [
-            "form",
-            "meta",
-            "username"
-          ]
-        }
+          "expression": {
+            "datatype": "string",
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "meta",
+              "username"
+            ]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "username"
       },
       {
         "column_id": "received_on",
-        "datatype": "date",
+        "datatype": "datetime",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "received_on"
+          "type": "root_doc",
+          "expression": {
+            "type": "property_name",
+            "datatype": "datetime",
+            "property_name": "received_on"
+          }
         }
       },
       {
@@ -888,14 +955,18 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_path",
-          "property_path": [
-            "form",
-            "update_mother_person_case",
-            "update_mother_person_case",
-            "case",
-            "@case_id"
-          ]
+          "type": "root_doc",
+          "expression": {
+            "type": "property_path",
+            "datatype": "string",
+            "property_path": [
+              "form",
+              "update_mother_person_case",
+              "update_mother_person_case",
+              "case",
+              "@case_id"
+            ]
+          }
         }
       },
       {
@@ -903,8 +974,12 @@
         "datatype": "small_integer",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "total_children_died"
+          "expression": {
+            "type": "property_name",
+            "property_name": "total_children_died",
+            "datatype": "small_integer"
+          },
+          "type": "root_doc"
         }
       },
       {
@@ -912,8 +987,12 @@
         "datatype": "small_integer",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "how_many_children"
+          "expression": {
+            "type": "property_name",
+            "property_name": "how_many_children",
+            "datatype": "small_integer"
+          },
+          "type": "root_doc"
         }
       },
       {
@@ -921,8 +1000,12 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "mother_alive"
+          "expression": {
+            "type": "property_name",
+            "property_name": "mother_alive",
+            "datatype": "string"
+          },
+          "type": "root_doc"
         }
       },
       {
@@ -930,8 +1013,12 @@
         "datatype": "date",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "mother_dob"
+          "expression": {
+            "type": "property_name",
+            "property_name": "mother_dob",
+            "datatype": "date"
+          },
+          "type": "root_doc"
         }
       },
       {
@@ -939,8 +1026,12 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "owner_id"
+          "expression": {
+            "type": "property_name",
+            "property_name": "owner_id",
+            "datatype": "string"
+          },
+          "type": "root_doc"
         }
       },
       {
@@ -948,8 +1039,12 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "safe"
+          "expression": {
+            "type": "property_name",
+            "property_name": "safe",
+            "datatype": "string"
+          },
+          "type": "root_doc"
         }
       },
       {
@@ -959,8 +1054,6 @@
         "expression": {
           "type": "property_path",
           "property_path": [
-            "form",
-            "child",
             "low_birth_weight"
           ]
         }
@@ -972,8 +1065,6 @@
         "expression": {
           "type": "property_path",
           "property_path": [
-            "form",
-            "child",
             "child_birth_weight_recorded"
           ]
         }
@@ -985,8 +1076,6 @@
         "expression": {
           "type": "property_path",
           "property_path": [
-            "form",
-            "child",
             "child_alive"
           ]
         }
