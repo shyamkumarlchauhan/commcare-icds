@@ -1,7 +1,7 @@
 from corehq.apps.es import filters
 from corehq.apps.locations.models import SQLLocation
 from corehq.util.quickcache import quickcache
-from custom.icds_core.const import CPMU_ROLE_NAME
+from custom.icds.const import CPMU_ROLE_NAME
 from corehq.apps.es.users import location as location_filter
 
 
