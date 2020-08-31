@@ -232,7 +232,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -243,7 +242,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -261,7 +259,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -279,7 +276,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -290,7 +286,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -335,7 +330,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -380,7 +374,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -425,7 +418,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
-                'aggregation_level': 1
             },
             loc_level='state'
         )
