@@ -461,7 +461,7 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
             WHERE t.state_id='{state_id}' and t.month='{month}'
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
         """.format(
-            birth_preparedness_ucr=self.child_delivery_ucr_tablename,
+            child_delivery_ucr=self.child_delivery_ucr_tablename,
             state_id=self.state_id,
             month=self.month
         )
