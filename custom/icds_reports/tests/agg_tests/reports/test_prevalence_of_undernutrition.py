@@ -220,7 +220,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -230,7 +230,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -240,7 +240,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -257,7 +257,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -274,7 +274,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -284,7 +284,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -328,7 +328,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -372,7 +372,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
