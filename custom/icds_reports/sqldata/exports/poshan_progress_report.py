@@ -63,7 +63,10 @@ class PoshanProgressReport(object):
             num = row[all_cols.index(v[0])]
             den = row[all_cols.index(v[1])]
             is_special = row.get(v[2], False)
-            row[k] = calculate_percent_beta(num, den, is_special)
+            if is_special:
+                row[k] = round(num/den)
+            else:
+                row[k] = calculate_percent_beta(num, den)
             # calculation is done on decimal values
             # and then round off to nearest integer
             row[all_cols.index(v[0])] = round(row[all_cols.index(v[0])])

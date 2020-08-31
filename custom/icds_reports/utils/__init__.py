@@ -2529,11 +2529,8 @@ def calculate_percent(num, den, extra_number, truncate_out=True):
         return ret
 
 
-def calculate_percent_beta(num, den, is_special, truncate_out=True):
+def calculate_percent_beta(num, den, truncate_out=True):
     ret = percent_num(num, den)
-    if is_special:
-        ret = ret / 100
-        ret = round(ret)
     if truncate_out:
         return "{}%".format("%.2f" % ret)
     else:

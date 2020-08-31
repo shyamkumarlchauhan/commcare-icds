@@ -37,7 +37,7 @@ def fetch_quarter_data(value_fields, order_by, filters, include_test, domain, mo
     return data
 
 
-def calculate_percentage_single_row(row, beta, truncate_out=True):
+def calculate_percentage_single_row(row, truncate_out=True):
     for k, v in PPR_COLS_PERCENTAGE_RELATIONS.items():
         num = row.get(v[0], 0)
         den = row.get(v[1], 1)  # to avoid 0/0 division error
@@ -55,7 +55,10 @@ def calculate_percentage_single_row_beta(row, truncate_out=True):
         num = row.get(v[0], 0)
         den = row.get(v[1], 1)  # to avoid 0/0 division error
         is_special = row.get(v[2], False)
-        row[k] = calculate_percent_beta(num, den, is_special, truncate_out)
+        if is_special:
+            row[k] = round(num / den)
+        else:
+            row[k] = calculate_percent_beta(num, den, truncate_out)
         # calculation is done on decimal values
         # and then round off to nearest integer
         # and if not present defaulting them to zero
