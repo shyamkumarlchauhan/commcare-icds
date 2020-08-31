@@ -59,7 +59,7 @@ def calculate_percentage_single_row_beta(row, truncate_out=True):
         if is_avg:
             row[k] = round(num / den)
         else:
-            row[k] = percent_num(num, den) if truncate_out else percent(num, den)
+            row[k] = percent(num, den) if truncate_out else percent_num(num, den)
         # calculation is done on decimal values
         # and then round off to nearest integer
         # and if not present defaulting them to zero
