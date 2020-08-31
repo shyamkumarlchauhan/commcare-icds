@@ -429,6 +429,9 @@
       },
       {
         "column_ids": ["state_id", "timeend_with_time"]
+      },
+      {
+        "column_ids": ["received_on", "state_id" ]
       }
     ],
     "sql_settings": {

@@ -1225,6 +1225,9 @@
     "sql_column_indexes": [
       {
         "column_ids": ["supervisor_id", "child_health_case_id"]
+      },
+      {
+        "column_ids": ["received_on", "state_id" ]
       }
     ],
     "sql_settings": {

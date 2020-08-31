@@ -616,6 +616,9 @@
     "sql_column_indexes": [
       {
         "column_ids": ["state_id", "timeend"]
+      },
+      {
+        "column_ids": ["received_on", "state_id" ]
       }
     ],
     "disable_destructive_rebuild": true
