@@ -18,7 +18,8 @@ class TestPPDData(TestCase):
                 'aggregation_level': 2,
                 'state_id': 'st1',
             },
-            False
+            False,
+            True
         )
         expected = {'ICDS CAS Coverage': [[{'Best performers': [{'place': 'd1',
                                                                  'value': '142.40%'}],
@@ -65,7 +66,8 @@ class TestPPDData(TestCase):
             {
                 'aggregation_level': 1,
             },
-            False
+            False,
+            True
         )
         expected = {'ICDS CAS Coverage': [[{'Best performers': [{'place': 'st1',
                                                                  'value': '64.80%'},
@@ -154,9 +156,10 @@ class TestPPDData(TestCase):
             {
                 'aggregation_level': 1,
             },
-            False
+            False,
+            True
         )
-        expected = {'ICDS CAS Coverage': {'% Number of Days AWC Were opened': '118.18%',
+        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': '11818%',
                                           '% of Home Visits': '0.79%',
                                           'Number of AWCs Launched': 22,
                                           'Number of Blocks Covered': 5,
@@ -183,9 +186,10 @@ class TestPPDData(TestCase):
             {
                 'aggregation_level': 1,
             },
-            False
+            False,
+            True
         )
-        expected = {'ICDS CAS Coverage': {'% Number of Days AWC Were opened': '53.27%',
+        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': '5327%',
                                           '% of Home Visits': '0.32%',
                                           'Number of AWCs Launched': 22,
                                           'Number of Blocks Covered': 5,

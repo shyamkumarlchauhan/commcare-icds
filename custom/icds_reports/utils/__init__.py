@@ -2529,6 +2529,22 @@ def calculate_percent(num, den, extra_number, truncate_out=True):
         return ret
 
 
+def calculate_percent_beta(num, den, extra_number, truncate_out=True):
+    if den == 0:
+        ret = 0
+    else:
+        if extra_number:
+            ret = (num / den) / extra_number
+            ret = round(ret)
+        else:
+            ret = (num / den) * 100
+
+    if truncate_out is True and not extra_number:
+        return "{}%".format("%.2f" % ret)
+    else:
+        return ret
+
+
 def handle_average(val):
     if val is None:
         ret = 0

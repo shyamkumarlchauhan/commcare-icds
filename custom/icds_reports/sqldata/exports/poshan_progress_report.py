@@ -8,7 +8,7 @@ from custom.icds_reports.const import (
     PPR_COLS_PERCENTAGE_RELATIONS
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
-from custom.icds_reports.utils import generate_quarter_months, calculate_percent, handle_average, apply_exclude
+from custom.icds_reports.utils import generate_quarter_months, calculate_percent, handle_average, apply_exclude, calculate_percent_beta
 from custom.icds_reports.utils import india_now
 
 
@@ -34,13 +34,22 @@ class PoshanProgressReport(object):
             self.row_constants[2].remove('District Name')
             self.row_constants[3].remove('district_name')
             self.row_constants[4].remove('district_name')
+        if beta:
+            self.row_constants[0][self.row_constants[0].index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
+            self.row_constants[1][self.row_constants[1].index(
+                '% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
+
+
 
     def __calculate_percentage_in_rows(self, row, all_cols):
         for k, v in PPR_COLS_PERCENTAGE_RELATIONS.items():
             num = row[all_cols.index(v[0])]
             den = row[all_cols.index(v[1])]
             extra_number = v[2] if len(v) > 2 else None
-            row[all_cols.index(k)] = calculate_percent(num, den, extra_number)
+            if self.beta:
+                row[all_cols.index(k)] = calculate_percent_beta(num, den, extra_number)
+            else:
+                row[all_cols.index(k)] = calculate_percent(num, den, extra_number)
             # calculation is done on decimal values
             # and then round off to nearest integer
             row[all_cols.index(v[0])] = round(row[all_cols.index(v[0])])

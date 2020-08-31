@@ -4240,7 +4240,8 @@ class TestExportData(TestCase):
                 'report_layout': 'comprehensive',
                 'data_period': 'month'
             },
-            loc_level=1
+            loc_level=1,
+            beta=True
         ).get_excel_data(location)
 
         self.assertListEqual(
@@ -4248,7 +4249,7 @@ class TestExportData(TestCase):
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 '% Number of Days AWC Were opened', 'Expected Home Visits', 'Actual Home Visits',
+                 'Average Number of Days AWC Were opened', 'Expected Home Visits', 'Actual Home Visits',
                  '% of Home Visits',
                  'Total Number of Children (3-6 yrs)',
                  'No. of children between 3-6 years provided PSE for atleast 21+ days',
@@ -4314,14 +4315,15 @@ class TestExportData(TestCase):
                 'report_layout': 'summary',
                 'data_period': 'month'
             },
-            loc_level=1
+            loc_level=1,
+            beta=True
         ).get_excel_data(location)
         self.assertListEqual(
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 '% Number of Days AWC Were opened', '% of Home Visits',
+                 'Average Number of Days AWC Were opened', '% of Home Visits',
                  '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
                  '% of trimester three women counselled on immediate and EBF', 'Height Measurement Efficiency',
                  '% of children between 6 months -3 years, P&LW provided THR for atleast ' '21+ days',
@@ -4355,13 +4357,14 @@ class TestExportData(TestCase):
                 'quarter': 2,
                 'year': 2017
             },
-            loc_level=2
+            loc_level=2,
+            beta=True
         ).get_excel_data(location)
         self.assertListEqual(
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'District Name', 'Number of Blocks Covered',
-                 'Number of AWCs Launched', '% Number of Days AWC Were opened', 'Expected Home Visits',
+                 'Number of AWCs Launched', 'Average Number of Days AWC Were opened', 'Expected Home Visits',
                  'Actual Home Visits',
                  '% of Home Visits', 'Total Number of Children (3-6 yrs)',
                  'No. of children between 3-6 years provided PSE for atleast 21+ days',
@@ -4401,14 +4404,15 @@ class TestExportData(TestCase):
                 'quarter': 2,
                 'year': 2017
             },
-            loc_level=1
+            loc_level=1,
+            beta=True
         ).get_excel_data(location)
         self.assertListEqual(
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 '% Number of Days AWC Were opened', '% of Home Visits',
+                 'Average Number of Days AWC Were opened', '% of Home Visits',
                  '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
                  '% of trimester three women counselled on immediate and EBF', 'Height Measurement Efficiency',
                  '% of children between 6 months -3 years, P&LW provided THR for atleast ' '21+ days',
