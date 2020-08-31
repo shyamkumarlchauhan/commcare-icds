@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models.query_utils import Q
+from django.http import HttpResponseNotFound
 from django.http.response import (
     Http404,
     HttpResponse,
@@ -455,6 +456,8 @@ class DownloadReleaseNotes(View):
         release_notes_file = IcdsFile.objects.filter(blob_id="dashboard_release_notes.pdf",
                                                      data_type='dashboard_release_notes')\
             .order_by('file_added').last()
+        if not release_notes_file:
+            return HttpResponseNotFound()
         request_type = request.GET.get('type')
         if request_type == 'date':
             release_date = release_notes_file.file_added
