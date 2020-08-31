@@ -716,7 +716,7 @@
         "transform": {},
         "is_nullable": true,
         "type": "expression",
-        "column_id": "timeStart"
+        "column_id": "timestart"
       },
       {
         "display_name": null,
@@ -895,7 +895,7 @@
         "datatype": "date",
         "expression": {
           "expression": {
-            "datatype": "small_integer",
+            "datatype": "date",
             "type": "property_path",
             "property_path": ["form", "next_due"]
           },
@@ -975,8 +975,8 @@
         "type": "expression",
         "expression": {
           "expression": {
-            "type": "property_name",
-            "property_name": "total_children_died",
+            "type": "property_path",
+            "property_path": ["form", "total_children_died"],
             "datatype": "small_integer"
           },
           "type": "root_doc"
@@ -988,8 +988,8 @@
         "type": "expression",
         "expression": {
           "expression": {
-            "type": "property_name",
-            "property_name": "how_many_children",
+            "type": "property_path",
+            "property_path": ["form", "how_many_children"],
             "datatype": "small_integer"
           },
           "type": "root_doc"
@@ -1001,8 +1001,8 @@
         "type": "expression",
         "expression": {
           "expression": {
-            "type": "property_name",
-            "property_name": "mother_alive",
+            "type": "property_path",
+            "property_path": ["form", "mother_alive"],
             "datatype": "string"
           },
           "type": "root_doc"
@@ -1014,8 +1014,8 @@
         "type": "expression",
         "expression": {
           "expression": {
-            "type": "property_name",
-            "property_name": "mother_dob",
+            "type": "property_path",
+            "property_path": ["form", "mother_dob"],
             "datatype": "date"
           },
           "type": "root_doc"
@@ -1027,8 +1027,8 @@
         "type": "expression",
         "expression": {
           "expression": {
-            "type": "property_name",
-            "property_name": "owner_id",
+            "type": "property_path",
+            "property_path": ["form", "owner_id"],
             "datatype": "string"
           },
           "type": "root_doc"
@@ -1040,8 +1040,8 @@
         "type": "expression",
         "expression": {
           "expression": {
-            "type": "property_name",
-            "property_name": "safe",
+            "type": "property_path",
+            "property_path": ["form", "safe"],
             "datatype": "string"
           },
           "type": "root_doc"

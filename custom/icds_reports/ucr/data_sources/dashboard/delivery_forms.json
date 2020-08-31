@@ -313,8 +313,8 @@
         "datatype": "date",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "edd"
+          "type": "property_path",
+          "property_path": [ "form", "edd"] 
         }
       },
       {
@@ -322,8 +322,8 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "delivery_nature"
+          "type": "property_path",
+          "property_path": ["form", "delivery_nature"]
         }
       },
       {
@@ -346,8 +346,8 @@
         "datatype": "small_integer",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "total_children_died"
+          "type": "property_path",
+          "property_path": ["form", "total_children_died"]
         }
       },
       {
@@ -355,8 +355,8 @@
         "datatype": "small_integer",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "how_many_children"
+          "type": "property_path",
+          "property_path": ["form", "how_many_children"]
         }
       },
       {
@@ -364,8 +364,8 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "mother_alive"
+          "type": "property_path",
+          "property_path": ["form", "mother_alive"]
         }
       },
       {
@@ -373,8 +373,8 @@
         "datatype": "date",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "mother_dob"
+          "type": "property_path",
+          "property_path": ["form", "mother_dob"]
         }
       },
       {
@@ -382,8 +382,8 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "owner_id"
+          "type": "property_path",
+          "property_path": ["form", "owner_id"]
         }
       },
       {
@@ -391,8 +391,8 @@
         "datatype": "string",
         "type": "expression",
         "expression": {
-          "type": "property_name",
-          "property_name": "safe"
+          "type": "property_path",
+          "property_path": ["form", "safe"]
         }
       },
       {

@@ -562,15 +562,6 @@
         }
       },
       {
-        "column_id": "using_ifa",
-        "datatype": "integer",
-        "type": "expression",
-        "expression": {
-          "type": "property_path",
-          "property_path": ["form", "bp1", "using_ifa"]
-        }
-      },
-      {
         "column_id": "num_anc_complete",
         "datatype": "integer",
         "type": "expression",

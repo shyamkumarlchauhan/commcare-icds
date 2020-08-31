@@ -87,6 +87,10 @@ class TestBirthPreparednessForms(BaseFormsTest):
                 "days_visit_late": None,
                 "next_visit": date(2018, 2, 21),
                 "new_ifa_tablets_total": 80,
-                "reason_no_ifa": None
+                "reason_no_ifa": None,
+                "num_anc_complete": 1,
+                "timestart": datetime(2017, 9, 1, 18, 51, 4, 453000),
+                "tt_complete": "",
+                "username": "clark",
             }]
         )
