@@ -36,7 +36,7 @@ class PoshanProgressReport(object):
             self.row_constants[4].remove('district_name')
         if beta:
             self.row_constants[0][self.row_constants[0].index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
-            self.row_constants[1][self.row_constants[1].index(
+            self.row_constants[1][self.row_constants[2].index(
                 '% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
 
 
