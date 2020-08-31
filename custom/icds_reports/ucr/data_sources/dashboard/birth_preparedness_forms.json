@@ -544,15 +544,6 @@
         }
       },
       {
-        "column_id": "play_family_planning_vid",
-        "datatype": "string",
-        "type": "expression",
-        "expression": {
-          "type": "property_name",
-          "property_name": "play_family_planning_vid"
-        }
-      },
-      {
         "column_id": "tt_complete",
         "datatype": "string",
         "type": "expression",
