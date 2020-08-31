@@ -717,6 +717,16 @@ class AggCcsRecord(models.Model, AggregateMixin):
     pregnant_permanent_resident = models.IntegerField(null=True)
     pregnant_temp_resident = models.IntegerField(null=True)
 
+    thr_0_days_resident = models.IntegerField(null=True)
+    thr_1_days_resident = models.IntegerField(null=True)
+    thr_25_days_sc_resident = models.IntegerField(null=True)
+    thr_25_days_st_resident = models.IntegerField(null=True)
+    thr_25_days_other_resident = models.IntegerField(null=True)
+    thr_25_days_disabled_resident = models.IntegerField(null=True)
+    thr_25_days_minority_resident = models.IntegerField(null=True)
+    total_thr_resident = models.IntegerField(null=True)
+    thr_1_days_migrant = models.IntegerField(null=True)
+
     class Meta:
         managed = False
         db_table = 'agg_ccs_record'
@@ -827,6 +837,27 @@ class AggChildHealth(models.Model, AggregateMixin):
     total_deaths_temp_resident = models.IntegerField(blank=True, null=True)
     lbw_permanent_resident = models.IntegerField(blank=True, null=True)
     lbw_temp_resident = models.IntegerField(blank=True, null=True)
+
+    thr_0_days_resident = models.IntegerField(null=True)
+    thr_1_days_resident = models.IntegerField(null=True)
+    thr_25_days_sc_resident = models.IntegerField(null=True)
+    thr_25_days_st_resident = models.IntegerField(null=True)
+    thr_25_days_other_resident = models.IntegerField(null=True)
+    thr_25_days_disabled_resident = models.IntegerField(null=True)
+    thr_25_days_minority_resident = models.IntegerField(null=True)
+    total_thr_resident = models.IntegerField(null=True)
+
+    lunch_0_days_resident = models.IntegerField(null=True)
+    lunch_1_days_resident = models.IntegerField(null=True)
+    lunch_25_days_sc_resident = models.IntegerField(null=True)
+    lunch_25_days_st_resident = models.IntegerField(null=True)
+    lunch_25_days_other_resident = models.IntegerField(null=True)
+    lunch_25_days_disabled_resident = models.IntegerField(null=True)
+    lunch_25_days_minority_resident = models.IntegerField(null=True)
+    total_lunch_resident = models.IntegerField(null=True)
+
+    thr_1_days_migrant = models.IntegerField(null=True)
+    lunch_1_days_migrant = models.IntegerField(null=True)
 
     class Meta:
         managed = False

@@ -422,6 +422,38 @@ class Migration(migrations.Migration):
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN total_deaths_temp_resident INTEGER"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lbw_permanent_resident INTEGER"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lbw_temp_resident INTEGER"),
+        
+
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_0_days_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_1_days_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_25_days_sc_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_25_days_st_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_25_days_other_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_25_days_disabled_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_25_days_minority_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN total_thr_resident integer"),
+
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_0_days_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_1_days_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_25_days_sc_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_25_days_st_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_25_days_other_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_25_days_disabled_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_25_days_minority_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN total_lunch_resident integer"),
+
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN thr_1_days_migrant integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN lunch_1_days_migrant integer"),
+
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_0_days_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_1_days_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_25_days_sc_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_25_days_st_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_25_days_other_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_25_days_disabled_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_25_days_minority_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN total_thr_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN thr_1_days_migrant integer"),
     ]
 
     operations.extend(get_view_migrations())
