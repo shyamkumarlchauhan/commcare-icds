@@ -1,6 +1,4 @@
 from copy import deepcopy
-from datetime import date
-
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.const import (
     PPR_HEADERS_COMPREHENSIVE,
@@ -16,7 +14,9 @@ from custom.icds_reports.const import (
     PPR_COLS_PERCENTAGE_RELATIONS_BETA
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
-from custom.icds_reports.utils import apply_exclude, generate_quarter_months, calculate_percent, handle_average, calculate_percent_beta
+from custom.icds_reports.utils import apply_exclude, generate_quarter_months, calculate_percent, handle_average, \
+    calculate_percent_beta
+from datetime import date
 
 
 def fetch_month_data(value_fields, order_by, filters, include_test, domain):
@@ -50,22 +50,22 @@ def calculate_percentage_single_row(row, truncate_out=True):
         row[v[1]] = round(row.get(v[1], 0))
     return row
 
+
 def calculate_percentage_single_row_beta(row, truncate_out=True):
     for k, v in PPR_COLS_PERCENTAGE_RELATIONS_BETA.items():
         num = row.get(v[0], 0)
         den = row.get(v[1], 1)  # to avoid 0/0 division error
-        is_special = row.get(v[2], False)
-        if is_special:
+        is_avg = v[2] if len(v) > 2 else False
+        if is_avg:
             row[k] = round(num / den)
         else:
-            row[k] = calculate_percent_beta(num, den, truncate_out)
+            row[k] = percent_num(num, den) if truncate_out else percent(num, den)
         # calculation is done on decimal values
         # and then round off to nearest integer
         # and if not present defaulting them to zero
         row[v[0]] = round(row.get(v[0], 0))
         row[v[1]] = round(row.get(v[1], 0))
     return row
-
 
 
 def calculate_aggregated_row(data, aggregation_level, beta):
@@ -196,13 +196,15 @@ def get_top_worst_cases(data, key, aggregation_level, indicator_name, beta=False
     for per in worst_performers[:3]:
         worst.append({
             "place": per[place_key],
-            "value": "{}".format("%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format("%.2f" % per[key])
+            "value": "{}".format("%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format(
+                "%.2f" % per[key])
         })
     best = []
     for per in best_performers[:3]:
         best.append({
             "place": per[place_key],
-            "value": "{}".format("%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format("%.2f" % per[key])
+            "value": "{}".format("%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format(
+                "%.2f" % per[key])
         })
     ret = {
         "indicator": indicator_name,

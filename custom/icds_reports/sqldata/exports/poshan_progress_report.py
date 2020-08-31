@@ -62,11 +62,11 @@ class PoshanProgressReport(object):
         for k, v in PPR_COLS_PERCENTAGE_RELATIONS_BETA.items():
             num = row[all_cols.index(v[0])]
             den = row[all_cols.index(v[1])]
-            is_special = row.get(v[2], False)
-            if is_special:
+            is_avg = v[2] if len(v) > 2 else False
+            if is_avg:
                 row[k] = round(num/den)
             else:
-                row[k] = calculate_percent_beta(num, den)
+                row[k] = percent(num, den)
             # calculation is done on decimal values
             # and then round off to nearest integer
             row[all_cols.index(v[0])] = round(row[all_cols.index(v[0])])
