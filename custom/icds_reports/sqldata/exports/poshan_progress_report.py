@@ -9,7 +9,7 @@ from custom.icds_reports.const import (
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
 from custom.icds_reports.utils import generate_quarter_months, calculate_percent, handle_average, apply_exclude, \
-    calculate_percent_beta
+    percent
 from custom.icds_reports.utils import india_now
 
 from corehq.apps.locations.models import SQLLocation
@@ -64,7 +64,7 @@ class PoshanProgressReport(object):
             den = row[all_cols.index(v[1])]
             is_avg = v[2] if len(v) > 2 else False
             if is_avg:
-                row[k] = round(num/den)
+                row[k] = round(num / den)
             else:
                 row[k] = percent(num, den)
             # calculation is done on decimal values

@@ -15,7 +15,7 @@ from custom.icds_reports.const import (
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
 from custom.icds_reports.utils import apply_exclude, generate_quarter_months, calculate_percent, handle_average, \
-    calculate_percent_beta
+    percent, percent_num
 from datetime import date
 
 
