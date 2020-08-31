@@ -2534,7 +2534,7 @@ def calculate_percent_beta(num, den, extra_number, truncate_out=True):
         ret = 0
     else:
         if extra_number:
-            ret = (num / den) / extra_number
+            ret = (num / den)
             ret = round(ret)
         else:
             ret = (num / den) * 100
