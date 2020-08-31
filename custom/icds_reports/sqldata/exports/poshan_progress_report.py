@@ -36,7 +36,7 @@ class PoshanProgressReport(object):
             self.row_constants[4].remove('district_name')
         if beta:
             self.row_constants[0][self.row_constants[0].index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
-            self.row_constants[1][self.row_constants[2].index(
+            self.row_constants[2][self.row_constants[2].index(
                 '% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
 
 
@@ -46,6 +46,7 @@ class PoshanProgressReport(object):
             num = row[all_cols.index(v[0])]
             den = row[all_cols.index(v[1])]
             extra_number = v[2] if len(v) > 2 else None
+
             if self.beta:
                 row[all_cols.index(k)] = calculate_percent_beta(num, den, extra_number)
             else:
