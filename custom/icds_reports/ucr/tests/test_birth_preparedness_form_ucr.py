@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from mock import patch
@@ -46,7 +46,11 @@ class TestBirthPreparednessForms(BaseFormsTest):
                 "days_visit_late": None,
                 "next_visit": date(2017, 7, 18),
                 "reason_no_ifa": None,
-                "new_ifa_tablets_total": 0
+                "new_ifa_tablets_total": 0,
+                'timestart': datetime(2017, 12, 25, 9, 56, 28, 234000),
+                'tt_complete': '',
+                'username': 'mp05',
+                'num_anc_complete': 0
             }]
         )
 

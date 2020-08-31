@@ -563,7 +563,7 @@
       },
       {
         "column_id": "using_ifa",
-        "datatype": "string",
+        "datatype": "integer",
         "type": "expression",
         "expression": {
           "type": "property_path",
@@ -572,7 +572,7 @@
       },
       {
         "column_id": "num_anc_complete",
-        "datatype": "string",
+        "datatype": "integer",
         "type": "expression",
         "expression": {
           "type": "property_path",
