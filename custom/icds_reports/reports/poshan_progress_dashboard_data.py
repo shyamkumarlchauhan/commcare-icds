@@ -176,13 +176,13 @@ def get_top_worst_cases(data, key, aggregation_level, indicator_name, beta=False
     for per in worst_performers[:3]:
         worst.append({
             "place": per[place_key],
-            "value": "{}".format("%.2f" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format("%.2f" % per[key])
+            "value": "{}".format("%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format("%.2f" % per[key])
         })
     best = []
     for per in best_performers[:3]:
         best.append({
             "place": per[place_key],
-            "value": "{}".format("%.2f" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format("%.2f" % per[key])
+            "value": "{}".format("%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{}%".format("%.2f" % per[key])
         })
     ret = {
         "indicator": indicator_name,
