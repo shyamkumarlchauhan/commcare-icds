@@ -22,9 +22,9 @@ class TestPPDData(TestCase):
             True
         )
         expected = {'ICDS CAS Coverage': [[{'Best performers': [{'place': 'd1',
-                                                                 'value': '142.40%'}],
+                                                                 'value': 1}],
                                             'Worst performers': [{'place': 'd1',
-                                                                  'value': '142.40%'}],
+                                                                  'value': 1}],
                                             'indicator': 'AWC Open'},
                                            {'Best performers': [{'place': 'd1', 'value': '1.62%'}],
                                             'Worst performers': [{'place': 'd1',
@@ -70,17 +70,17 @@ class TestPPDData(TestCase):
             True
         )
         expected = {'ICDS CAS Coverage': [[{'Best performers': [{'place': 'st1',
-                                                                 'value': '64.80%'},
+                                                                 'value': 6480},
                                                                 {'place': 'st2',
-                                                                 'value': '47.76%'},
+                                                                 'value': 4776},
                                                                 {'place': 'st7',
-                                                                 'value': '0.00%'}],
+                                                                 'value': 0}],
                                             'Worst performers': [{'place': 'st7',
-                                                                  'value': '0.00%'},
+                                                                  'value': 0},
                                                                  {'place': 'st2',
-                                                                  'value': '47.76%'},
+                                                                  'value': 0},
                                                                  {'place': 'st1',
-                                                                  'value': '64.80%'}],
+                                                                  'value': 1}],
                                             'indicator': 'AWC Open'},
                                            {'Best performers': [{'place': 'st1', 'value': '0.66%'},
                                                                 {'place': 'st2', 'value': '0.00%'},
@@ -159,7 +159,7 @@ class TestPPDData(TestCase):
             False,
             True
         )
-        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': '11818%',
+        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': 1,
                                           '% of Home Visits': '0.79%',
                                           'Number of AWCs Launched': 22,
                                           'Number of Blocks Covered': 5,
@@ -189,7 +189,7 @@ class TestPPDData(TestCase):
             False,
             True
         )
-        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': '5327%',
+        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': 5,
                                           '% of Home Visits': '0.32%',
                                           'Number of AWCs Launched': 22,
                                           'Number of Blocks Covered': 5,

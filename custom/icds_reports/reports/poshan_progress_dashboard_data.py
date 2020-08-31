@@ -71,7 +71,7 @@ def calculate_aggregated_row(data, aggregation_level, beta):
         aggregated_row[col] = round(aggregated_row.get(col, 0))
     aggregated_row = prepare_structure_aggregated_row(deepcopy(aggregated_row),
                                                       aggregated_row['num_launched_states'],
-                                                      aggregation_level)
+                                                      aggregation_level, beta)
     return aggregated_row
 
 
@@ -80,6 +80,9 @@ def prepare_structure_aggregated_row(row, count, aggregation_level, beta):
     icds_cas_coverage_overview = PPD_ICDS_CAS_COVERAGE_OVERVIEW[:]
     if beta:
         icds_cas_coverage_overview[icds_cas_coverage_overview.index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
+        ppr_headers_comprehensive = PPR_HEADERS_COMPREHENSIVE[:]
+        ppr_headers_comprehensive[ppr_headers_comprehensive.index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
+        header_to_col_dict = dict(zip(ppr_headers_comprehensive, PPR_COLS_COMPREHENSIVE))
     # for district level we don't need state count
     if aggregation_level == 2:
         icds_cas_coverage_overview.remove("Number of States Covered")
