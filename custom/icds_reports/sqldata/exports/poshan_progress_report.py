@@ -1,15 +1,18 @@
-from corehq.apps.locations.models import SQLLocation
 from custom.icds_reports.const import (
     PPR_HEADERS_COMPREHENSIVE,
     PPR_HEADERS_SUMMARY,
     PPR_COLS_COMPREHENSIVE,
     PPR_COLS_SUMMARY,
     PPR_COLS_TO_FETCH,
-    PPR_COLS_PERCENTAGE_RELATIONS
+    PPR_COLS_PERCENTAGE_RELATIONS,
+    PPR_COLS_PERCENTAGE_RELATIONS_BETA
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
-from custom.icds_reports.utils import generate_quarter_months, calculate_percent, handle_average, apply_exclude, calculate_percent_beta
+from custom.icds_reports.utils import generate_quarter_months, calculate_percent, handle_average, apply_exclude, \
+    calculate_percent_beta
 from custom.icds_reports.utils import india_now
+
+from corehq.apps.locations.models import SQLLocation
 
 
 class PoshanProgressReport(object):
@@ -22,9 +25,17 @@ class PoshanProgressReport(object):
         self.show_test = show_test
         self.layout = self.config['report_layout']
         self.report_type = self.config['data_period']
-        self.row_constants = [
-            PPR_HEADERS_COMPREHENSIVE[:], PPR_COLS_COMPREHENSIVE[:], PPR_HEADERS_SUMMARY[:], PPR_COLS_SUMMARY[:],
-            PPR_COLS_TO_FETCH[:]]
+        if beta:
+            self.row_constants = [
+                PPR_HEADERS_COMPREHENSIVE_BETA[:], PPR_COLS_COMPREHENSIVE[:], PPR_HEADERS_SUMMARY_BETA[:],
+                PPR_COLS_SUMMARY[:],
+                PPR_COLS_TO_FETCH[:]]
+        else:
+            self.row_constants = [
+                PPR_HEADERS_COMPREHENSIVE[:], PPR_COLS_COMPREHENSIVE[:], PPR_HEADERS_SUMMARY[:],
+                PPR_COLS_SUMMARY[:],
+                PPR_COLS_TO_FETCH[:]]
+
         if self.report_type == 'quarter':
             self.quarter = self.config['quarter']
             self.year = self.config['year']
@@ -34,23 +45,25 @@ class PoshanProgressReport(object):
             self.row_constants[2].remove('District Name')
             self.row_constants[3].remove('district_name')
             self.row_constants[4].remove('district_name')
-        if beta:
-            self.row_constants[0][self.row_constants[0].index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
-            self.row_constants[2][self.row_constants[2].index(
-                '% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
-
-
 
     def __calculate_percentage_in_rows(self, row, all_cols):
         for k, v in PPR_COLS_PERCENTAGE_RELATIONS.items():
             num = row[all_cols.index(v[0])]
             den = row[all_cols.index(v[1])]
             extra_number = v[2] if len(v) > 2 else None
+            row[all_cols.index(k)] = calculate_percent(num, den, extra_number)
+            # calculation is done on decimal values
+            # and then round off to nearest integer
+            row[all_cols.index(v[0])] = round(row[all_cols.index(v[0])])
+            row[all_cols.index(v[1])] = round(row[all_cols.index(v[1])])
+        return row
 
-            if self.beta:
-                row[all_cols.index(k)] = calculate_percent_beta(num, den, extra_number)
-            else:
-                row[all_cols.index(k)] = calculate_percent(num, den, extra_number)
+    def __calculate_percentage_in_rows_beta(self, row, all_cols):
+        for k, v in PPR_COLS_PERCENTAGE_RELATIONS_BETA.items():
+            num = row[all_cols.index(v[0])]
+            den = row[all_cols.index(v[1])]
+            is_special = row.get(v[2], False)
+            row[k] = calculate_percent_beta(num, den, is_special)
             # calculation is done on decimal values
             # and then round off to nearest integer
             row[all_cols.index(v[0])] = round(row[all_cols.index(v[0])])
@@ -93,7 +106,8 @@ class PoshanProgressReport(object):
                 if k in ['state_name', 'district_name']:
                     row_data[all_cols.index(k)] = v
                 elif k in latest_value_cols:
-                    row_data[all_cols.index(k)] = max(row_data[all_cols.index(k)], v if (v and launched is True) else 0)
+                    row_data[all_cols.index(k)] = max(row_data[all_cols.index(k)],
+                                                      v if (v and launched is True) else 0)
                 elif k != unique_id:
                     row_data[all_cols.index(k)] += v if (v and launched is True) else 0
             row_data_dict[row[unique_id]] = row_data
@@ -122,7 +136,10 @@ class PoshanProgressReport(object):
         # percent(current col) = 100 * (actual_value(prev col) / expected_value(prev prev col))
         for k, v in row_data_dict.items():
             row = v[:]
-            row_data_dict[k] = self.__calculate_percentage_in_rows(row, all_cols)
+            if self.beta:
+                row_data_dict[k] = self.__calculate_percentage_in_rows_beta(row, all_cols)
+            else:
+                row_data_dict[k] = self.__calculate_percentage_in_rows(row, all_cols)
             # marking all the unlaunched states as Not Launched
             if row_data_dict[k][all_cols.index('num_launched_awcs')] == 0:
                 for col in all_cols:
@@ -180,7 +197,10 @@ class PoshanProgressReport(object):
         # calcuating percentage for all rows
         for i in range(1, len(excel_rows)):
             row = excel_rows[i][:]
-            excel_rows[i] = self.__calculate_percentage_in_rows(row, all_cols)
+            if self.beta:
+                excel_rows[i] = self.__calculate_percentage_in_rows_beta(row, all_cols)
+            else:
+                excel_rows[i] = self.__calculate_percentage_in_rows(row, all_cols)
             # marking all the unlaunched states as Not Launched
             if excel_rows[i][all_cols.index('num_launched_awcs')] == 0:
                 for col in all_cols:

@@ -4,13 +4,16 @@ from datetime import date
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.const import (
     PPR_HEADERS_COMPREHENSIVE,
+    PPR_HEADERS_COMPREHENSIVE_BETA,
     PPR_COLS_COMPREHENSIVE,
     PPR_COLS_TO_FETCH,
     PPR_COLS_PERCENTAGE_RELATIONS,
     PPD_ICDS_CAS_COVERAGE_OVERVIEW,
     PPD_SERVICE_DELIVERY_OVERVIEW,
     PPD_ICDS_CAS_COVERAGE_COMPARATIVE_MAPPING,
-    PPD_SERVICE_DELIVERY_COMPARATIVE_MAPPING
+    PPD_SERVICE_DELIVERY_COMPARATIVE_MAPPING,
+    PPD_ICDS_CAS_COVERAGE_OVERVIEW_BETA,
+    PPR_COLS_PERCENTAGE_RELATIONS_BETA
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
 from custom.icds_reports.utils import apply_exclude, generate_quarter_months, calculate_percent, handle_average, calculate_percent_beta
@@ -39,16 +42,27 @@ def calculate_percentage_single_row(row, beta, truncate_out=True):
         num = row.get(v[0], 0)
         den = row.get(v[1], 1)  # to avoid 0/0 division error
         extra_number = v[2] if len(v) > 2 else None
-        if beta:
-            row[k] = calculate_percent_beta(num, den, extra_number, truncate_out)
-        else:
-            row[k] = calculate_percent(num, den, extra_number, truncate_out)
+        row[k] = calculate_percent(num, den, extra_number, truncate_out)
         # calculation is done on decimal values
         # and then round off to nearest integer
         # and if not present defaulting them to zero
         row[v[0]] = round(row.get(v[0], 0))
         row[v[1]] = round(row.get(v[1], 0))
     return row
+
+def calculate_percentage_single_row_beta(row, truncate_out=True):
+    for k, v in PPR_COLS_PERCENTAGE_RELATIONS_BETA.items():
+        num = row.get(v[0], 0)
+        den = row.get(v[1], 1)  # to avoid 0/0 division error
+        is_special = row.get(v[2], False)
+        row[k] = calculate_percent_beta(num, den, is_special, truncate_out)
+        # calculation is done on decimal values
+        # and then round off to nearest integer
+        # and if not present defaulting them to zero
+        row[v[0]] = round(row.get(v[0], 0))
+        row[v[1]] = round(row.get(v[1], 0))
+    return row
+
 
 
 def calculate_aggregated_row(data, aggregation_level, beta):
@@ -64,8 +78,10 @@ def calculate_aggregated_row(data, aggregation_level, beta):
                 aggregated_row[col] = round(row[col]) if row[col] else 0
             else:
                 aggregated_row[col] += round(row[col]) if row[col] else 0
-
-    aggregated_row = calculate_percentage_single_row(deepcopy(aggregated_row), beta)
+    if beta:
+        aggregated_row = calculate_percentage_single_row_beta(deepcopy(aggregated_row))
+    else:
+        aggregated_row = calculate_percentage_single_row(deepcopy(aggregated_row))
     # rounding values
     for col in ['num_launched_districts', 'num_launched_blocks', 'num_launched_states']:
         aggregated_row[col] = round(aggregated_row.get(col, 0))
@@ -79,10 +95,8 @@ def prepare_structure_aggregated_row(row, count, aggregation_level, beta):
     header_to_col_dict = dict(zip(PPR_HEADERS_COMPREHENSIVE, PPR_COLS_COMPREHENSIVE))
     icds_cas_coverage_overview = PPD_ICDS_CAS_COVERAGE_OVERVIEW[:]
     if beta:
-        icds_cas_coverage_overview[icds_cas_coverage_overview.index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
-        ppr_headers_comprehensive = PPR_HEADERS_COMPREHENSIVE[:]
-        ppr_headers_comprehensive[ppr_headers_comprehensive.index('% Number of Days AWC Were opened')] = 'Average Number of Days AWC Were opened'
-        header_to_col_dict = dict(zip(ppr_headers_comprehensive, PPR_COLS_COMPREHENSIVE))
+        icds_cas_coverage_overview = PPD_ICDS_CAS_COVERAGE_OVERVIEW_BETA[:]
+        header_to_col_dict = dict(zip(PPR_HEADERS_COMPREHENSIVE_BETA, PPR_COLS_COMPREHENSIVE))
     # for district level we don't need state count
     if aggregation_level == 2:
         icds_cas_coverage_overview.remove("Number of States Covered")
@@ -160,7 +174,10 @@ def prepare_quarter_dict(data, data_period, unique_id):
 def calculate_comparative_rows(data, aggregation_level, beta):
     response = []
     for i in range(0, len(data)):
-        response.append(calculate_percentage_single_row(deepcopy(data[i]), beta, False))
+        if beta:
+            response.append(calculate_percentage_single_row_beta(deepcopy(data[i]), False))
+        else:
+            response.append(calculate_percentage_single_row(deepcopy(data[i]), False))
     response = prepare_structure_comparative(deepcopy(response), aggregation_level, beta)
     return response
 
