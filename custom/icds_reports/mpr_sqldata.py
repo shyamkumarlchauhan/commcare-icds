@@ -8,7 +8,7 @@ from custom.icds_reports.sqldata.base_identification import BaseIdentification
 from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization
 from custom.icds_reports.sqldata.base_populations import BasePopulation
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
-from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport
+from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport, AggCcsRecord
 from custom.icds_reports.utils import get_location_filter
 from django.db.models.aggregates import Sum
 from django.db.models import Case, When, Value
@@ -470,6 +470,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
         if self.config['location_id']:
             data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
             sections = []
+            print(self.row_config)
             for section in self.row_config:
                 rows = []
                 for row in section['rows_config']:
@@ -875,6 +876,197 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
                 )
             }
         ]
+
+
+
+class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
+
+    @property
+    def headers(self):
+        return DataTablesHeader(
+            DataTablesColumn('Category'),
+            DataTablesColumnGroup(
+                _('6-35 months'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys'))
+            ),
+            DataTablesColumnGroup(
+                _('36-71 months'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys'))
+            ),
+            DataTablesColumnGroup(
+                _('All Children (6-71 months)'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys')),
+                DataTablesColumn(_('Total'))
+            ),
+            DataTablesColumn(_('Pregnant Women')),
+            DataTablesColumn(_('Lactating mothers'))
+        )
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        data = dict()
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            thr_rations_female_st=Sum(Case(When(gender='F', then='thr_25_days_st_resident'))),
+            thr_rations_male_st=Sum(Case(When(gender='M', then='thr_25_days_st_resident'))),
+            thr_rations_female_st_1=Sum(Case(When(gender='F', then='lunch_25_days_st_resident'))),
+            thr_rations_male_st_1=Sum(Case(When(gender='M', then='lunch_25_days_st_resident'))),
+
+            thr_rations_female_sc=Sum(Case(When(gender='F', then='thr_25_days_sc_resident'))),
+            thr_rations_male_sc=Sum(Case(When(gender='M', then='thr_25_days_sc_resident'))),
+            thr_rations_female_sc_1=Sum(Case(When(gender='F', then='lunch_25_days_sc_resident'))),
+            thr_rations_male_sc_1=Sum(Case(When(gender='M', then='lunch_25_days_sc_resident'))),
+
+            thr_rations_female_others=Sum(Case(When(gender='F', then='thr_25_days_other_resident'))),
+            thr_rations_male_others=Sum(Case(When(gender='M', then='thr_25_days_other_resident'))),
+            thr_rations_female_others_1=Sum(Case(When(gender='F', then='lunch_25_days_other_resident'))),
+            thr_rations_male_others_1=Sum(Case(When(gender='M', then='lunch_25_days_other_resident'))),
+
+            thr_rations_female_disabled=Sum(Case(When(gender='F', then='thr_25_days_disabled_resident'))),
+            thr_rations_male_disabled=Sum(Case(When(gender='M', then='thr_25_days_disabled_resident'))),
+            thr_rations_female_disabled_1=Sum(Case(When(gender='F', then='lunch_25_days_disabled_resident'))),
+            thr_rations_male_disabled_1=Sum(Case(When(gender='M', then='lunch_25_days_disabled_resident'))),
+
+            thr_rations_female_minority=Sum(Case(When(gender='F', then='thr_25_days_minority_resident'))),
+            thr_rations_male_minority=Sum(Case(When(gender='M', then='thr_25_days_minority_resident'))),
+            thr_rations_female_minority_1=Sum(Case(When(gender='F', then='lunch_25_days_minority_resident'))),
+            thr_rations_male_minority_1=Sum(Case(When(gender='M', then='lunch_25_days_minority_resident'))),
+            child_count_female=Sum(Case(When(gender='F', then='thr_eligible'))),
+            child_count_male=Sum(Case(When(gender='M', then='thr_eligible'))),
+            child_count_female_1=Sum(Case(When(gender='F', then='pse_eligible'))),
+            child_count_male_1=Sum(Case(When(gender='M', then='pse_eligible'))),
+            thr_rations_absent_female=Sum(Case(When(gender='F', then='thr_0_days_resident'))),
+            thr_rations_absent_male=Sum(Case(When(gender='M', then='thr_0_days_resident'))),
+            thr_rations_absent_female_1=Sum(Case(When(gender='F', then='lunch_0_days_resident'))),
+            thr_rations_absent_male_1=Sum(Case(When(gender='M', then='lunch_0_days_resident'))),
+            thr_rations_partial_female=Sum(Case(When(gender='F', then='thr_1_days_resident'))),
+            thr_rations_partial_male=Sum(Case(When(gender='M', then='thr_1_days_resident'))),
+            thr_rations_partial_female_1=Sum(Case(When(gender='F', then='lunch_1_days_resident'))),
+            thr_rations_partial_male_1=Sum(Case(When(gender='M', then='lunch_1_days_resident'))),
+            thr_total_rations_female=Sum(Case(When(gender='F', then='total_thr_resident'))),
+            thr_total_rations_male=Sum(Case(When(gender='M', then='total_thr_resident'))),
+            thr_total_rations_female_1=Sum(Case(When(gender='F', then='total_lunch_resident'))),
+            thr_total_rations_male_1=Sum(Case(When(gender='M', then='total_lunch_resident'))),
+            thr_rations_migrant_female=Sum(Case(When(gender='F', then='thr_1_days_migrant'))),
+            thr_rations_migrant_male=Sum(Case(When(gender='M', then='thr_1_days_migrant'))),
+            thr_rations_migrant_female_1=Sum(Case(When(gender='F', then='lunch_1_days_migrant'))),
+            thr_rations_migrant_male_1=Sum(Case(When(gender='M', then='lunch_1_days_migrant'))),
+        ).order_by('month').first()
+
+        mother_data = AggCcsRecord.objects.filter(**filters).values('month').annotate(
+            thr_rations_pregnant_st=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_st_resident'))),
+            thr_rations_lactating_st=Sum(Case(When(ccs_status='lactating', then='thr_25_days_st_resident'))),
+            thr_rations_pregnant_sc=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_sc_resident'))),
+            thr_rations_lactating_sc=Sum(Case(When(ccs_status='lactating', then='thr_25_days_sc_resident'))),
+            thr_rations_pregnant_others=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_other_resident'))),
+            thr_rations_lactating_others=Sum(Case(When(ccs_status='lactating', then='thr_25_days_other_resident'))),
+            thr_rations_pregnant_disabled=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_disabled_resident'))),
+            thr_rations_lactating_disabled=Sum(Case(When(ccs_status='lactating', then='thr_25_days_disabled_resident'))),
+            thr_rations_pregnant_minority=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_minority_resident'))),
+            thr_rations_lactating_minority=Sum(Case(When(ccs_status='lactating', then='thr_25_days_minority_resident'))),
+            thr_rations_absent_pregnant=Sum(Case(When(ccs_status='pregnant', then='thr_0_days_resident'))),
+            thr_rations_absent_lactating=Sum(Case(When(ccs_status='lactating', then='thr_0_days_resident'))),
+            thr_rations_partial_pregnant=Sum(Case(When(ccs_status='pregnant', then='thr_1_days_resident'))),
+            thr_rations_partial_lactating=Sum(Case(When(ccs_status='lactating', then='thr_1_days_resident'))),
+            thr_total_rations_pregnant=Sum(Case(When(ccs_status='pregnant', then='total_thr_resident'))),
+            thr_total_rations_lactating=Sum(Case(When(ccs_status='lactating', then='total_thr_resident'))),
+            thr_rations_migrant_pregnant=Sum(Case(When(ccs_status='pregnant', then='thr_1_days_migrant'))),
+            thr_rations_migrant_lactating=Sum(Case(When(ccs_status='lactating', then='thr_1_days_migrant'))),
+            pregnant=Sum('pregnant'),
+            lactating=Sum('lactating'),
+        ).order_by('month').first()
+
+        if child_data:
+            data.update(child_data)
+        if mother_data:
+            data.update(mother_data)
+
+        return data
+
+    @property
+    def row_config(self):
+        parent_row_config = super(MPRProgrammeCoverageBeta, self).row_config
+
+        feeding_efficiency = list(parent_row_config[1]['rows_config'])
+
+        del feeding_efficiency[3]
+        del feeding_efficiency[4]
+
+        feeding_efficiency[2] = (
+            _('III. Total present for at least one day during the month'),
+            {
+                'columns': (
+                    'thr_rations_partial_female',
+                    'thr_rations_female_sc',
+                    'thr_rations_female_st',
+                    'thr_rations_female_others'
+                ),
+                'alias': 'sum_thr_rations_female'
+            },
+            {
+                'columns': (
+                    'thr_rations_partial_male',
+                    'thr_rations_male_sc',
+                    'thr_rations_male_st',
+                    'thr_rations_male_others'
+                ),
+                'alias': 'sum_thr_rations_male'
+            },
+            {
+                'columns': (
+                    'thr_rations_partial_female_1',
+                    'thr_rations_female_sc_1',
+                    'thr_rations_female_st_1',
+                    'thr_rations_female_others_1'
+                ),
+                'alias': 'sum_thr_rations_female_1'
+            },
+            {
+                'columns': (
+                    'thr_rations_partial_male_1',
+                    'thr_rations_male_sc_1',
+                    'thr_rations_male_st_1',
+                    'thr_rations_male_others_1'
+                ),
+                'alias': 'sum_thr_rations_male_1'
+            },
+            {
+                'columns': ('sum_thr_rations_female', 'sum_thr_rations_female_1'),
+                'alias': 'total_rations_partial_female',
+            },
+            {
+                'columns': ('sum_thr_rations_male', 'sum_thr_rations_male_1'),
+                'alias': 'total_rations_partial_male'
+            },
+            {
+                'columns': ('total_rations_partial_female', 'total_rations_partial_male'),
+                'alias': 'all_rations_partial'
+            },
+            {
+                'columns': (
+                    'thr_rations_partial_pregnant',
+                    'thr_rations_pregnant_sc',
+                    'thr_rations_pregnant_st',
+                    'thr_rations_pregnant_others',
+                )
+            },
+            {
+                'columns': (
+                    'thr_rations_partial_lactating',
+                    'thr_rations_lactating_sc',
+                    'thr_rations_lactating_st',
+                    'thr_rations_lactating_others',
+                )
+            }
+        )
+
+        parent_row_config[1]['rows_config'] = tuple(feeding_efficiency)
+        return parent_row_config
 
 
 class MPRPreschoolEducation(ICDSMixin, MPRData):
