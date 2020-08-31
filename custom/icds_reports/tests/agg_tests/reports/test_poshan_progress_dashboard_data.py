@@ -189,7 +189,7 @@ class TestPPDData(TestCase):
             False,
             True
         )
-        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': 5,
+        expected = {'ICDS CAS Coverage': {'Average Number of Days AWC Were opened': 1,
                                           '% of Home Visits': '0.32%',
                                           'Number of AWCs Launched': 22,
                                           'Number of Blocks Covered': 5,
