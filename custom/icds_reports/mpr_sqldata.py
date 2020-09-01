@@ -1551,7 +1551,7 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
             data.update(child_data)
         if mother_data:
             data.update(mother_data)
-
+        data = {key: value if value else 0 for key, value in data.items()}
         return data
 
     @property
@@ -2066,7 +2066,7 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
     def row_config(self):
         return [
             {
-                'title': 'a. Average attendance of children for 16 or more days '
+                'title': 'a. Average attendance of children for 25 or more days '
                          'in the reporting month by different categories',
                 'slug': 'preschool_1',
                 'headers': DataTablesHeader(

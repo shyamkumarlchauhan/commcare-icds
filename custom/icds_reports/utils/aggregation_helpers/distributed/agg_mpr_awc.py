@@ -213,44 +213,44 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             SELECT
                 state_id,
                 awc_id,
-                SUM(CASE WHEN referral_health_problem='premature' THEN 1 ELSE 0 END) as total_premature_referrals,
-                SUM(CASE WHEN referral_health_problem='premature' AND
+                SUM(CASE WHEN referral_health_problem like '%premature%' THEN 1 ELSE 0 END) as total_premature_referrals,
+                SUM(CASE WHEN referral_health_problem like '%premature%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_premature_reached_facility,
-                SUM(CASE WHEN referral_health_problem='sepsis' THEN 1 ELSE 0 END) as total_sepsis_referrals,
-                SUM(CASE WHEN referral_health_problem='sepsis' AND
+                SUM(CASE WHEN referral_health_problem like '%sepsis%' THEN 1 ELSE 0 END) as total_sepsis_referrals,
+                SUM(CASE WHEN referral_health_problem like '%sepsis%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_sepsis_reached_facility,
-                SUM(CASE WHEN referral_health_problem='diarrhoea' THEN 1 ELSE 0 END) as total_diarrhoea_referrals,
-                SUM(CASE WHEN referral_health_problem='diarrhoea' AND
+                SUM(CASE WHEN referral_health_problem like '%diarrhoea%' THEN 1 ELSE 0 END) as total_diarrhoea_referrals,
+                SUM(CASE WHEN referral_health_problem like '%diarrhoea%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_diarrhoea_reached_facility,
-                SUM(CASE WHEN referral_health_problem='pneumonia' THEN 1 ELSE 0 END) as total_pneumonia_referrals,
-                SUM(CASE WHEN referral_health_problem='pneumonia' AND
+                SUM(CASE WHEN referral_health_problem like '%pneumonia%' THEN 1 ELSE 0 END) as total_pneumonia_referrals,
+                SUM(CASE WHEN referral_health_problem like '%pneumonia%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_pneumonia_reached_facility,
-                SUM(CASE WHEN referral_health_problem='fever_child' THEN 1 ELSE 0 END) as total_fever_referrals,
-                SUM(CASE WHEN referral_health_problem='fever_child' AND
+                SUM(CASE WHEN referral_health_problem like '%fever_child%' THEN 1 ELSE 0 END) as total_fever_referrals,
+                SUM(CASE WHEN referral_health_problem like '%fever_child%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_fever_reached_facility,
-                SUM(CASE WHEN referral_health_problem='severely_underweight' THEN 1 ELSE 0 END) as total_severely_underweight_referrals,
-                SUM(CASE WHEN referral_health_problem='severely_underweight' AND
+                SUM(CASE WHEN referral_health_problem like '%severely_underweight%' THEN 1 ELSE 0 END) as total_severely_underweight_referrals,
+                SUM(CASE WHEN referral_health_problem like '%severely_underweight%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_severely_underweight_reached_facility,
-                SUM(CASE WHEN referral_health_problem='other_child' THEN 1 ELSE 0 END) as total_other_child_referrals,
-                SUM(CASE WHEN referral_health_problem='other_child' AND
+                SUM(CASE WHEN referral_health_problem like '%other_child%' THEN 1 ELSE 0 END) as total_other_child_referrals,
+                SUM(CASE WHEN referral_health_problem like '%other_child%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_child_reached_facility,
-                SUM(CASE WHEN referral_health_problem='bleeding' THEN 1 ELSE 0 END) as total_bleeding_referrals,
-                SUM(CASE WHEN referral_health_problem='bleeding' AND
+                SUM(CASE WHEN referral_health_problem like '%bleeding%' THEN 1 ELSE 0 END) as total_bleeding_referrals,
+                SUM(CASE WHEN referral_health_problem like '%bleeding%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_bleeding_reached_facility,
-                SUM(CASE WHEN referral_health_problem='convulsions' THEN 1 ELSE 0 END) as total_convulsions_referrals,
-                SUM(CASE WHEN referral_health_problem='convulsions' AND
+                SUM(CASE WHEN referral_health_problem like '%convulsions%' THEN 1 ELSE 0 END) as total_convulsions_referrals,
+                SUM(CASE WHEN referral_health_problem like '%convulsions%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_convulsions_reached_facility,
-                SUM(CASE WHEN referral_health_problem='prolonged_labor' THEN 1 ELSE 0 END) as total_prolonged_labor_referrals,
-                SUM(CASE WHEN referral_health_problem='prolonged_labor' AND
+                SUM(CASE WHEN referral_health_problem like '%prolonged_labor%' THEN 1 ELSE 0 END) as total_prolonged_labor_referrals,
+                SUM(CASE WHEN referral_health_problem like '%prolonged_labor%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_prolonged_labor_reached_facility,
-                SUM(CASE WHEN referral_health_problem='abortion_complications' THEN 1 ELSE 0 END) as total_abortion_complications_referrals,
-                SUM(CASE WHEN referral_health_problem='abortion_complications' AND
+                SUM(CASE WHEN referral_health_problem like '%abortion_complications%' THEN 1 ELSE 0 END) as total_abortion_complications_referrals,
+                SUM(CASE WHEN referral_health_problem like '%abortion_complications%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_abortion_complications_reached_facility,
-                SUM(CASE WHEN referral_health_problem in ('fever', 'offensive_discharge') THEN 1 ELSE 0 END) as total_fever_discharge_referrals,
-                SUM(CASE WHEN referral_health_problem in ('fever', 'offensive_discharge') AND
+                SUM(CASE WHEN referral_health_problem like '%fever%' or referral_health_problem like  '%offensive_discharge%' THEN 1 ELSE 0 END) as total_fever_discharge_referrals,
+                SUM(CASE WHEN referral_health_problem like '%fever%' or referral_health_problem like  '%offensive_discharge%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_fever_discharge_reached_facility,
-                SUM(CASE WHEN referral_health_problem in ('swelling', 'blurred_vision', 'other') THEN 1 ELSE 0 END) as total_other_referrals,
-                SUM(CASE WHEN referral_health_problem in ('swelling', 'blurred_vision', 'other') AND
+                SUM(CASE WHEN referral_health_problem like '%swelling%' or referral_health_problem like  '%blurred_vision%' or referral_health_problem like  '%other%' THEN 1 ELSE 0 END) as total_other_referrals,
+                SUM(CASE WHEN referral_health_problem like '%swelling%' or referral_health_problem like  '%blurred_vision%' or referral_health_problem like  '%other%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_reached_facility
             FROM "{self.person_case_ucr_table}" ucr
             WHERE last_referral_date>=%(start_date)s and last_referral_date<%(next_month_start_date)s
