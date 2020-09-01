@@ -1,12 +1,10 @@
 import csv
-import datetime
+from datetime import date
 from custom.icds_reports.utils.connections import get_icds_ucr_citus_db_alias
-from dateutil import parser
-from dimagi.utils.chunked import chunked
+from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand
 from django.db import connections
 
-from corehq.form_processor.interfaces.dbaccessors import CaseAccessors
 
 
 def _run_custom_sql_script(command, data=True):
@@ -55,14 +53,14 @@ query_1 = """
     "agg_awc"."month" = '{month}' AND
     "agg_awc".num_launched_awcs>0 AND
     usage_form.awc_id IS NULL AND
-    usage_form.month='{month}' AND
     "awc_location"."state_id" = '{state_id}'
 """
 
-query_1 = """
+query_2 = """
     DROP TABLE IF EXISTS tmp_usage
 """
 STATE_ID = 'f98e91aa003accb7b849a0f18ebd7039'
+
 
 class Command(BaseCommand):
     help = "Run Custom Data Pull"
@@ -80,7 +78,7 @@ class Command(BaseCommand):
             for data in csv_dict:
                 writer.writerow(data)
         print("===dropping tmp table===")
-        _run_custom_sql_script(query_1.format(month=start_date), False)
+        _run_custom_sql_script(query_2.format(month=start_date), False)
 
     def handle(self, **options):
         start_date = date(2019, 6, 1)
