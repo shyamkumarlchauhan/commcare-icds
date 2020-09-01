@@ -73,8 +73,8 @@ class TestFunctionalToilet(TestCase):
             loc_level='state'
         )
         expected = (
-            "Of the AWCs that submitted an Infrastructure Details form, the percentage of AWCs that reported "
-            "having a functional toilet"
+            "Of the AWCs that submitted an Infrastructure Details form in the last 6 months, the percentage of "
+            "AWCs that reported having a functional toilet"
         )
         self.assertEqual(data['rightLegend']['info'], expected)
 

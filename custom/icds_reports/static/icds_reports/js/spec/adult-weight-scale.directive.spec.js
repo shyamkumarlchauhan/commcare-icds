@@ -158,7 +158,8 @@ describe('Adult Weight Scale Directive', function () {
         });
         assert.equal(controller.chartOptions.caption.html,
             '<i class="fa fa-info-circle"></i> ' +
-            'Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having a weighing scale for mother and child');
+            'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage of ' +
+            'AWCs that reported having a weighing scale for mother and child');
     });
 
     it('tests chart tooltip content', function () {

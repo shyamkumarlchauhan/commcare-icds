@@ -22,7 +22,8 @@ function InfantometerController($scope, $routeParams, $location, $filter, infras
     };
     vm.filters = ['gender', 'age', 'data_period'];
     vm.rightLegend = {
-        info: 'Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having an Infantometer. ',
+        info: 'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage ' +
+            'of AWCs that reported having an Infantometer. ',
     };
 
     vm.getPopupData = function (row) {
@@ -45,7 +46,8 @@ function InfantometerController($scope, $routeParams, $location, $filter, infras
     var options = {
         'xAxisTickFormat': '%b %Y',
         'yAxisTickFormat': ".2%",
-        'captionContent': ' Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having an Infantometer. ',
+        'captionContent': ' Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, ' +
+            'the percentage of AWCs that reported having an Infantometer. ',
     };
     vm.chartOptions = vm.getChartOptions(options);
     vm.chartOptions.chart.color = d3.scale.category10().range();
