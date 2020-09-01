@@ -4249,7 +4249,7 @@ class TestExportData(TestCase):
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 'Average Number of Days AWC Were opened', 'Expected Home Visits', 'Actual Home Visits',
+                 'Average Number of Days AWC Were open', 'Expected Home Visits', 'Actual Home Visits',
                  '% of Home Visits',
                  'Total Number of Children (3-6 yrs)',
                  'No. of children between 3-6 years provided PSE for atleast 21+ days',
@@ -4323,7 +4323,7 @@ class TestExportData(TestCase):
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 'Average Number of Days AWC Were opened', '% of Home Visits',
+                 'Average Number of Days AWC Were open', '% of Home Visits',
                  '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
                  '% of trimester three women counselled on immediate and EBF', 'Height Measurement Efficiency',
                  '% of children between 6 months -3 years, P&LW provided THR for atleast ' '21+ days',
@@ -4364,7 +4364,7 @@ class TestExportData(TestCase):
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'District Name', 'Number of Blocks Covered',
-                 'Number of AWCs Launched', 'Average Number of Days AWC Were opened', 'Expected Home Visits',
+                 'Number of AWCs Launched', 'Average Number of Days AWC Were open', 'Expected Home Visits',
                  'Actual Home Visits',
                  '% of Home Visits', 'Total Number of Children (3-6 yrs)',
                  'No. of children between 3-6 years provided PSE for atleast 21+ days',
@@ -4412,7 +4412,8 @@ class TestExportData(TestCase):
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 'Average Number of Days AWC Were opened', '% of Home Visits',
+                 ''
+                 'Average Number of Days AWC Were open', '% of Home Visits',
                  '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
                  '% of trimester three women counselled on immediate and EBF', 'Height Measurement Efficiency',
                  '% of children between 6 months -3 years, P&LW provided THR for atleast ' '21+ days',

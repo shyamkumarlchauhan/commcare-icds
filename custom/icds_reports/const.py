@@ -212,7 +212,7 @@ PPR_HEADERS_COMPREHENSIVE = [
 
 PPR_HEADERS_COMPREHENSIVE_BETA = [
     'State Name', 'District Name', 'Number of Districts Covered', 'Number of Blocks Covered',
-    'Number of AWCs Launched', 'Average Number of Days AWC Were opened', 'Expected Home Visits',
+    'Number of AWCs Launched', 'Average Number of Days AWC Were open', 'Expected Home Visits',
     'Actual Home Visits', '% of Home Visits', 'Total Number of Children (3-6 yrs)',
     'No. of children between 3-6 years provided PSE for atleast 21+ days',
     '% of children between 3-6 years provided PSE for atleast 21+ days',
@@ -248,7 +248,7 @@ PPR_HEADERS_SUMMARY = [
 
 PPR_HEADERS_SUMMARY_BETA = [
     'State Name', 'District Name', 'Number of Districts Covered', 'Number of Blocks Covered',
-    'Number of AWCs Launched', 'Average Number of Days AWC Were opened', '% of Home Visits',
+    'Number of AWCs Launched', 'Average Number of Days AWC Were open', '% of Home Visits',
     '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
     '% of trimester three women counselled on immediate and EBF',
     'Height Measurement Efficiency',
@@ -298,7 +298,7 @@ PPD_ICDS_CAS_COVERAGE_OVERVIEW = [
 
 PPD_ICDS_CAS_COVERAGE_OVERVIEW_BETA = [
     'Number of States Covered', 'Number of Districts Covered', 'Number of Blocks Covered',
-    'Number of AWCs Launched', 'Average Number of Days AWC Were opened', '% of Home Visits']
+    'Number of AWCs Launched', 'Average Number of Days AWC Were open', '% of Home Visits']
 
 PPD_SERVICE_DELIVERY_OVERVIEW = [
     '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
