@@ -14,7 +14,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -29,7 +29,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )['rightLegend']
@@ -42,7 +42,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -103,7 +103,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -114,7 +114,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -124,7 +124,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -143,7 +143,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -161,7 +161,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -171,7 +171,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
             },
             loc_level='state'
         )
@@ -247,6 +247,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertListEqual(
             data['bottom_five'],
             [
+                {'loc_name': 'st5', 'percent': 0.0},
+                {'loc_name': 'st6', 'percent': 0.0},
                 {'loc_name': 'st7', 'percent': 0.0},
                 {'loc_name': 'st2', 'percent': 20.37037037037037},
                 {'loc_name': 'st1', 'percent': 22.71293375394322}
@@ -264,9 +266,11 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertListEqual(
             data['top_five'],
             [
-                {'loc_name': 'st7', 'percent': 0.0},
-                {'loc_name': 'st2', 'percent': 20.37037037037037},
-                {'loc_name': 'st1', 'percent': 22.71293375394322}
+                {'loc_name': 'st3', 'percent': 0.0},
+                {'loc_name': 'st4', 'percent': 0.0},
+                {'loc_name': 'st5', 'percent': 0.0},
+                {'loc_name': 'st6', 'percent': 0.0},
+                {'loc_name': 'st7', 'percent': 0.0}
             ]
         )
 
@@ -423,6 +427,10 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertListEqual(
             data['all_locations'],
             [
+                {'loc_name': 'st3', 'percent': 0.0},
+                {'loc_name': 'st4', 'percent': 0.0},
+                {'loc_name': 'st5', 'percent': 0.0},
+                {'loc_name': 'st6', 'percent': 0.0},
                 {'loc_name': 'st7', 'percent': 0.0},
                 {'loc_name': 'st2', 'percent': 20.37037037037037},
                 {'loc_name': 'st1', 'percent': 22.71293375394322}
