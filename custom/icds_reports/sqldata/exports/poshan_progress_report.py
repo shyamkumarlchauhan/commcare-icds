@@ -5,7 +5,9 @@ from custom.icds_reports.const import (
     PPR_COLS_SUMMARY,
     PPR_COLS_TO_FETCH,
     PPR_COLS_PERCENTAGE_RELATIONS,
-    PPR_COLS_PERCENTAGE_RELATIONS_BETA
+    PPR_COLS_PERCENTAGE_RELATIONS_BETA,
+    PPR_HEADERS_COMPREHENSIVE_BETA,
+    PPR_HEADERS_SUMMARY_BETA
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
 from custom.icds_reports.utils import generate_quarter_months, calculate_percent, handle_average, apply_exclude, \
