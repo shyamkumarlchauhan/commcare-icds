@@ -1,4 +1,7 @@
 import pytz
+
+from django.db.models import Q
+
 from corehq.apps.sms.models import SMS
 from corehq.apps.locations.models import SQLLocation
 from corehq.apps.users.models import CommCareUser
@@ -41,45 +44,45 @@ class Command(BaseCommand):
 
         return location_id
 
-    def get_location(self, sms):
-        location_id = self.get_location_id(sms)
+    def get_state_code(self, domain, location_id):
         if not location_id:
-            return None
-
-        if location_id in self.location_id_to_location:
-            return self.location_id_to_location[location_id]
-
-        location = SQLLocation.by_location_id(location_id)
-        self.location_id_to_location[location_id] = location
-        return location
-
-    def get_state_code(self, location):
-        if not location:
             return 'unknown'
 
-        if location.location_id in self.location_id_to_state_code:
-            return self.location_id_to_state_code[location.location_id]
+        if location_id in self.location_id_to_state_code:
+            return self.location_id_to_state_code[location_id]
 
-        state = location.get_ancestors().filter(location_type__code='state').first()
+        try:
+            state = SQLLocation.objects.get_ancestors(
+                Q(domain=domain, location_id=location_id)
+            ).get(location_type__code='state')
+        except SQLLocation.DoesNotExist:
+            state = None
         if not state:
+            self.location_id_to_state_code[location_id] = 'unknown'
             return 'unknown'
 
-        self.location_id_to_state_code[location.location_id] = state.site_code
+        self.location_id_to_state_code[location_id] = state.site_code
         self.state_code_to_name[state.site_code] = state.name
         return state.site_code
 
-    def get_district_code(self, location):
-        if not location:
+    def get_district_code(self, domain, location_id):
+        if not location_id:
             return 'unknown'
 
-        if location.location_id in self.location_id_to_district_code:
-            return self.location_id_to_district_code[location.location_id]
+        if location_id in self.location_id_to_district_code:
+            return self.location_id_to_district_code[location_id]
 
-        district = location.get_ancestors().filter(location_type__code='district').first()
+        try:
+            district = SQLLocation.objects.get_ancestors(
+                Q(domain=domain, location_id=location_id)
+            ).get(location_type__code='district')
+        except SQLLocation.DoesNotExist:
+            district = None
         if not district:
+            self.location_id_to_district_code[location_id] = 'unknown'
             return 'unknown'
 
-        self.location_id_to_district_code[location.location_id] = district.site_code
+        self.location_id_to_district_code[location_id] = district.site_code
         self.district_code_to_name[district.site_code] = district.name
         return district.site_code
 
@@ -110,7 +113,6 @@ class Command(BaseCommand):
     def handle(self, domain, start_date, end_date, **options):
         start_timestamp, end_timestamp = self.get_start_and_end_timestamps(start_date, end_date)
         self.recipient_id_to_location_id = {}
-        self.location_id_to_location = {}
         self.location_id_to_state_code = {}
         self.location_id_to_district_code = {}
         self.state_code_to_name = {'unknown': 'Unknown'}
@@ -132,9 +134,9 @@ class Command(BaseCommand):
             direction='O',
             processed=True,
         ):
-            location = self.get_location(sms)
-            state_code = self.get_state_code(location)
-            district_code = self.get_district_code(location)
+            location_id = self.get_location_id(sms)
+            state_code = self.get_state_code(domain, location_id)
+            district_code = self.get_district_code(domain, location_id)
             if state_code not in district_level_data:
                 state_level_data[state_code] = {}
                 district_level_data[state_code] = {}
