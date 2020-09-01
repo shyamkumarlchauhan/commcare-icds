@@ -43,6 +43,7 @@ class BaseOperationalization(ICDSMixin):
 
 
 class BaseOperationalizationBeta(BaseOperationalization):
+    title = 'b. Status of operationalization of AWCs'
 
     @property
     def headers(self):

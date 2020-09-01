@@ -45,7 +45,7 @@ class MPROperationalizationBeta(BaseOperationalizationBeta, MPRData):
 
 class MPRSectors(object):
 
-    title = 'd. No of Sectors'
+    title = 'c. No of Sectors'
     slug = 'sectors'
     has_sections = False
     subtitle = []
@@ -86,7 +86,7 @@ class MPRPopulation(BasePopulation, MPRData):
 
 
 class MPRPopulationBeta(BasePopulationBeta, MPRData):
-    title = 'e. Total Population of Project'
+    title = 'd. Total Population of Project'
 
 
 class MPRBirthsAndDeaths(ICDSMixin, MPRData):
