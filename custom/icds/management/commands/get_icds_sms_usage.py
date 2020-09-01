@@ -9,6 +9,7 @@ from corehq.form_processor.utils import is_commcarecase
 from corehq.messaging.smsbackends.airtel_tcl.models import AirtelTCLBackend
 from corehq.util.argparse_types import date_type
 from corehq.util.timezones.conversions import UserTime
+from corehq.util.queries import paginated_queryset
 from couchexport.export import export_raw
 from datetime import datetime, timedelta, time
 from django.core.management.base import BaseCommand
@@ -126,14 +127,14 @@ class Command(BaseCommand):
             end_date.strftime('%Y-%m-%d'),
         )
 
-        for sms in SMS.objects.filter(
+        for sms in paginated_queryset(SMS.objects.filter(
             domain=domain,
             processed_timestamp__gt=start_timestamp,
             processed_timestamp__lte=end_timestamp,
             backend_api=AirtelTCLBackend.get_api_id(),
             direction='O',
             processed=True,
-        ):
+        ), 10000):
             location_id = self.get_location_id(sms)
             state_code = self.get_state_code(domain, location_id)
             district_code = self.get_district_code(domain, location_id)
