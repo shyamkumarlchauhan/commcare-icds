@@ -134,7 +134,7 @@ class Command(BaseCommand):
             backend_api=AirtelTCLBackend.get_api_id(),
             direction='O',
             processed=True,
-        ), 10000):
+        ).order_by('pk'), 10000):
             location_id = self.get_location_id(sms)
             state_code = self.get_state_code(domain, location_id)
             district_code = self.get_district_code(domain, location_id)
