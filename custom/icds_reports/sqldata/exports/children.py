@@ -454,7 +454,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                              AliasColumn('cf_in_month'),
                                              slug='cf_in_month'))
         agg_columns.insert(50, DatabaseColumn('No.of children (6-24) months of age enrolled with ICDS-CAS',
-                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              lambda x, y: '%d' % ((x or 0) + (y or 0)),
                                               [
                                                   SumWhen(
                                                       whens=[["age_tranche = :age_24",
@@ -474,7 +474,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                              AliasColumn('cf_diet_diversity'),
                                              slug='cf_diet_diversity'))
         agg_columns.insert(53, DatabaseColumn('Total number of children (6 months - 2 yrs) of age enrolled with ICDS-CAS',
-                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              lambda x, y: '%d' % ((x or 0) + (y or 0)),
                                               [
                                                   SumWhen(
                                                       whens=[["age_tranche = :age_24",
@@ -494,7 +494,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                              AliasColumn('cf_diet_quantity'),
                                              slug='cf_diet_quantity'))
         agg_columns.insert(56, DatabaseColumn('No.of children (6-24) months of age enrolled with ICDS-CAS',
-                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              lambda x, y: '%d' % ((x or 0) + (y or 0)),
                                               [
                                                   SumWhen(
                                                       whens=[["age_tranche = :age_24",
@@ -515,7 +515,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                              AliasColumn('cf_handwashing'),
                                              slug='cf_handwashing'))
         agg_columns.insert(59, DatabaseColumn('No.of children (6-24) months of age enrolled with ICDS-CAS',
-                                              lambda x, y: ((x or 0) + (y or 0)),
+                                              lambda x, y: '%d' % ((x or 0) + (y or 0)),
                                               [
                                                   SumWhen(
                                                       whens=[["age_tranche = :age_24",
