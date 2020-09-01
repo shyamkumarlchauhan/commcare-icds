@@ -91,7 +91,7 @@ def icds_ucr_data_sources():
 @static_ucr_report_paths.extend()
 def icds_ucr_reports():
     return [os.path.join(ICDS_APPS_ROOT, path) for path in [
-        "icds_reports/ucr/reports/dashboard/*.j,son",
+        "icds_reports/ucr/reports/dashboard/*.json",
         "icds_reports/ucr/reports/asr/*.json",
         "icds_reports/ucr/reports/asr/ucr_v2/*.json",
         "icds_reports/ucr/reports/mpr/*.json",
