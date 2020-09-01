@@ -431,6 +431,10 @@ class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
     helper_key = 'birth-preparedness-mbt'
 
     @property
+    def base_tablename(self):
+        return 'birth_preparedness'
+
+    @property
     def birth_preparedness_ucr_tablename(self):
         return get_table_name(self.domain, 'static-dashboard_birth_preparedness_forms')
 
@@ -453,6 +457,10 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
     @property
     def child_delivery_ucr_tablename(self):
         return get_table_name(self.domain, 'static-child_delivery_forms')
+
+    @property
+    def base_tablename(self):
+        return 'delivery_child'
 
     def query(self):
         return """

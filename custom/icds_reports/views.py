@@ -2439,7 +2439,7 @@ class CasDataExportAPIView(View):
 
     @property
     def valid_types(self):
-        return ('woman', 'child', 'awc')
+        return ('woman', 'child', 'awc', 'birth', 'deliverychild')
 
     @staticmethod
     def get_type_code(data_type):
@@ -2447,6 +2447,8 @@ class CasDataExportAPIView(View):
             "child": 'child_health_monthly',
             "woman": 'ccs_record_monthly',
             "awc": 'agg_awc',
+            "birth": 'birth_preparedness',
+            "deliverychild": 'delivery_child'
         }
         return type_map[data_type]
 
