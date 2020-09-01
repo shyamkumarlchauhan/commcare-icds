@@ -1816,7 +1816,7 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             },
             {
                 'mData': 'closed',
-                'heading': haveAccessToFeatures ? 'Pregnant Status' : 'Status',
+                'heading': haveAccessToFeatures ? 'Pregnancy Status' : 'Status',
                 'class': 'medium-col',
                 'value': renderClosed
             },
