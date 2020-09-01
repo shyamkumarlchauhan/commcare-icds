@@ -1476,6 +1476,7 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
         if filters.get('aggregation_level') > 1:
             filters['aggregation_level'] -= 1
 
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
         data = dict()
         child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
             thr_rations_female_st=Sum(Case(When(gender='F', then='thr_25_days_st_resident'))),
@@ -3883,78 +3884,58 @@ class MPRReferralServicesBeta(MPRReferralServices):
 
         filters['month'] = date(self.config['year'], self.config['month'], 1)
         data = dict()
-        (
-            'e. Fever/offensive discharge after delivery',
-            'referred_fever_discharge',
-            {
-                'columns': ('referred_fever_discharge',),
-                'func': truediv,
-                'second_value': 'location_number',
-                'format': 'percent'
-            },
-            {
-                'columns': ('referred_fever_discharge_all',),
-                'func': truediv,
-                'second_value': 'location_number',
-            },
-            {
-                'columns': ('fever_discharge_reached_count',),
-                'func': truediv,
-                'second_value': 'location_number',
-            }
-        ),
         agg_mpr_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
             referred_premature=F('num_premature_referral_awcs'),
             referred_premature_all=F('total_premature_referrals'),
             premature_reached_count=F('total_premature_reached_facility'),
 
-            referred_sepsis=F('num_premature_referral_awcs'),
-            referred_sepsis_all=F('total_premature_referrals'),
-            sepsis_reached_count=F('total_premature_reached_facility'),
+            referred_sepsis=F('num_sepsis_referral_awcs'),
+            referred_sepsis_all=F('total_sepsis_referrals'),
+            sepsis_reached_count=F('total_sepsis_reached_facility'),
 
-            referred_diarrhoea=F('num_premature_referral_awcs'),
-            referred_diarrhoea_all=F('total_premature_referrals'),
-            diarrhoea_reached_count=F('total_premature_reached_facility'),
+            referred_diarrhoea=F('num_diarrhoea_referral_awcs'),
+            referred_diarrhoea_all=F('total_diarrhoea_referrals'),
+            diarrhoea_reached_count=F('total_diarrhoea_reached_facility'),
 
-            referred_pneumonia=F('num_premature_referral_awcs'),
-            referred_pneumonia_all=F('total_premature_referrals'),
-            pneumonia_reached_count=F('total_premature_reached_facility'),
+            referred_pneumonia=F('num_pneumonia_referral_awcs'),
+            referred_pneumonia_all=F('total_pneumonia_referrals'),
+            pneumonia_reached_count=F('total_pneumonia_reached_facility'),
 
-            referred_fever_child=F('num_premature_referral_awcs'),
-            referred_fever_child_all=F('total_premature_referrals'),
-            fever_child_reached_count=F('total_premature_reached_facility'),
+            referred_fever_child=F('num_fever_referral_awcs'),
+            referred_fever_child_all=F('total_fever_referrals'),
+            fever_child_reached_count=F('total_fever_reached_facility'),
 
-            referred_severely_underweight=F('num_premature_referral_awcs'),
-            referred_severely_underweight_all=F('total_premature_referrals'),
-            sev_underweight_reached_count=F('total_premature_reached_facility'),
+            referred_severely_underweight=F('num_severely_underweight_referral_awcs'),
+            referred_severely_underweight_all=F('total_severely_underweight_referrals'),
+            sev_underweight_reached_count=F('total_severely_underweight_reached_facility'),
 
-            referred_other_child=F('num_premature_referral_awcs'),
-            referred_other_child_all=F('total_premature_referrals'),
-            other_child_reached_count=F('total_premature_reached_facility'),
+            referred_other_child=F('num_other_child_referral_awcs'),
+            referred_other_child_all=F('total_other_child_referrals'),
+            other_child_reached_count=F('total_other_child_reached_facility'),
 
-            referred_bleeding=F('num_premature_referral_awcs'),
-            referred_bleeding_all=F('total_premature_referrals'),
-            bleeding_reached_count=F('total_premature_reached_facility'),
+            referred_bleeding=F('num_bleeding_referral_awcs'),
+            referred_bleeding_all=F('total_bleeding_referrals'),
+            bleeding_reached_count=F('total_bleeding_reached_facility'),
 
-            referred_convulsions=F('num_premature_referral_awcs'),
-            referred_convulsions_all=F('total_premature_referrals'),
-            convulsions_reached_count=F('total_premature_reached_facility'),
+            referred_convulsions=F('num_convulsions_referral_awcs'),
+            referred_convulsions_all=F('total_convulsions_referrals'),
+            convulsions_reached_count=F('total_convulsions_reached_facility'),
 
-            referred_prolonged_labor=F('num_premature_referral_awcs'),
-            referred_prolonged_labor_all=F('total_premature_referrals'),
-            prolonged_labor_reached_count=F('total_premature_reached_facility'),
+            referred_prolonged_labor=F('num_prolonged_labor_referral_awcs'),
+            referred_prolonged_labor_all=F('total_prolonged_labor_referrals'),
+            prolonged_labor_reached_count=F('total_prolonged_labor_reached_facility'),
 
-            referred_abortion_complications=F('num_premature_referral_awcs'),
-            referred_abortion_complications_all=F('total_premature_referrals'),
-            abort_comp_reached_count=F('total_premature_reached_facility'),
+            referred_abortion_complications=F('num_abortion_complications_referral_awcs'),
+            referred_abortion_complications_all=F('total_abortion_complications_referrals'),
+            abort_comp_reached_count=F('total_abortion_complications_reached_facility'),
 
-            referred_fever_discharge=F('num_premature_referral_awcs'),
-            referred_fever_discharge_all=F('total_premature_referrals'),
-            fever_discharge_reached_count=F('total_premature_reached_facility'),
+            referred_fever_discharge=F('num_fever_discharge_referral_awcs'),
+            referred_fever_discharge_all=F('total_fever_discharge_referrals'),
+            fever_discharge_reached_count=F('total_fever_discharge_reached_facility'),
 
-            referred_other=F('num_premature_referral_awcs'),
-            referred_other_all=F('total_premature_referrals'),
-            other_reached_count=F('total_premature_reached_facility'),
+            referred_other=F('num_other_referral_awcs'),
+            referred_other_all=F('total_other_referrals'),
+            other_reached_count=F('total_other_reached_facility'),
 
         ).first()
 
