@@ -253,18 +253,15 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
                 SUM(CASE WHEN referral_health_problem like '%swelling%' or referral_health_problem like  '%blurred_vision%' or referral_health_problem like  '%other%' AND
                     referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_reached_facility
             FROM "{self.person_case_ucr_table}" ucr
-            WHERE last_referral_date>=%(start_date)s and last_referral_date<%(next_month_start_date)s
+            WHERE last_referral_date>='{self.month}' and last_referral_date<'{next_month_start}'
             GROUP BY state_id, awc_id
         ) ut
 
-        WHERE agg_mpr.month=%(start_date)s AND
+        WHERE agg_mpr.month='{self.month}' AND
             agg_mpr.awc_id=ut.awc_id AND
             agg_mpr.state_id=ut.state_id AND
             agg_mpr.aggregation_level=5
-        """, {
-            'start_date': self.month,
-            'next_month_start_date': next_month_start
-        }
+        """, None
 
         yield f"""
         UPDATE  "{self.temporary_tablename}" agg_mpr
@@ -279,8 +276,8 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             pnc_death_temp_resident = ut.pnc_dead_migrant
         FROM (
         SELECT
-            supervisor_id,
-            awc_id,
+            ucr.supervisor_id,
+            ucr.awc_id,
             COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
                                 AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
                                 AND ucr.age_at_death_yrs >= 11) AS female_dead_resident,
@@ -296,13 +293,13 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
                                 AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
                                 AND ucr.female_death_type='delivery') AS delivery_dead_resident,
-            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident is distinct from 1 AND ucr.date_death IS NOT NULL 
                                 AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
                                 AND ucr.female_death_type='delivery') AS delivery_dead_migrant,
             COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
                                 AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
                                 AND ucr.female_death_type='pnc') AS pnc_dead_resident,
-            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident=1 AND ucr.date_death IS NOT NULL 
+            COUNT(*) filter (WHERE ucr.sex='F' AND ucr.resident is distinct from 1 AND ucr.date_death IS NOT NULL 
                                 AND ucr.date_death>=%(start_date)s AND ucr.date_death<%(next_month_start_date)s 
                                 AND ucr.female_death_type='pnc') AS pnc_dead_migrant
 
@@ -319,7 +316,7 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
               (closed_on IS NULL OR closed_on >= %(start_date)s)) AND 
               (agg_availing.is_registered IS DISTINCT FROM 0 OR agg_availing.registration_date::date >= %(start_date)s) AND 
               (agg_migration.is_migrated IS DISTINCT FROM 1 OR agg_migration.migration_date::date >= %(start_date)s)
-        GROUP BY supervisor_id, awc_id
+        GROUP BY ucr.supervisor_id, ucr.awc_id
         ) ut
         WHERE
             agg_mpr.supervisor_id=ut.supervisor_id AND
