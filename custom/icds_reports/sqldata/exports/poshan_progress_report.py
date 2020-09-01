@@ -66,7 +66,7 @@ class PoshanProgressReport(object):
             den = row[all_cols.index(v[1])]
             is_avg = v[2] if len(v) > 2 else False
             if is_avg:
-                row[all_cols.index(k)] = round(num / den)
+                row[all_cols.index(k)] = round(num / float(den or 1))
             else:
                 row[all_cols.index(k)] = percent(num, den)
             # calculation is done on decimal values
