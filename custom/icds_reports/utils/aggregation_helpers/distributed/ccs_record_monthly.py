@@ -272,6 +272,7 @@ class CcsRecordMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribute
             ('num_children_del', 'agg_delivery.num_children_del'),
             ('still_live_birth', 'agg_delivery.still_live_birth'),
             ('last_preg_year', 'preg.last_preg'),
+            ('female_death_type', 'person_cases.female_death_type'),
             ('complication_type', 'case_list.complication_type'),  # backfilled for only Bihar
             ('reason_no_ifa', 'agg_bp.reason_no_ifa'),  # backfilled for only Bihar
             ('new_ifa_tablets_total_bp', 'agg_bp.new_ifa_tablets_total'),  # backfilled for only Bihar

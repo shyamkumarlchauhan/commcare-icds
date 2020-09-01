@@ -35,6 +35,7 @@ from .migration_forms import MigrationFormsAggregationDistributedHelper
 from .bihar_api_demographics import BiharApiDemographicsHelper
 from .availing_service_forms import AvailingServiceFormsAggregationDistributedHelper
 from .child_vaccine_helper import ChildVaccineHelper
+from .agg_mpr_awc import AggMprAwcHelper
 
 __all__ = (
     'AggAwcDistributedHelper',
@@ -75,5 +76,6 @@ __all__ = (
     'BiharApiDemographicsHelper',
     'ChildVaccineHelper',
     'DailyTHRCCSRecordHelper',
-    'DailyTHRChildHealthHelper'
+    'DailyTHRChildHealthHelper',
+    'AggMprAwcHelper'
 )

@@ -131,6 +131,12 @@ class ChildHealthMonthlyView(models.Model):
     dob = models.DateField(blank=True, null=True)
     sex = models.TextField(blank=True, null=True)
     month = models.DateField(blank=True, null=True)
+    resident = models.TextField(blank=True, null=True)
+    caste = models.TextField(blank=True, null=True)
+    disabled = models.TextField(blank=True, null=True)
+    minority = models.TextField(blank=True, null=True)
+    num_rations_distributed = models.IntegerField(blank=True, null=True)
+    pse_eligible = models.IntegerField(blank=True, null=True)
     age_in_months = models.IntegerField(
         blank=True, null=True, help_text="age in months at the end of the month"
     )
@@ -1471,6 +1477,17 @@ class ServiceDeliveryReportView(models.Model):
     suposhan_diwas_count = models.IntegerField(null=True)
     coming_of_age_count = models.IntegerField(null=True)
     public_health_message_count = models.IntegerField(null=True)
+    awc_days_open = models.IntegerField()
+    breakfast_served = models.IntegerField(null=True)
+    hcm_served = models.IntegerField(null=True)
+    thr_served = models.IntegerField(null=True)
+    pse_provided = models.IntegerField(null=True)
+    breakfast_21_days = models.IntegerField(null=True)
+    hcm_21_days = models.IntegerField(null=True)
+    pse_16_days = models.IntegerField(null=True)
+    breakfast_9_days = models.IntegerField(null=True)
+    hcm_9_days = models.IntegerField(null=True)
+    pse_9_days = models.IntegerField(null=True)
 
     class Meta(object):
         app_label = 'icds_reports'

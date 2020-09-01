@@ -37,7 +37,7 @@ def _skip_if_nose_attr():
     return '--attr=es_test' in sys.argv
 
 
-@timelimit(480)
+@timelimit(48000)
 def setUpModule():
     if _skip_if_nose_attr():
         return

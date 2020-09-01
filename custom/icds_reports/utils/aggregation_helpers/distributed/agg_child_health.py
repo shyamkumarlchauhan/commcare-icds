@@ -31,6 +31,8 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
         return get_agg_child_temp_tablename()
 
     def staging_queries(self):
+        death_eligible = ("chm.date_death is not null AND chm.dob is not null "
+                          "AND date_trunc('month', chm.date_death)::DATE=chm.month")
         columns = (
             ('state_id', 'awc_loc.state_id'),
             ('district_id', 'awc_loc.district_id'),
@@ -62,8 +64,60 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
                 "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
             ('pse_attended_21_days',
              "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended >= 21)"),
+            ('pse_attended_0_days',
+             "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended = 0)"),
+            ('pse_attended_1_days',
+             "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended >= 1)"),
+            ('total_pse_days_attended',
+             "SUM(CASE WHEN chm.pse_eligible = 1 THEN chm.pse_days_attended ELSE 0 END)"),
+
+            ('pse_attended_16_days_sc',
+             "COUNT(*) FILTER (WHERE chm.caste='sc' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
+            ('pse_attended_16_days_st',
+             "COUNT(*) FILTER (WHERE chm.caste='st' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
+            ('pse_attended_16_days_other',
+             "COUNT(*) FILTER (WHERE chm.caste='other' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
+            ('pse_attended_16_days_disabled',
+             "COUNT(*) FILTER (WHERE COALESCE(chm.disabled, 'no')='yes' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
+            ('pse_attended_16_days_minority',
+             "COUNT(*) FILTER (WHERE COALESCE(chm.minority, 'no')='yes' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
+
             ('lunch_count_21_days',
              "COUNT(*) FILTER (WHERE chm.lunch_count >= 21)"),
+             ('thr_25_days_sc_resident',
+             "COUNT(*) FILTER (WHERE chm.caste='sc' and chm.thr_eligible = 1 AND chm.resident='yes' AND chm.num_rations_distributed >= 25)"),
+            ('thr_25_days_st_resident',
+             "COUNT(*) FILTER (WHERE chm.caste='st' and chm.thr_eligible = 1 AND chm.resident='yes' AND chm.num_rations_distributed >= 25)"),
+            ('thr_25_days_other_resident',
+             "COUNT(*) FILTER (WHERE chm.caste='other' and chm.thr_eligible = 1 AND chm.resident='yes' AND chm.num_rations_distributed >= 25)"),
+            ('thr_25_days_disabled_resident',
+             "COUNT(*) FILTER (WHERE COALESCE(chm.disabled, 'no')='yes' and chm.thr_eligible = 1 AND chm.resident='yes'AND chm.num_rations_distributed >= 25)"),
+            ('thr_25_days_minority_resident',
+             "COUNT(*) FILTER (WHERE COALESCE(chm.minority, 'no')='yes' and chm.thr_eligible = 1 AND chm.resident='yes' AND chm.num_rations_distributed >= 25)"),
+            ('thr_0_days_resident',
+             "COUNT(*) FILTER (WHERE chm.thr_eligible = 1 AND chm.resident='yes' AND chm.num_rations_distributed = 0)"),
+            ('thr_1_days_resident',
+             "COUNT(*) FILTER (WHERE chm.thr_eligible = 1 AND chm.resident='yes' AND chm.num_rations_distributed >= 1)"),
+            ('total_thr_resident', "SUM(CASE WHEN chm.thr_eligible=1 AND chm.resident='yes' THEN num_rations_distributed ELSE 0 END)"),
+            ('lunch_25_days_sc_resident',
+             "COUNT(*) FILTER (WHERE chm.caste='sc' and chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count >= 25)"),
+            ('lunch_25_days_st_resident',
+             "COUNT(*) FILTER (WHERE chm.caste='st' and chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count >= 25)"),
+            ('lunch_25_days_other_resident',
+             "COUNT(*) FILTER (WHERE chm.caste='other' and chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count >= 25)"),
+            ('lunch_25_days_disabled_resident',
+             "COUNT(*) FILTER (WHERE COALESCE(chm.disabled, 'no')='yes' and chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count >= 25)"),
+            ('lunch_25_days_minority_resident',
+             "COUNT(*) FILTER (WHERE COALESCE(chm.minority, 'no')='yes' and chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count >= 25)"),
+            ('lunch_0_days_resident',
+             "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count = 0)"),
+            ('lunch_1_days_resident',
+             "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.resident='yes' AND chm.lunch_count >= 1)"),
+            ('total_lunch_resident', "SUM(CASE WHEN chm.pse_eligible=1 AND chm.resident='yes' THEN lunch_count ELSE 0 END)"),
+            ('thr_1_days_migrant', "SUM(CASE WHEN chm.thr_eligible = 1 AND chm.resident is distinct from 'yes' AND "
+                                   "chm.num_rations_distributed >= 1 THEN 1 ELSE 0 END)"),
+            ('lunch_1_days_migrant', "SUM(CASE WHEN chm.pse_eligible = 1 AND chm.resident is distinct from 'yes' AND "
+                                   "chm.lunch_count >= 1 THEN 1 ELSE 0 END)"),
             ('born_in_month', "SUM(chm.born_in_month)"),
             ('low_birth_weight_in_month', "SUM(chm.low_birth_weight_born_in_month)"),
             ('bf_at_birth', "SUM(chm.bf_at_birth_born_in_month)"),
@@ -84,6 +138,14 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('fully_immunized_eligible', "SUM(chm.fully_immunized_eligible)"),
             ('fully_immunized_on_time', "SUM(chm.fully_immunized_on_time)"),
             ('fully_immunized_late', "SUM(chm.fully_immunized_late)"),
+            ('fully_immunized_eligible_in_month', "SUM(CASE WHEN "
+                                                  "date_trunc('MONTH',dob + INTERVAL '12 months')=%(start_date)s "
+                                                  "AND valid_in_month=1 THEN 1 ELSE 0 END )"),
+            ('fully_immun_before_month_end', "SUM(CASE WHEN "
+                                             "date_trunc('MONTH',dob + INTERVAL '12 months')=%(start_date)s "
+                                             "AND valid_in_month=1"
+                                             "AND fully_immun_before_month_end=1"
+                                             "THEN 1 ELSE 0 END)"),
             ('has_aadhar_id', "SUM(chm.has_aadhar_id)"),
             ('aggregation_level', '5'),
             ('pnc_eligible', 'SUM(chm.pnc_eligible)'),
@@ -136,6 +198,48 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('zscore_grading_hfa_recorded_in_month', "SUM(chm.zscore_grading_hfa_recorded_in_month)"),
             ('zscore_grading_wfh_recorded_in_month', "SUM(chm.zscore_grading_wfh_recorded_in_month)"),
             ('days_ration_given_child', "SUM(chm.days_ration_given_child)"),
+            ('permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.valid_in_month=1 THEN 1 ELSE 0 END)"),
+            ('temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND "
+                              " chm.valid_in_month=1  THEN 1 ELSE 0 END)"),
+            ('live_birth', "SUM(chm.live_birth)"),
+            ('still_birth', "SUM(chm.still_birth)"),
+            ('deaths', "SUM(CASE WHEN chm.date_death is not null THEN 1 ELSE 0 END)"),
+            ('live_birth_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status='yes' AND "
+                                              "chm.birth_status_in_month='live' THEN 1 ELSE 0 END)"),
+            ('live_birth_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' "
+                                         "AND chm.birth_status_in_month='live' THEN 1 ELSE 0 END)"),
+            ('still_birth_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status='yes' AND "
+                                               "chm.birth_status_in_month='still' THEN 1 ELSE 0 END)"),
+            ('still_birth_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' "
+                                          "AND chm.birth_status_in_month='still' THEN 1 ELSE 0 END)"),
+            ('weighed_in_3_days_permanent_resident', "SUM(CASE WHEN  chm.mother_resident_status='yes' AND "
+                                                     "chm.weighed_within_3_days=1 THEN 1 ELSE 0 END)"),
+            ('weighed_in_3_days_temp_resident', "SUM(CASE WHEN  chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                                "chm.weighed_within_3_days=1 THEN 1 ELSE 0 END)"),
+            ('neonatal_deaths_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status='yes' AND "
+                                                   f"{death_eligible} AND chm.date_death-chm.dob<=28 THEN 1 ELSE 0 END)"),
+            ('neonatal_deaths_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                              f"{death_eligible} AND chm.date_death-chm.dob<=28 THEN 1 ELSE 0 END)"),
+            ('post_neonatal_deaths_permanent_resident',
+             "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+             f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 29 and 364 "
+             f" THEN 1 ELSE 0 END)"),
+            (
+            'post_neonatal_deaths_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                                  f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 29 and 364 "
+                                                  f" THEN 1 ELSE 0 END)"),
+            ('total_deaths_permanent_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                                f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 365 and 1826 "
+                                                f"THEN 1 ELSE 0 END)"),
+            ('total_deaths_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' AND "
+                                           f"{death_eligible} AND chm.date_death-chm.dob BETWEEN 365 and 1826 "
+                                           f"THEN 1 ELSE 0 END)"),
+            ('lbw_permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.birth_status_in_month='live' AND "
+                                       " chm.weighed_within_3_days is not null THEN "
+                                       "chm.low_birth_weight_born_in_month ELSE 0 END)"),
+            ('lbw_temp_resident', "SUM(CASE WHEN chm.resident is distinct from 'yes' AND "
+                                  "chm.birth_status_in_month='live' AND chm.weighed_within_3_days is not null THEN "
+                                  "chm.low_birth_weight_born_in_month ELSE 0 END)"),
         )
         query_cols = []
         for c in columns:
@@ -260,7 +364,33 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('pse_eligible', ),
             ('pse_attended_16_days', ),
             ('pse_attended_21_days',),
+            ('pse_attended_0_days',),
+            ('pse_attended_1_days',),
+            ('pse_attended_16_days_sc',),
+            ('pse_attended_16_days_st',),
+            ('pse_attended_16_days_other',),
+            ('pse_attended_16_days_disabled',),
+            ('pse_attended_16_days_minority',),
+            ('total_pse_days_attended',),
             ('lunch_count_21_days', ),
+            ('thr_25_days_sc_resident',),
+            ('thr_25_days_st_resident',),
+            ('thr_25_days_other_resident',),
+            ('thr_25_days_disabled_resident',),
+            ('thr_25_days_minority_resident',),
+            ('thr_0_days_resident',),
+            ('thr_1_days_resident',),
+            ('total_thr_resident',),
+            ('lunch_25_days_sc_resident',),
+            ('lunch_25_days_st_resident',),
+            ('lunch_25_days_other_resident',),
+            ('lunch_25_days_disabled_resident',),
+            ('lunch_25_days_minority_resident',),
+            ('lunch_0_days_resident',),
+            ('lunch_1_days_resident',),
+            ('total_lunch_resident',),
+            ('thr_1_days_migrant',),
+            ('lunch_1_days_migrant',),
             ('born_in_month', ),
             ('low_birth_weight_in_month', ),
             ('bf_at_birth', ),
@@ -281,6 +411,8 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('fully_immunized_eligible', ),
             ('fully_immunized_on_time', ),
             ('fully_immunized_late', ),
+            ('fully_immunized_eligible_in_month',),
+            ('fully_immun_before_month_end',),
             ('has_aadhar_id', ),
             ('aggregation_level', str(aggregation_level)),
             ('pnc_eligible', ),
@@ -299,12 +431,32 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('weighed_and_height_measured_in_month', ),
             ('weighed_and_born_in_month', ),
             ('days_ration_given_child', ),
+            ('permanent_resident',),
+            ('temp_resident',),
+            ('live_birth_permanent_resident',),
+            ('live_birth_temp_resident',),
+            ('still_birth_permanent_resident',),
+            ('still_birth_temp_resident',),
+            ('weighed_in_3_days_permanent_resident',),
+            ('weighed_in_3_days_temp_resident',),
+            ('neonatal_deaths_permanent_resident',),
+            ('neonatal_deaths_temp_resident',),
+            ('post_neonatal_deaths_permanent_resident',),
+            ('post_neonatal_deaths_temp_resident',),
+            ('total_deaths_permanent_resident',),
+            ('total_deaths_temp_resident',),
+            ('lbw_permanent_resident',),
+            ('lbw_temp_resident',),
             ('zscore_grading_hfa_normal', ),
             ('zscore_grading_hfa_moderate', ),
             ('zscore_grading_hfa_severe', ),
             ('wasting_normal_v2', ),
             ('wasting_moderate_v2', ),
             ('wasting_severe_v2', ),
+            ('live_birth',),
+            ('still_birth',),
+            ('weighed_within_3_days',),
+            ('deaths',),
             ('zscore_grading_hfa_recorded_in_month', ),
             ('zscore_grading_wfh_recorded_in_month', ),
             ('state_is_test', 'MAX(state_is_test)'),
