@@ -196,7 +196,7 @@
         "distribution_type": "hash",
         "distribution_column": "supervisor_id"
       },
-      "primary_key": ["supervisor_id","doc_id","repeat_iteration"]
+      "primary_key": ["supervisor_id","doc_id"]
     },
     "disable_destructive_rebuild": true
   }
