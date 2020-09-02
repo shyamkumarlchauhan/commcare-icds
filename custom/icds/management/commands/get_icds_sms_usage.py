@@ -11,7 +11,7 @@ from corehq.util.argparse_types import date_type
 from corehq.util.timezones.conversions import UserTime
 from couchexport.export import export_raw
 from datetime import datetime, timedelta, time
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -104,6 +104,9 @@ class Command(BaseCommand):
         return start_timestamp, end_timestamp
 
     def handle(self, domain, start_date, end_date, **options):
+        if end_date < start_date:
+            raise CommandError("Can not have end date before start date")
+
         self.recipient_id_to_location_id = {}
         self.location_id_to_state_code = {}
         self.location_id_to_district_code = {}
