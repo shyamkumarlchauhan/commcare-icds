@@ -1397,9 +1397,9 @@ def get_awc_report_thr(config, month, domain, show_test=False, now_date=None):
         ccs_image_data = apply_exclude(domain, ccs_image_data)
         child_image_data = apply_exclude(domain, child_image_data)
 
-    sorted_result_by_name = sorted(list(chain(ccs_image_data, child_image_data)),
-                                   key=lambda x: (x['person_name'] or '').lower())
-    sorted_image_data_list = sorted(sorted_result_by_name, key=lambda x: x['submitted_on'].strftime("%d/%m/%Y"))
+    sorted_result_by_date = sorted(list(chain(ccs_image_data, child_image_data)),
+                                   key=lambda x: x['submitted_on'].strftime("%d/%m/%Y"))
+    sorted_image_data_list = sorted(sorted_result_by_date, key=lambda x: (x['person_name'] or '').lower())
 
     images = []
     tmp_image = []
