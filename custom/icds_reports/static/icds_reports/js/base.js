@@ -8,9 +8,9 @@ hqDefine("icds_reports/js/base", function () {
             var isMprReport = mprLocationInfo.length === 1;
 
             if (isMprReport) {
-                var isSectorOrAWCSelected = $('select.form-control').length >= 5;
+                var isStateOrBelowSelected = $('select.form-control').length >= 2;
                 setTimeout(function () {
-                    if (isSectorOrAWCSelected) {
+                    if (isStateOrBelowSelected) {
                         applyBtn.enableButton();
                         mprLocationInfo.hide();
                     } else {
