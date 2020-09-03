@@ -3,6 +3,8 @@ from corehq.apps.userreports.models import StaticDataSourceConfiguration, get_da
 from corehq.apps.userreports.util import get_table_name
 from custom.icds_reports.const import DASHBOARD_DOMAIN
 from custom.icds_reports.utils.aggregation_helpers import AggregationHelper
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 class MBTDistributedHelper(AggregationHelper):
@@ -438,16 +440,25 @@ class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
     def birth_preparedness_ucr_tablename(self):
         return get_table_name(self.domain, 'static-dashboard_birth_preparedness_forms')
 
+    @property
+    def get_month_range(self):
+        start_datetime = datetime.strptime(self.month, '%Y-%m-%d')
+        end_datetime = start_datetime + relativedelta(months=1)
+        return [str(start_datetime.date()), str(end_datetime.date())]
+
     def query(self):
+        requested_month, next_month = self.get_month_range
         return """
         COPY(
             SELECT * FROM "{birth_preparedness_ucr}" t
-            WHERE t.state_id='{state_id}' and t.received_on='{month}' 
+            WHERE t.state_id='{state_id}' and t.received_on >= '{requested_month}'
+            and t.received_on < '{next_month_start}' 
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
         """.format(
             birth_preparedness_ucr=self.birth_preparedness_ucr_tablename,
             state_id=self.state_id,
-            month=self.month
+            requested_month=requested_month,
+            next_month_start=next_month
         )
 
 
@@ -461,15 +472,24 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
     @property
     def base_tablename(self):
         return 'delivery_child'
+    
+    @property
+    def get_month_range(self):
+        start_datetime = datetime.strptime(self.month, '%Y-%m-%d')
+        end_datetime = start_datetime + relativedelta(months=1)
+        return [str(start_datetime.date()), str(end_datetime.date())]
 
     def query(self):
+        requested_month, next_month = self.get_month_range
         return """
         COPY(
             SELECT * FROM "{child_delivery_ucr}"
-            WHERE t.state_id='{state_id}' and t.received_on='{month}'
+            WHERE t.state_id='{state_id}' and t.received_on >= '{requested_month}'
+            and t.received_on < '{next_month_start}'
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
         """.format(
             child_delivery_ucr=self.child_delivery_ucr_tablename,
             state_id=self.state_id,
-            month=self.month
+            requested_month=requested_month,
+            next_month_start=next_month
         )
