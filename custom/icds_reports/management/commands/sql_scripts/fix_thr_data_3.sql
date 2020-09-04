@@ -17,4 +17,5 @@ FROM (
     child_health_monthly.month = thr.month AND
     child_health_monthly.case_id = thr.case_id AND
     child_health_monthly.supervisor_id = thr.supervisor_id AND
+    child_health_monthly.state_id = thr.state_id AND
     child_health_monthly.month = '{month}';
