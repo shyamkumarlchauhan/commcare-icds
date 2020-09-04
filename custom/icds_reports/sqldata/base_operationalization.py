@@ -10,7 +10,7 @@ from custom.icds_reports.utils import get_location_filter
 
 class BaseOperationalization(ICDSMixin):
 
-    title = 'c. Status of operationalization of AWCs'
+    title = 'b. Status of operationalization of AWCs'
     slug = 'operationalization'
 
     @property
