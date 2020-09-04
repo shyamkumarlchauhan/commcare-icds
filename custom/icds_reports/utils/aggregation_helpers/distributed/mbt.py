@@ -443,7 +443,7 @@ class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
     @property
     def get_month_range(self):
         start_datetime = datetime.strptime(self.month, '%Y-%m-%d')\
-            if type(self.month) == 'str' else self.month
+            if isinstance(self.month, str) else self.month
         end_datetime = start_datetime + relativedelta(months=1)
         return [str(start_datetime.date()), str(end_datetime.date())]
 
@@ -477,7 +477,7 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
     @property
     def get_month_range(self):
         start_datetime = datetime.strptime(self.month, '%Y-%m-%d')\
-            if type(self.month) == 'str' else self.month
+            if isinstance(self.month, str) else self.month
         end_datetime = start_datetime + relativedelta(months=1)
         return [str(start_datetime.date()), str(end_datetime.date())]
 
