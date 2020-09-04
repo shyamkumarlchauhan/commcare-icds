@@ -1918,7 +1918,7 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                             if 'second_value' in cell:
                                 denom = data.get(cell['second_value'], 1)
                                 alias_data = cell['func'](num, float(denom or 1))
-                                cell_data = "%.1f" % cell['func'](num, float(denom or 1))
+                                cell_data = "%.2f" % cell['func'](num, float(denom or 1))
                                 if cell.get('format') == 'percent':
                                     cell_data = f"{cell_data}%"
                             else:
@@ -2239,19 +2239,19 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                         _('VI. PSE Attendance Efficiency'),
                         {
                             'columns': ('total_pse_days_attended_f',),
-                            'func': truediv,
+                            'func': _get_percent,
                             'second_value': 'expected_attendance_female',
                             'format': 'percent',
                         },
                         {
                             'columns': ('total_pse_days_attended_m',),
-                            'func': truediv,
+                            'func': _get_percent,
                             'second_value': 'expected_attendance_male',
                             'format': 'percent',
                         },
                         {
                             'columns': ('attendance',),
-                            'func': truediv,
+                            'func': _get_percent,
                             'second_value': 'expected_attendance',
                             'format': 'percent',
                         }
