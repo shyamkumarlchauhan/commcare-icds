@@ -1076,6 +1076,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
                     slug=section['slug'],
                     rows=rows
                 ))
+            print(data)
             return sections
 
     @property
@@ -1158,7 +1159,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
                         ('thr_rations_male_st_1', 'thr_rations_male_sc_1', 'thr_rations_male_others_1'),
                         ('rations_female_st', 'rations_female_sc', 'rations_female_others'),
                         ('rations_male_st', 'rations_male_sc', 'rations_male_others'),
-                        ('all_rations_st' 'all_rations_sc', 'all_rations_others'),
+                        ('all_rations_st', 'all_rations_sc', 'all_rations_others'),
                         ('thr_rations_pregnant_st', 'thr_rations_pregnant_sc', 'thr_rations_pregnant_others'),
                         ('thr_rations_lactating_st', 'thr_rations_lactating_sc', 'thr_rations_lactating_others'),
                     ),
@@ -1918,6 +1919,8 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                                 denom = data.get(cell['second_value'], 1)
                                 alias_data = cell['func'](num, float(denom or 1))
                                 cell_data = "%.1f" % cell['func'](num, float(denom or 1))
+                                if cell.get('format') == 'percent':
+                                    cell_data = f"{cell_data}%"
                             else:
                                 cell_data = num
                                 alias_data = num
@@ -2051,16 +2054,17 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
         if not data:
             return {}
 
-        pse_4 = 0
-        pse_1 = 0
+        pse_4 = data['num_days_4_pse_activities'] if data['num_days_4_pse_activities']  else 0
+        pse_1 = data['num_days_1_pse_activities'] if data['num_days_1_pse_activities'] else 0
+        awc_open = data['awc_days_open'] if data['awc_days_open'] else 0
         if data['num_launched_awcs']:
-            pse_4 = data['num_days_4_pse_activities'] / data['num_launched_awcs'] if data['num_days_4_pse_activities']  else 0
-            pse_1 = data['num_days_1_pse_activities'] / data['num_launched_awcs'] if data['num_days_1_pse_activities'] else 0
-
+            avg_pse_4 = pse_4 / data['num_launched_awcs']
+            avg_pse_1 = pse_1 / data['num_launched_awcs']
+            avg_awc_open = awc_open / data['num_launched_awcs']
         return {
-            'open_four_acts_count': pse_4,
-            'open_one_acts_count': pse_1,
-            'open_pse_count': data['awc_days_open'] if data['awc_days_open'] else 0
+            'open_four_acts_count': avg_pse_4,
+            'open_one_acts_count': avg_pse_1,
+            'open_pse_count': avg_awc_open
         }
 
     @property
@@ -2240,13 +2244,13 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                             'format': 'percent',
                         },
                         {
-                            'columns': 'total_pse_days_attended_m',
+                            'columns': ('total_pse_days_attended_m',),
                             'func': truediv,
                             'second_value': 'expected_attendance_male',
                             'format': 'percent',
                         },
                         {
-                            'columns': 'attendance',
+                            'columns': ('attendance',),
                             'func': truediv,
                             'second_value': 'expected_attendance',
                             'format': 'percent',
