@@ -1,6 +1,6 @@
 
         COPY(
-            SELECT * FROM "ucr_icds-cas_static-child_delivery_forms_eafd4095"
+            SELECT * FROM "ucr_icds-cas_static-child_delivery_forms_eafd4095" t
             WHERE t.state_id='st1' and t.received_on >= '2019-01-01'
             and t.received_on < '2019-02-01'
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
