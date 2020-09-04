@@ -455,9 +455,9 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 'hcm_served',
                 'thr_served',
                 'pse_provided',
-                'breakfast_21_days',
-                'hcm_21_days',
-                'pse_16_days',
+                'breakfast_25_days',
+                'hcm_25_days',
+                'pse_25_days',
                 'breakfast_9_days',
                 'hcm_9_days',
                 'pse_9_days',
@@ -511,15 +511,15 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 }
             ),
             (
-                _('b. % of AWCs provided supplementary food for 21 or more days'),
+                _('b. % of AWCs provided supplementary food for 25 or more days'),
                 {
-                    'column': 'breakfast_21_days',
+                    'column': 'breakfast_25_days',
                     'func': truediv,
                     'second_value': "num_launched_awcs",
                     'format': 'percent'
                 },
                 {
-                    'column': 'hcm_21_days',
+                    'column': 'hcm_25_days',
                     'func': truediv,
                     'second_value': "num_launched_awcs",
                     'format': 'percent'
@@ -528,12 +528,12 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 '--'
             ),
             (
-                _('c. % of AWCs providing PSE for 16 or more days'),
+                _('c. % of AWCs providing PSE for 25 or more days'),
                 '--',
                 '--',
                 '--',
                 {
-                    'column': 'pse_16_days',
+                    'column': 'pse_25_days',
                     'func': truediv,
                     'second_value': "num_launched_awcs",
                     'format': 'percent'

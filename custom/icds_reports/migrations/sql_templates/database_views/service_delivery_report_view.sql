@@ -95,12 +95,12 @@ COALESCE(agg_sdr.breakfast_served,0) as breakfast_served,
 COALESCE(agg_sdr.hcm_served,0) as hcm_served,
 COALESCE(agg_sdr.thr_served,0) as thr_served,
 COALESCE(agg_sdr.pse_provided,0) as pse_provided,
-COALESCE(agg_sdr.breakfast_21_days,0) as breakfast_21_days,
-COALESCE(agg_sdr.hcm_21_days,0) as hcm_21_days,
+COALESCE(agg_sdr.breakfast_25_days,0) as breakfast_25_days,
+COALESCE(agg_sdr.hcm_25_days,0) as hcm_25_days,
 COALESCE(agg_sdr.breakfast_9_days,0) as breakfast_9_days,
 COALESCE(agg_sdr.hcm_9_days,0) as hcm_9_days,
 COALESCE(agg_sdr.pse_9_days,0) as pse_9_days,
-COALESCE(agg_sdr.pse_16_days,0) as pse_16_days,
+COALESCE(agg_sdr.pse_25_days,0) as pse_25_days,
 COALESCE (agg_awc.awc_days_open,0) as awc_days_open
 FROM "public"."awc_location_months_local" "awc_location_months"
 LEFT join agg_awc on (

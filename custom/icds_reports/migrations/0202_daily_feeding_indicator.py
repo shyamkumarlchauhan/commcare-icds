@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='aggservicedeliveryreport',
-            name='breakfast_21_days',
+            name='breakfast_25_days',
             field=models.IntegerField(null=True),
         ),
         migrations.AddField(
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='aggservicedeliveryreport',
-            name='hcm_21_days',
+            name='hcm_25_days',
             field=models.IntegerField(null=True),
         ),
         migrations.AddField(
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='aggservicedeliveryreport',
-            name='pse_16_days',
+            name='pse_25_days',
             field=models.IntegerField(null=True),
         ),
         migrations.AddField(
