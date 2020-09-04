@@ -437,6 +437,10 @@ class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
         return 'birth_preparedness'
 
     @property
+    def base_class(self):
+        return None
+
+    @property
     def birth_preparedness_ucr_tablename(self):
         return get_table_name(self.domain, 'static-dashboard_birth_preparedness_forms')
 
@@ -471,6 +475,10 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
         return get_table_name(self.domain, 'static-child_delivery_forms')
 
     @property
+    def base_class(self):
+        return None
+
+    @property
     def base_tablename(self):
         return 'delivery_child'
     
@@ -485,7 +493,7 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
         requested_month, next_month = self.get_month_range
         return """
         COPY(
-            SELECT * FROM "{child_delivery_ucr}"
+            SELECT * FROM "{child_delivery_ucr}" t
             WHERE t.state_id='{state_id}' and t.received_on >= '{requested_month}'
             and t.received_on < '{next_month_start}'
         ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
