@@ -82,7 +82,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     //if report is requested in first three days of the month, then we will remove the current month in filter
     vm.excludeCurrentMonthIfInitialThreeDays = function () {
         var latest = new Date();
-        if (latest.getDate() <= 3 && vm.months[vm.months.length - 1].id === latest.getMonth() + 1 &&
+        if (latest.getDate() <= 2 && vm.months[vm.months.length - 1].id === latest.getMonth() + 1 &&
             vm.selectedYear === latest.getFullYear()) {
             if (vm.months.length === 1) {
                 // For January, reset to Dec last year
