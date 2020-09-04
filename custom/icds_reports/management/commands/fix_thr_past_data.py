@@ -28,7 +28,7 @@ FROM (
             MAX(timeend) over w AS latest_time_end_processed,
             CASE WHEN SUM(days_ration_given_child) over w > 32767 THEN 32767 ELSE SUM(days_ration_given_child) over w END AS days_ration_given_child
           FROM "ucr_icds-cas_static-dashboard_thr_forms_b8bca6ea"
-          WHERE timeend >= '{month}' AND timeend < '{next_month}' AND
+          WHERE state_id = {state_id} AND timeend >= '{month}' AND timeend < '{next_month}' AND
                 child_health_case_id IS NOT NULL
     WINDOW w AS (PARTITION BY supervisor_id, child_health_case_id)
     ) thr
@@ -45,9 +45,9 @@ class Command(BaseCommand):
         parser.add_argument('start_month')
         parser.add_argument('end_month')
 
-    def state_wise_query(self, state_ids, start_month, next_month):
+    def state_wise_query(self, state_ids, start_month, next_month, script_name):
         for state_id in state_ids:
-            query = self.sql_to_execute(start_month, next_month, 'fix_thr_data_1.sql', state_id)
+            query = self.sql_to_execute(start_month, next_month, script_name, state_id)
             for quer in query.split(';'):
                 _run_custom_sql_script(quer)
             print(f"Executed query {state_id}")
@@ -68,12 +68,11 @@ class Command(BaseCommand):
         while start_month <= end_month:
             print("PROCESSING MONTH {}".format(start_month))
             next_month = start_month + relativedelta(months=1)
-            # initial query
-            _run_custom_sql_script(initial_query.format(month=start_month, next_month=next_month))
             # state wise queries
-            self.state_wise_query(state_ids, start_month, next_month)
+            self.state_wise_query(state_ids, start_month, next_month, 'fix_thr_data_3.sql')
+            self.state_wise_query(state_ids, start_month, next_month, 'fix_thr_data_2.sql')
             # normal queries
-            query = self.sql_to_execute(start_month, next_month, 'fix_thr_data_2.sql')
+            query = self.sql_to_execute(start_month, next_month, 'fix_thr_data_1.sql')
             for quer in query.split(';'):
                 _run_custom_sql_script(quer)
             start_month += relativedelta(months=1)
