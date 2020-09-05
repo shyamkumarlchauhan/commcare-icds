@@ -10,7 +10,7 @@ from custom.icds_reports.utils.migrations import (
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0200_update_chm_ccs_view'),
+        ('icds_reports', '0201_auto_20200817_1631'),
     ]
 
     operations = [
