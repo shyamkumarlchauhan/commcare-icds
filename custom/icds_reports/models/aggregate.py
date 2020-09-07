@@ -785,11 +785,12 @@ class AggChildHealth(models.Model, AggregateMixin):
     total_pse_days_attended = models.IntegerField(blank=True, null=True)
     pse_attended_0_days = models.IntegerField(null=True)
     pse_attended_1_days = models.IntegerField(null=True)
-    pse_attended_16_days_sc = models.IntegerField(null=True)
-    pse_attended_16_days_st = models.IntegerField(null=True)
-    pse_attended_16_days_other = models.IntegerField(null=True)
-    pse_attended_16_days_disabled = models.IntegerField(null=True)
-    pse_attended_16_days_minority = models.IntegerField(null=True)
+    pse_attended_25_days_sc = models.IntegerField(null=True)
+    pse_attended_25_days_st = models.IntegerField(null=True)
+    pse_attended_25_days_other = models.IntegerField(null=True)
+    pse_attended_25_days_disabled = models.IntegerField(null=True)
+    pse_attended_25_days_minority = models.IntegerField(null=True)
+
     class Meta:
         managed = False
         db_table = 'agg_child_health'

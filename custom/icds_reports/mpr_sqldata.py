@@ -1169,63 +1169,20 @@ class MPRPreschoolEducation(ICDSMixin, MPRData):
         ]
 
 
-class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
+class MPRPreschoolEducationBeta(MPRPreschoolEducation):
 
-    title = '7. Pre-school Education conducted for children 3-6 years'
-    slug = 'preschool'
-    has_sections = True
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(self.config['location_id'], self.config['domain'])
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
 
-    @property
-    def rows(self):
-        if self.config['location_id']:
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
 
-            filters = get_location_filter(self.config['location_id'], self.config['domain'])
-            if filters.get('aggregation_level') > 1:
-                filters['aggregation_level'] -= 1
+        data = self.get_child_data(filters)
+        data.update(self.get_activity_data(filters))
+        data = {key: value if value else 0 for key, value in data.items()}
 
-            filters['month'] = date(self.config['year'], self.config['month'], 1)
-
-            data = self.get_child_data(filters)
-            data.update(self.get_activity_data(filters))
-
-            sections = []
-            for section in self.row_config:
-
-                rows = []
-                for row in section['rows_config']:
-                    row_data = []
-                    for idx, cell in enumerate(row):
-                        if isinstance(cell, dict):
-                            num = 0
-                            for c in cell['columns']:
-                                num += data.get(c, 0)
-
-                            if 'second_value' in cell:
-                                denom = data.get(cell['second_value'], 1)
-                                alias_data = cell['func'](num, float(denom or 1))
-                                cell_data = "%.1f" % cell['func'](num, float(denom or 1))
-                            else:
-                                cell_data = num
-                                alias_data = num
-
-                            if 'alias' in cell:
-                                data[cell['alias']] = alias_data
-                            row_data.append(cell_data)
-                        elif isinstance(cell, tuple):
-                            cell_data = 0
-                            for c in cell:
-                                cell_data += data.get(c, 0)
-                            row_data.append(cell_data)
-                        else:
-                            row_data.append(data.get(cell, cell if cell == '--' or idx == 0 else 0))
-                    rows.append(row_data)
-                sections.append(dict(
-                    title=section['title'],
-                    slug=section['slug'],
-                    headers=section['headers'],
-                    rows=rows
-                ))
-            return sections
+        return data
 
     def get_child_data(self, filters):
         child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
@@ -1277,35 +1234,35 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
             total_pse_days_attended_m=Sum(Case(When(gender='M',
                                                     then='total_pse_days_attended',
                                                     ), default=Value(0))),
-            pse_attended_16_days_st_f=Sum(Case(When(gender='F',
-                                                    then='pse_attended_16_days_st',
+            pse_attended_25_days_st_f=Sum(Case(When(gender='F',
+                                                    then='pse_attended_25_days_st',
                                                     ), default=Value(0))),
-            pse_attended_16_days_st_M=Sum(Case(When(gender='M',
-                                                    then='pse_attended_16_days_st',
+            pse_attended_25_days_st_M=Sum(Case(When(gender='M',
+                                                    then='pse_attended_25_days_st',
                                                     ), default=Value(0))),
-            pse_attended_16_days_sc_f=Sum(Case(When(gender='F',
-                                                    then='pse_attended_16_days_sc',
+            pse_attended_25_days_sc_f=Sum(Case(When(gender='F',
+                                                    then='pse_attended_25_days_sc',
                                                     ), default=Value(0))),
-            pse_attended_16_days_sc_m=Sum(Case(When(gender='M',
-                                                    then='pse_attended_16_days_sc',
+            pse_attended_25_days_sc_m=Sum(Case(When(gender='M',
+                                                    then='pse_attended_25_days_sc',
                                                     ), default=Value(0))),
-            pse_attended_16_days_other_f=Sum(Case(When(gender='F',
-                                                       then='pse_attended_16_days_other',
+            pse_attended_25_days_other_f=Sum(Case(When(gender='F',
+                                                       then='pse_attended_25_days_other',
                                                        ), default=Value(0))),
-            pse_attended_16_days_other_m=Sum(Case(When(gender='M',
-                                                       then='pse_attended_16_days_other',
+            pse_attended_25_days_other_m=Sum(Case(When(gender='M',
+                                                       then='pse_attended_25_days_other',
                                                        ), default=Value(0))),
-            pse_attended_16_days_disabled_f=Sum(Case(When(gender='F',
-                                                          then='pse_attended_16_days_disabled',
+            pse_attended_25_days_disabled_f=Sum(Case(When(gender='F',
+                                                          then='pse_attended_25_days_disabled',
                                                           ), default=Value(0))),
-            pse_attended_16_days_disabled_m=Sum(Case(When(gender='M',
-                                                          then='pse_attended_16_days_disabled',
+            pse_attended_25_days_disabled_m=Sum(Case(When(gender='M',
+                                                          then='pse_attended_25_days_disabled',
                                                           ), default=Value(0))),
-            pse_attended_16_days_minority_f=Sum(Case(When(gender='F',
-                                                          then='pse_attended_16_days_minority',
+            pse_attended_25_days_minority_f=Sum(Case(When(gender='F',
+                                                          then='pse_attended_25_days_minority',
                                                           ), default=Value(0))),
-            pse_attended_16_days_minority_m=Sum(Case(When(gender='M',
-                                                          then='pse_attended_16_days_minority',
+            pse_attended_25_days_minority_m=Sum(Case(When(gender='M',
+                                                          then='pse_attended_25_days_minority',
                                                           ), default=Value(0))),
         ).order_by('month').first()
 
@@ -1353,7 +1310,7 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
     def row_config(self):
         return [
             {
-                'title': 'a. Average attendance of children for 16 or more days '
+                'title': 'a. Average attendance of children for 25 or more days '
                          'in the reporting month by different categories',
                 'slug': 'preschool_1',
                 'headers': DataTablesHeader(
@@ -1365,48 +1322,48 @@ class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
                 'rows_config': (
                     (
                         _('ST'),
-                        'pse_attended_16_days_st_f',
-                        'pse_attended_16_days_st_m',
+                        'pse_attended_25_days_st_f',
+                        'pse_attended_25_days_st_m',
                         {
-                            'columns': ('pse_attended_16_days_st_f', 'pse_attended_16_days_st_m'),
-                            'alias': '21_days_st'
+                            'columns': ('pse_attended_25_days_st_f', 'pse_attended_25_days_st_m'),
+                            'alias': '25_days_st'
                         }
                     ),
                     (
                         _('SC'),
-                        'pse_attended_16_days_sc_f',
-                        'pse_attended_16_days_sc_m',
+                        'pse_attended_25_days_sc_f',
+                        'pse_attended_25_days_sc_m',
                         {
-                            'columns': ('pse_attended_16_days_sc_f', 'pse_attended_16_days_sc_m'),
-                            'alias': '21_days_sc'
+                            'columns': ('pse_attended_25_days_sc_f', 'pse_attended_25_days_sc_m'),
+                            'alias': '25_days_sc'
                         }
                     ),
                     (
                         _('Other'),
-                        'pse_attended_16_days_other_f',
-                        'pse_attended_16_days_other_m',
+                        'pse_attended_25_days_other_f',
+                        'pse_attended_25_days_other_m',
                         {
-                            'columns': ('pse_attended_16_days_other_f', 'pse_attended_16_days_other_m'),
-                            'alias': '21_days_others'
+                            'columns': ('pse_attended_25_days_other_f', 'pse_attended_25_days_other_m'),
+                            'alias': '25_days_others'
                         }
                     ),
                     (
                         _('All Categories (Total)'),
-                        ('pse_attended_16_days_st_f', 'pse_attended_16_days_sc_f', 'pse_attended_16_days_other_f'),
-                        ('pse_attended_16_days_st_m', 'pse_attended_16_days_sc_m', 'pse_attended_16_days_other_m'),
-                        ('21_days_st', '21_days_sc', '21_days_others')
+                        ('pse_attended_25_days_st_f', 'pse_attended_25_days_sc_f', 'pse_attended_25_days_other_f'),
+                        ('pse_attended_25_days_st_m', 'pse_attended_25_days_sc_m', 'pse_attended_25_days_other_m'),
+                        ('25_days_st', '25_days_sc', '25_days_others')
                     ),
                     (
                         _('Disabled'),
-                        'pse_attended_16_days_disabled_f',
-                        'pse_attended_16_days_disabled_m',
-                        ('pse_attended_16_days_disabled_f', 'pse_attended_16_days_disabled_m')
+                        'pse_attended_25_days_disabled_f',
+                        'pse_attended_25_days_disabled_m',
+                        ('pse_attended_25_days_disabled_f', 'pse_attended_25_days_disabled_m')
                     ),
                     (
                         _('Minority'),
-                        'pse_attended_16_days_minority_f',
-                        'pse_attended_16_days_minority_m',
-                        ('pse_attended_16_days_minority_f', 'pse_attended_16_days_minority_m')
+                        'pse_attended_25_days_minority_f',
+                        'pse_attended_25_days_minority_m',
+                        ('pse_attended_25_days_minority_f', 'pse_attended_25_days_minority_m')
                     )
                 )
 
