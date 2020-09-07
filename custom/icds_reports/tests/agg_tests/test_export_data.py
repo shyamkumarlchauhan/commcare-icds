@@ -94,37 +94,37 @@ class TestExportData(TestCase):
         ).get_excel_data()
         self.assertListEqual(
             data,
-            [['Take Home Ration', [['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name',
+            [['Take Home Ration', [['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name',
                                     'AWW Phone No.', 'Total No. of Beneficiaries eligible for THR',
                                     'Total No. of beneficiaries received THR for at least 21 days in given month',
                                     'Total No of Pictures taken by AWW'],
-                                   ['st1', 'd1', 'b1', 's1', 'a1', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a1', 'a1', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a17', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a17', 'a17', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a25', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a25', 'a25', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a33', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a33', 'a33', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a41', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's1', 'a41', 'a41', 'Data Not Entered',
                                     'Data Not Entered', 2, 0, 0],
-                                   ['st1', 'd1', 'b1', 's1', 'a49', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's1', 'a49', 'a49', 'Data Not Entered', 'Data Not Entered',
                                     11, 0, 0],
-                                   ['st1', 'd1', 'b1', 's1', 'a9', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a9', 'a9', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a10', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's2', 'a10', 'a10', 'Data Not Entered', 'Data Not Entered',
                                     10, 0, 0],
-                                   ['st1', 'd1', 'b1', 's2', 'a18', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's2', 'a18', 'a18', 'Data Not Entered', 'Data Not Entered',
                                     15, 1, 4],
-                                   ['st1', 'd1', 'b1', 's2', 'a2', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a2', 'a2', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a26', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a26', 'a26', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a34', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's2', 'a34', 'a34', 'Data Not Entered', 'Data Not Entered',
                                     7, 0, 0],
-                                   ['st1', 'd1', 'b1', 's2', 'a42', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a42', 'a42', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a50', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a50', 'a50', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched']]],
              ['Export Info', [
                  ['Generated at', self.now],
@@ -154,7 +154,7 @@ class TestExportData(TestCase):
                 'Take Home Ration',
                 [
                     [
-                        'State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name', 'AWW Phone No.',
+                        'State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name', 'AWW Phone No.',
                         'Total No. of PW eligible for THR', 'Total No. of LW eligible for THR',
                         'Total No. of Children(6-36 months) eligible for THR',
                         'Total No. of PW received THR>=21 days in given month',
@@ -163,67 +163,67 @@ class TestExportData(TestCase):
                         'Total No of Pictures taken by AWW'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a1', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's1', 'a1', 'a1', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a17', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's1', 'a17', 'a17', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a25', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's1', 'a25', 'a25', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a33', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's1', 'a33', 'a33', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a41', 'Data Not Entered', 'Data Not Entered', 2,
+                        'st1', 'd1', 'b1', 's1', 'a41', 'a41', 'Data Not Entered', 'Data Not Entered', 2,
                         0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a49', 'Data Not Entered', 'Data Not Entered', 3,
+                        'st1', 'd1', 'b1', 's1', 'a49', 'a49', 'Data Not Entered', 'Data Not Entered', 3,
                         5, 3, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a9', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's1', 'a9', 'a9', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a10', 'Data Not Entered', 'Data Not Entered', 0,
+                        'st1', 'd1', 'b1', 's2', 'a10', 'a10', 'Data Not Entered', 'Data Not Entered', 0,
                         2, 8, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a18', 'Data Not Entered', 'Data Not Entered', 5,
+                        'st1', 'd1', 'b1', 's2', 'a18', 'a18', 'Data Not Entered', 'Data Not Entered', 5,
                         6, 4, 1, 0, 0, 4
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a2', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's2', 'a2', 'a2', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a26', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's2', 'a26', 'a26', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a34', 'Data Not Entered', 'Data Not Entered', 4,
+                        'st1', 'd1', 'b1', 's2', 'a34', 'a34', 'Data Not Entered', 'Data Not Entered', 4,
                         3, 'Data Not Entered', 0, 0, 'Data Not Entered', 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a42', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's2', 'a42', 'a42', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a50', 'AWC Not Launched', 'AWC Not Launched',
+                        'st1', 'd1', 'b1', 's2', 'a50', 'a50', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                         'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched'
                     ]]
@@ -252,7 +252,7 @@ class TestExportData(TestCase):
         ).get_excel_data()
         self.assertListEqual(
             data,
-            [['Take Home Ration', [['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name',
+            [['Take Home Ration', [['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name',
                                     'AWW Phone No.',
                                     'Total No. of PW eligible for THR', 'Total No. of LW eligible for THR',
                                     'Total No. of Children (0-3 years) eligible for THR',
@@ -275,75 +275,75 @@ class TestExportData(TestCase):
                                     'Total No. of LW received THR>=25 days in given month',
                                     'Total No. of Children(0-3 years) received THR>=25 days in given month',
                                     'Total No of Pictures taken by AWW'],
-                                   ['st1', 'd1', 'b1', 's1', 'a1', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a1', 'a1', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a17', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a17', 'a17', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a25', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a25', 'a25', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a33', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a33', 'a33', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's1', 'a41', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's1', 'a41', 'a41', 'Data Not Entered', 'Data Not Entered',
                                     2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                   ['st1', 'd1', 'b1', 's1', 'a49', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's1', 'a49', 'a49', 'Data Not Entered', 'Data Not Entered',
                                     3, 5, 3, 0, 1, 0, 0, 2, 1, 3, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                   ['st1', 'd1', 'b1', 's1', 'a9', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's1', 'a9', 'a9', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a10', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's2', 'a10', 'a10', 'Data Not Entered', 'Data Not Entered',
                                     0, 2, 8, 0, 0, 1, 0, 1, 6, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                   ['st1', 'd1', 'b1', 's2', 'a18', 'Data Not Entered', 'Data Not Entered',
+                                   ['st1', 'd1', 'b1', 's2', 'a18', 'a18', 'Data Not Entered', 'Data Not Entered',
                                     5, 6, 4, 0, 0, 0, 0, 1, 0, 1, 0, 1, 3, 5, 3, 0, 0, 0, 1, 0, 0, 4],
-                                   ['st1', 'd1', 'b1', 's2', 'a2', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a2', 'a2', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a26', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a26', 'a26', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a34', 'Data Not Entered', 'Data Not Entered', 4, 3,
+                                   ['st1', 'd1', 'b1', 's2', 'a34', 'a34', 'Data Not Entered', 'Data Not Entered', 4, 3,
                                     'Data Not Entered', 0, 0, 'Data Not Entered', 2, 3, 'Data Not Entered', 2, 0,
                                     'Data Not Entered', 0, 0, 'Data Not Entered', 0, 0, 'Data Not Entered', 0, 0,
                                     'Data Not Entered', 0],
-                                   ['st1', 'd1', 'b1', 's2', 'a42', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a42', 'a42', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched'],
-                                   ['st1', 'd1', 'b1', 's2', 'a50', 'AWC Not Launched', 'AWC Not Launched',
+                                   ['st1', 'd1', 'b1', 's2', 'a50', 'a50', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
                                     'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched', 'AWC Not Launched',
@@ -1092,7 +1092,8 @@ class TestExportData(TestCase):
                     'aggregation_level': 5,
                     'month': date(2017, 5, 1)
                 },
-                loc_level=5
+                loc_level=5,
+                beta=True
             ).get_excel_data('b1', system_usage_num_launched_awcs_formatting_at_awc_level=True),
             [
                 ['System Usage', [
@@ -1102,6 +1103,7 @@ class TestExportData(TestCase):
                         'Block',
                         'Supervisor',
                         'AWC',
+                        'AWC Site Code',
                         'AWW Phone Number',
                         'Number of days AWC was open in the given month',
                         'Number of launched AWCs (ever submitted at least one HH reg form)',
@@ -1112,59 +1114,59 @@ class TestExportData(TestCase):
                         'Number of take home rations forms', 'Number of due list forms'
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a1', '+91555555',
+                        'st1', 'd1', 'b1', 's1', 'a1', 'a1', '+91555555',
                         18, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a17', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's1', 'a17', 'a17', 'Data Not Entered',
                         11, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a25', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's1', 'a25', 'a25', 'Data Not Entered',
                         13, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a33', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's1', 'a33', 'a33', 'Data Not Entered',
                         12, 'Not Launched', 0, 0, 0, 1, 0, 0, 0, 0, 0, 1
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a41', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's1', 'a41', 'a41', 'Data Not Entered',
                         16, 'Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 2
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a49', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's1', 'a49', 'a49', 'Data Not Entered',
                         14, 'Launched', 0, 0, 0, 0, 0, 0, 1, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's1', 'a9', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's1', 'a9', 'a9', 'Data Not Entered',
                         18, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a10', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a10', 'a10', 'Data Not Entered',
                         8, 'Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a18', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a18', 'a18', 'Data Not Entered',
                         17, 'Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a2', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a2', 'a2', 'Data Not Entered',
                         10, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a26', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a26', 'a26', 'Data Not Entered',
                         12, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a34', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a34', 'a34', 'Data Not Entered',
                         4, 'Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a42', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a42', 'a42', 'Data Not Entered',
                         7, 'Not Launched', 0, 0, 1, 0, 0, 0, 1, 0, 0, 0
                     ],
                     [
-                        'st1', 'd1', 'b1', 's2', 'a50', 'Data Not Entered',
+                        'st1', 'd1', 'b1', 's2', 'a50', 'a50', 'Data Not Entered',
                         19, 'Not Launched', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     ]
                 ]],
@@ -4015,57 +4017,57 @@ class TestExportData(TestCase):
                         "State", "District", "Block", "Supervisor Name", "AWC Name", "AWC Site Code",
                         "First Submission Date", "Last Submission Date", "Days Since Start", "Days Inactive"
                     ],
-                    ['st1', 'd1', 'b1', 's1', 'a1', 'awca1', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a1', 'a1', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's1', 'a17', 'awca17', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a17', 'a17', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's1', 'a25', 'awca25', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a25', 'a25', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's1', 'a33', 'awca33', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a33', 'a33', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's1', 'a41', 'awca41', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a41', 'a41', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's1', 'a49', 'awca49', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a49', 'a49', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's1', 'a9', 'awca9', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's1', 'a9', 'a9', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a10', 'awca10', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a10', 'a10', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a18', 'awca18', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a18', 'a18', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a2', 'awca2', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a2', 'a2', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a26', 'awca26', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a26', 'a26', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a34', 'awca34', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a34', 'a34', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a42', 'awca42', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a42', 'a42', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b1', 's2', 'a50', 'awca50', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b1', 's2', 'a50', 'a50', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's3', 'a11', 'awca11', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's3', 'a11', 'a11', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's3', 'a19', 'awca19', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's3', 'a19', 'a19', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's3', 'a27', 'awca27', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's3', 'a27', 'a27', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's3', 'a3', 'awca3', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's3', 'a3', 'a3', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's3', 'a35', 'awca35', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's3', 'a35', 'a35', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's3', 'a43', 'awca43', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's3', 'a43', 'a43', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's4', 'a12', 'awca12', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's4', 'a12', 'a12', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's4', 'a20', 'awca20', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's4', 'a20', 'a20', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's4', 'a28', 'awca28', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's4', 'a28', 'a28', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's4', 'a36', 'awca36', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's4', 'a36', 'a36', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's4', 'a4', 'awca4', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's4', 'a4', 'a4', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched'],
-                    ['st1', 'd1', 'b2', 's4', 'a44', 'awca44', 'Not Launched', 'Not Launched',
+                    ['st1', 'd1', 'b2', 's4', 'a44', 'a44', 'Not Launched', 'Not Launched',
                      'Not Launched', 'Not Launched']
                 ]
                 ],
@@ -4238,7 +4240,8 @@ class TestExportData(TestCase):
                 'report_layout': 'comprehensive',
                 'data_period': 'month'
             },
-            loc_level=1
+            loc_level=1,
+            beta=True
         ).get_excel_data(location)
 
         self.assertListEqual(
@@ -4246,7 +4249,7 @@ class TestExportData(TestCase):
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 '% Number of Days AWC Were opened', 'Expected Home Visits', 'Actual Home Visits',
+                 'Average Number of Days AWC Were open', 'Expected Home Visits', 'Actual Home Visits',
                  '% of Home Visits',
                  'Total Number of Children (3-6 yrs)',
                  'No. of children between 3-6 years provided PSE for atleast 21+ days',
@@ -4265,12 +4268,12 @@ class TestExportData(TestCase):
                  'No. of children between 3-6 years ',
                  'No of children between 3-6 years provided SNP for atleast 21+ days',
                  '% of children between 3-6 years provided SNP for atleast 21+ days'],
-                ['st1', 1, 2, 10, '142.40%', 185, 3, '1.62%', 483, 7, '1.45%', 475, 317, '66.74%', 37, 27,
-                 '72.97%', 475, 7,
-                 '1.47%', 279, 80, '28.67%', 483, 4, '0.83%'],
-                ['st2', 2, 2, 11, '106.91%', 193, 0, '0.00%', 507, 59, '11.64%', 513, 378, '73.68%', 42, 30,
-                 '71.43%', 513, 25,
-                 '4.87%', 318, 181, '56.92%', 507, 11, '2.17%'],
+                ['st1', 1, 2, 10, 36, 185, 3, '1.62 %', 483, 7, '1.45 %', 475, 317, '66.74 %', 37, 27,
+                 '72.97 %', 475, 7,
+                 '1.47 %', 279, 80, '28.67 %', 483, 4, '0.83 %'],
+                ['st2', 2, 2, 11, 27, 193, 0, '0.00 %', 507, 59, '11.64 %', 513, 378, '73.68 %', 42, 30,
+                 '71.43 %', 513, 25,
+                 '4.87 %', 318, 181, '56.92 %', 507, 11, '2.17 %'],
                 ['st3', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
@@ -4291,12 +4294,12 @@ class TestExportData(TestCase):
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched'],
-                ['st7', 1, 1, 1, '0.00%', 1, 0, '0.00%', 1, 0, '0.00%', 1, 0, '0.00%', 0, 0, '0.00%', 1, 0,
-                 '0.00%', 1, 0,
-                 '0.00%', 1, 0, '0.00%'],
-                ['Total', 4, 5, 22, '118.18%', 379, 3, '0.79%', 991, 66, '6.66%', 989, 695, '70.27%', 79, 57,
-                 '72.15%', 989, 32, '3.24%', 598, 261,
-                 '43.65%', 991, 15, '1.51%']]], ['Export Info', [['Generated at', self.now],
+                ['st7', 1, 1, 1, 0, 1, 0, '0.00 %', 1, 0, '0.00 %', 1, 0, '0.00 %', 0, 0, '0.00 %', 1, 0,
+                 '0.00 %', 1, 0,
+                 '0.00 %', 1, 0, '0.00 %'],
+                ['Total', 4, 5, 22, 30, 379, 3, '0.79 %', 991, 66, '6.66 %', 989, 695, '70.27 %', 79, 57,
+                 '72.15 %', 989, 32, '3.24 %', 598, 261,
+                 '43.65 %', 991, 15, '1.51 %']]], ['Export Info', [['Generated at', self.now],
                                                                  ['Report Layout', 'Comprehensive'],
                                                                  ['Data Period', 'Month'],
                                                                  ['Month', 'May'],
@@ -4312,20 +4315,21 @@ class TestExportData(TestCase):
                 'report_layout': 'summary',
                 'data_period': 'month'
             },
-            loc_level=1
+            loc_level=1,
+            beta=True
         ).get_excel_data(location)
         self.assertListEqual(
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 '% Number of Days AWC Were opened', '% of Home Visits',
+                 'Average Number of Days AWC Were open', '% of Home Visits',
                  '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
                  '% of trimester three women counselled on immediate and EBF', 'Height Measurement Efficiency',
                  '% of children between 6 months -3 years, P&LW provided THR for atleast ' '21+ days',
                  '% of children between 3-6 years provided SNP for atleast 21+ days'],
-                ['st1', 1, 2, 10, '142.40%', '1.62%', '1.45%', '66.74%', '72.97%', '1.47%', '28.67%', '0.83%'],
-                ['st2', 2, 2, 11, '106.91%', '0.00%', '11.64%', '73.68%', '71.43%', '4.87%', '56.92%', '2.17%'],
+                ['st1', 1, 2, 10, 36, '1.62 %', '1.45 %', '66.74 %', '72.97 %', '1.47 %', '28.67 %', '0.83 %'],
+                ['st2', 2, 2, 11, 27, '0.00 %', '11.64 %', '73.68 %', '71.43 %', '4.87 %', '56.92 %', '2.17 %'],
                 ['st3', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched'],
                 ['st4', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
@@ -4334,8 +4338,8 @@ class TestExportData(TestCase):
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched'],
                 ['st6', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched'],
-                ['st7', 1, 1, 1, '0.00%', '0.00%', '0.00%', '0.00%', '0.00%', '0.00%', '0.00%', '0.00%'],
-                ['Total', 4, 5, 22, '118.18%', '0.79%', '6.66%', '70.27%', '72.15%', '3.24%', '43.65%', '1.51%']]],
+                ['st7', 1, 1, 1, 0, '0.00 %', '0.00 %', '0.00 %', '0.00 %', '0.00 %', '0.00 %', '0.00 %'],
+                ['Total', 4, 5, 22, 30, '0.79 %', '6.66 %', '70.27 %', '72.15 %', '3.24 %', '43.65 %', '1.51 %']]],
              ['Export Info', [
                  ['Generated at', self.now], ['Report Layout', 'Summary'], ['Data Period', 'Month'],
                  ['Month', 'May'], ['Year', 2017]]]]
@@ -4353,13 +4357,14 @@ class TestExportData(TestCase):
                 'quarter': 2,
                 'year': 2017
             },
-            loc_level=2
+            loc_level=2,
+            beta=True
         ).get_excel_data(location)
         self.assertListEqual(
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'District Name', 'Number of Blocks Covered',
-                 'Number of AWCs Launched', '% Number of Days AWC Were opened', 'Expected Home Visits',
+                 'Number of AWCs Launched', 'Average Number of Days AWC Were open', 'Expected Home Visits',
                  'Actual Home Visits',
                  '% of Home Visits', 'Total Number of Children (3-6 yrs)',
                  'No. of children between 3-6 years provided PSE for atleast 21+ days',
@@ -4378,12 +4383,12 @@ class TestExportData(TestCase):
                  'No. of children between 3-6 years ',
                  'No of children between 3-6 years provided SNP for atleast 21+ days',
                  '% of children between 3-6 years provided SNP for atleast 21+ days'],
-                ['st2', 'd2', 1, 6, '52.00%', 89, 0, '0.00%', 134, 18, '13.22%', 168,
-                 124, '73.47%', 11, 7, '60.61%', 168, 4, '2.38%', 118, 51, '43.10%', 134, 1, '0.50%'],
-                ['st2', 'd3', 1, 5, '42.67%', 67, 0, '0.00%', 199, 10, '5.18%', 177,
-                 120, '67.48%', 12, 7, '55.56%', 177, 6, '3.38%', 85, 20, '23.14%', 199, 3, '1.51%'],
-                ['Total', 'Total', 2, 11, '47.64%', 156, 0, '0.00%', 333, 28, '8.41%', 345, 244, '70.72%', 23,
-                 14, '60.87%', 345, 10, '2.90%', 203, 71, '34.98%', 333, 4, '1.20%']]], ['Export Info', [
+                ['st2', 'd2', 1, 6, 13, 89, 0, '0.00 %', 134, 18, '13.22 %', 168,
+                 124, '73.47 %', 11, 7, '60.61 %', 168, 4, '2.38 %', 118, 51, '43.10 %', 134, 1, '0.50 %'],
+                ['st2', 'd3', 1, 5, 11, 67, 0, '0.00 %', 199, 10, '5.18 %', 177,
+                 120, '67.48 %', 12, 7, '55.56 %', 177, 6, '3.38 %', 85, 20, '23.14 %', 199, 3, '1.51 %'],
+                ['Total', 'Total', 2, 11, 12, 156, 0, '0.00 %', 333, 28, '8.41 %', 345, 244, '70.72 %', 23,
+                 14, '60.87 %', 345, 10, '2.90 %', 203, 71, '34.98 %', 333, 4, '1.20 %']]], ['Export Info', [
                 ['Generated at', self.now], ['State', 'st2'], ['Report Layout', 'Comprehensive'],
                 ['Data Period', 'Quarter'], ['Quarter', 'April-June'], ['Year', 2017]]]]
         )
@@ -4399,20 +4404,22 @@ class TestExportData(TestCase):
                 'quarter': 2,
                 'year': 2017
             },
-            loc_level=1
+            loc_level=1,
+            beta=True
         ).get_excel_data(location)
         self.assertListEqual(
             data,
             [['Poshan Progress Report', [
                 ['State Name', 'Number of Districts Covered', 'Number of Blocks Covered',
                  'Number of AWCs Launched',
-                 '% Number of Days AWC Were opened', '% of Home Visits',
+                 ''
+                 'Average Number of Days AWC Were open', '% of Home Visits',
                  '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
                  '% of trimester three women counselled on immediate and EBF', 'Height Measurement Efficiency',
                  '% of children between 6 months -3 years, P&LW provided THR for atleast ' '21+ days',
                  '% of children between 3-6 years provided SNP for atleast 21+ days'],
-                ['st1', 1, 2, 10, '64.80%', '0.66%', '2.52%', '67.39%', '60.32%', '1.44%', '14.60%', '0.95%'],
-                ['st2', 2, 2, 11, '47.76%', '0.00%', '8.41%', '70.40%', '57.97%', '2.89%', '34.75%', '1.10%'],
+                ['st1', 1, 2, 10, 16, '0.66 %', '2.52 %', '67.39 %', '60.32 %', '1.44 %', '14.60 %', '0.95 %'],
+                ['st2', 2, 2, 11, 12, '0.00 %', '8.41 %', '70.40 %', '57.97 %', '2.89 %', '34.75 %', '1.10 %'],
                 ['st3', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched'],
                 ['st4', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
@@ -4421,8 +4428,8 @@ class TestExportData(TestCase):
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched'],
                 ['st6', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched',
                  'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched', 'Not Launched'],
-                ['st7', 1, 1, 1, '0.00%', '0.00%', '0.00%', '0.00%', '0.00%', '0.00%', '0.00%', '0.00%'],
-                ['Total', 4, 5, 22, '53.27%', '0.32%', '5.54%', '68.81%', '59.09%', '2.24%', '25.32%', '1.08%']]],
+                ['st7', 1, 1, 1, 0, '0.00 %', '0.00 %', '0.00 %', '0.00 %', '0.00 %', '0.00 %', '0.00 %'],
+                ['Total', 4, 5, 22, 13, '0.32 %', '5.54 %', '68.81 %', '59.09 %', '2.24 %', '25.32 %', '1.08 %']]],
              ['Export Info',
               [['Generated at', self.now], ['Report Layout', 'Summary'], ['Data Period', 'Quarter'],
                ['Quarter', 'April-June'], ['Year', 2017]]]]
