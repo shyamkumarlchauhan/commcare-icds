@@ -1628,95 +1628,23 @@ class MPRGrowthMonitoring(ICDSMixin, MPRData):
         )
 
 
-class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
-    title = '8. Growth Monitoring and Classification of Nutritional Status of Children ' \
-            '(as per growth chart based on the WHO Child Growth Standards)'
-    slug = 'growth_monitoring'
+class MPRGrowthMonitoringBeta(MPRGrowthMonitoring):
 
-    @property
-    def headers(self):
-        return DataTablesHeader(
-            DataTablesColumn(''),
-            DataTablesColumn(''),
-            DataTablesColumnGroup(
-                '0 m - 1 yr',
-                DataTablesColumn('Girls'),
-                DataTablesColumn('Boys')
-            ),
-            DataTablesColumnGroup(
-                '1 yr - 3 yrs',
-                DataTablesColumn('Girls'),
-                DataTablesColumn('Boys')
-            ),
-            DataTablesColumnGroup(
-                '3 yrs - 5 yrs',
-                DataTablesColumn('Girls'),
-                DataTablesColumn('Boys')
-            ),
-            DataTablesColumnGroup(
-                'All Children',
-                DataTablesColumn('Girls'),
-                DataTablesColumn('Boys'),
-                DataTablesColumn('Total')
-            )
-        )
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
 
-    @property
-    def rows(self):
-        if self.config['location_id']:
-            filters = get_location_filter(self.config['location_id'], self.config['domain'])
-            if filters.get('aggregation_level') > 1:
-                filters['aggregation_level'] -= 1
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
 
-            filters['month'] = date(self.config['year'], self.config['month'], 1)
-            data = self.get_child_gm_data(filters)
-            rows = []
-            for row in self.row_config:
-                row_data = []
-                for idx, cell in enumerate(row):
-                    if isinstance(cell, dict):
-                        num = 0
-                        if 'second_value' in cell:
-                            for c in cell['columns']:
-                                num += data.get(c, 0)
-                            denom = data.get(cell['second_value'], 1)
-                            alias_data = cell['func'](num, float(denom or 1))
-                            cell_data = "%.1f" % cell['func'](num, float(denom or 1))
-                        else:
-                            for c in cell['columns']:
-                                if 'func' in cell:
-                                    if num == 0:
-                                        num = data.get(c)
-                                    else:
-                                        num = cell['func'](num, data.get(c, 0))
-                                else:
-                                    num += data.get(c, 0)
-                            cell_data = num
-                            alias_data = num
-
-                        if 'alias' in cell:
-                            data[cell['alias']] = alias_data
-                        row_data.append(cell_data)
-                    elif isinstance(cell, tuple):
-                        cell_data = 0
-                        for c in cell:
-                            cell_data += data.get(c, 0)
-                        row_data.append(cell_data)
-                    else:
-                        row_data.append(data.get(cell, cell if cell == '--' or idx in [0, 1] else 0))
-                rows.append(row_data)
-
-            return rows
-
-    def get_child_gm_data(self, filters):
         child_data = AggChildHealth.objects.filter(**filters).values('gender').annotate(
-            weighed=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+            weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
                                   then='nutrition_status_weighed',
                                   ), default=Value(0))),
-            weighed_1=Sum(Case(When(age_tranche__in=['24', '36'],
+            weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
                                     then='nutrition_status_weighed',
                                     ), default=Value(0))),
-            weighed_2=Sum(Case(When(age_tranche__in=['48', '60'],
+            weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
                                     then='nutrition_status_weighed',
                                     ), default=Value(0))),
             child_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
@@ -1728,13 +1656,13 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
             child_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
                                         then='valid_in_month',
                                         ), default=Value(0))),
-            sub_weight=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+            norm_weight_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
                                      then='nutrition_status_normal',
                                      ), default=Value(0))),
-            sub_weight_1=Sum(Case(When(age_tranche__in=['24', '36'],
+            norm_weight_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
                                        then='nutrition_status_normal',
                                        ), default=Value(0))),
-            sub_weight_2=Sum(Case(When(age_tranche__in=['48', '60'],
+            norm_weight_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
                                        then='nutrition_status_normal',
                                        ), default=Value(0))),
             mod_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
@@ -1763,6 +1691,7 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
                 f"{row['gender']}_{key}": value
                 for key, value in row.items()
             })
+        data = {key: value if value else 0 for key, value in data.items()}
         return data
 
     @property
@@ -1875,18 +1804,18 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
             (
                 'a. Normal (Green)',
                 'Num',
-                'F_mod_weighed_count',
-                'M_mod_weighed_count',
-                'F_mod_weighed_count_1',
-                'M_mod_weighed_count_1',
-                'F_mod_weighed_count_2',
-                'M_mod_weighed_count_2',
+                'F_norm_weight_count',
+                'M_norm_weight_count',
+                'F_norm_weight_count_1',
+                'M_norm_weight_count_1',
+                'F_norm_weight_count_2',
+                'M_norm_weight_count_2',
                 {
-                    'columns': ('F_mod_weighed_count', 'F_mod_weighed_count_1', 'F_mod_weighed_count_2'),
+                    'columns': ('F_norm_weight_count', 'F_norm_weight_count_1', 'F_norm_weight_count_2'),
                     'alias': 'all_F_sub_weight'
                 },
                 {
-                    'columns': ('M_mod_weighed_count', 'M_mod_weighed_count_1', 'M_mod_weighed_count_2'),
+                    'columns': ('M_norm_weight_count', 'M_norm_weight_count_1', 'M_norm_weight_count_2'),
                     'alias': 'all_M_sub_weight'
                 },
                 {
@@ -1898,32 +1827,32 @@ class MPRGrowthMonitoringBeta(ICDSMixin, MPRData):
                 '',
                 '%',
                 {
-                    'columns': ('F_mod_weighed_count',),
+                    'columns': ('F_norm_weight_count',),
                     'func': truediv,
                     'second_value': 'F_weighed_count',
                 },
                 {
-                    'columns': ('M_mod_weighed_count',),
+                    'columns': ('M_norm_weight_count',),
                     'func': truediv,
                     'second_value': 'M_weighed_count',
                 },
                 {
-                    'columns': ('F_mod_weighed_count_1',),
+                    'columns': ('F_norm_weight_count_1',),
                     'func': truediv,
                     'second_value': 'F_weighed_count_1',
                 },
                 {
-                    'columns': ('M_mod_weighed_count_1',),
+                    'columns': ('M_norm_weight_count_1',),
                     'func': truediv,
                     'second_value': 'M_weighed_count_1',
                 },
                 {
-                    'columns': ('F_mod_weighed_count_2',),
+                    'columns': ('F_norm_weight_count_2',),
                     'func': truediv,
                     'second_value': 'F_weighed_count_2',
                 },
                 {
-                    'columns': ('M_mod_weighed_count_2',),
+                    'columns': ('M_norm_weight_count_2',),
                     'func': truediv,
                     'second_value': 'M_weighed_count_2',
                 },
