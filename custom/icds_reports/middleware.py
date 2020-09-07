@@ -1,6 +1,3 @@
-import random
-import string
-
 from django.utils.deprecation import MiddlewareMixin
 
 from corehq.apps.users.models import CouchUser
@@ -54,13 +51,6 @@ def is_icds_dashboard_view(request):
         is_icds_domain(request) and
         is_path_in_audit_urls(request)
     )
-
-
-# Reference: https://django-simple-captcha.readthedocs.io/en/latest/advanced.html#roll-your-own
-def random_alphanumeric_challenge():
-    ret = u''
-    ret += ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    return ret, ret
 
 
 class ICDSAuditMiddleware(MiddlewareMixin):
