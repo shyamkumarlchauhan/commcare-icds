@@ -96,6 +96,8 @@ from custom.icds_reports.models import (
     ICDSAuditEntryRecord,
     IcdsMonths,
     UcrTableNameMapping,
+    AggregateSamMamForm
+
 )
 from custom.icds_reports.models.aggregate import (
     AggAwcDaily,
@@ -276,6 +278,11 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
             stage_1_tasks.extend([
                 icds_state_aggregation_task.si(
                     state_id=state_id, date=monthly_date, func_name='_aggregate_child_health_pnc_forms'
+                ) for state_id in state_ids
+            ])
+            stage_1_tasks.extend([
+                icds_state_aggregation_task.si(
+                    state_id=state_id, date=monthly_date, func_name='_aggregate_child_health_sam_mam_form'
                 ) for state_id in state_ids
             ])
             stage_1_tasks.extend([
@@ -491,6 +498,7 @@ def icds_state_aggregation_task(self, state_id, date, func_name):
         '_aggregate_child_health_thr_forms': _aggregate_child_health_thr_forms,
         '_aggregate_ccs_record_thr_forms': _aggregate_ccs_record_thr_forms,
         '_aggregate_child_health_pnc_forms': _aggregate_child_health_pnc_forms,
+        '_aggregate_child_health_sam_mam_form': _aggregate_child_health_sam_mam_form,
         '_aggregate_ccs_record_pnc_forms': _aggregate_ccs_record_pnc_forms,
         '_aggregate_delivery_forms': _aggregate_delivery_forms,
         '_aggregate_df_forms': _aggregate_df_forms,
@@ -2076,8 +2084,11 @@ def update_child_vaccine_table(target_date):
     current_month = force_to_date(target_date).replace(day=1)
     ChildVaccines.aggregate(current_month)
 
-
-
 def update_agg_mpr_table(target_date):
     current_month = force_to_date(target_date).replace(day=1)
     AggMPRAwc.aggregate(current_month)
+
+@track_time
+def _aggregate_child_health_sam_mam_form(state_id, day):
+    AggregateSamMamForm.aggregate(state_id, day)
+
