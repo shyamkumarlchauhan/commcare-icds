@@ -21,7 +21,8 @@ class TestTHRForms(BaseFormsTest):
                 "ccs_record_case_id": "ef8a946d-3f6a-4715-b743-68d55b86a230",
                 "child_health_case_id": "cccd8d00-851c-4524-ab12-811ac98d1fe9",
                 "days_ration_given_child": 22,
-                "days_ration_given_mother": None
+                "days_ration_given_mother": None,
+                "photo_thr_packets_distributed": None
             }])
 
     def test_without_child_form(self):
@@ -34,5 +35,20 @@ class TestTHRForms(BaseFormsTest):
                 "ccs_record_case_id": "ecf7d5cc-123d-41d2-a0d7-edf722895d13",
                 "child_health_case_id": None,
                 "days_ration_given_child": None,
-                "days_ration_given_mother": 22
+                "days_ration_given_mother": 22,
+                "photo_thr_packets_distributed": None
+            }])
+
+    def test_with_image_form(self):
+        self._test_data_source_results(
+            'thr_form_v2',
+            [{
+                "doc_id": None,
+                "repeat_iteration": 0,
+                "timeend": datetime.datetime(2019, 5, 23, 9, 51, 50, 735000),
+                "ccs_record_case_id": "8179eed0-d462-4893-907b-5f551283399b",
+                "child_health_case_id": "01385ee0-3dcb-471e-831f-09543fc3459a",
+                "days_ration_given_child": 7,
+                "days_ration_given_mother": None,
+                'photo_thr_packets_distributed': '1558605103125.jpg'
             }])
