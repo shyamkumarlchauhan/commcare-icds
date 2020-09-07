@@ -33,7 +33,7 @@ from .migration_forms import MigrationFormsAggregationDistributedHelper
 from .bihar_api_demographics import BiharApiDemographicsHelper
 from .availing_service_forms import AvailingServiceFormsAggregationDistributedHelper
 from .child_vaccine_helper import ChildVaccineHelper
-
+from .sam_mam_form import SamMamFormAggregationDistributedHelper
 __all__ = (
     'AggAwcDistributedHelper',
     'AggAwcDailyAggregationDistributedHelper',
@@ -71,5 +71,6 @@ __all__ = (
     'AggServiceDeliveryReportHelper',
     'MigrationFormsAggregationDistributedHelper',
     'BiharApiDemographicsHelper',
-    'ChildVaccineHelper'
+    'ChildVaccineHelper',
+    'SamMamFormAggregationDistributedHelper'
 )
