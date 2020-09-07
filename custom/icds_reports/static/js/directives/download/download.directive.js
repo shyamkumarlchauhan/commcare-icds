@@ -166,6 +166,9 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     if (vm.userLocationType.toLowerCase() !== 'block'  && vm.userLocationType.toLowerCase() !== 'district') {
         vm.indicators.push({id: 15, name: 'Poshan Progress Report'});
     }
+    if (vm.haveAccessToFeatures) {
+        vm.indicators.push({id: 16, name: 'Malnutrition Tracking Report'});
+    }
     vm.reportLayouts = [
         {id: 'comprehensive', name: 'Comprehensive'},
         {id: 'summary', name: 'Summary'},
@@ -249,7 +252,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     init();
 
     vm.disallowNational = function () {
-        return vm.isChildBeneficiaryListSelected() || vm.isChildGrowthTrackerSelected() || vm.isAwwActivityReportSelected();
+        return vm.isChildBeneficiaryListSelected() || vm.isChildGrowthTrackerSelected() || vm.isAwwActivityReportSelected() || vm.isMTRSelected();
     };
 
     vm.getPlaceholder = function (locationTypes) {
@@ -551,6 +554,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
         var viewByErrors = vm.showViewBy() && (vm.selectedLevel <= 0 || vm.selectedLevel > 5);
         var beneficiaryListErrors = vm.isChildBeneficiaryListSelected() && (vm.selectedFilterOptions().length === 0 || !vm.isDistrictOrBelowSelected());
         var growthListErrors = vm.isChildGrowthTrackerSelected() && !vm.isDistrictOrBelowSelected();
+        var mtrListErrors = vm.isMTRSelected() && !vm.isDistrictOrBelowSelected();
         var incentiveReportErrors = vm.isIncentiveReportSelected() && !vm.isStateSelected();
         var PPRErrors = vm.isPPRSelected() && (vm.isDistrictOrBelowSelected() || vm.selectedLevel === 0);
         var ladySupervisorReportErrors = false;
@@ -558,7 +562,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             ladySupervisorReportErrors = vm.isLadySupervisorSelected() && !vm.isStateSelected();
         }
         var awwActvityReportErrors = vm.isAwwActivityReportSelected() && (vm.selectedLevel === 5 || vm.selectedLevel === 0);
-        return beneficiaryListErrors || incentiveReportErrors || ladySupervisorReportErrors || growthListErrors || awwActvityReportErrors || PPRErrors || viewByErrors;
+        return beneficiaryListErrors || incentiveReportErrors || ladySupervisorReportErrors || growthListErrors || awwActvityReportErrors || PPRErrors || viewByErrors || mtrListErrors;
     };
 
     vm.isCombinedPDFSelected = function () {
@@ -638,6 +642,10 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
         return vm.selectedIndicator === 13;
     };
 
+    vm.isMTRSelected = function () {
+        return vm.selectedIndicator === 16;
+    };
+
     vm.isMonthlyDataPeriodSelected = function() {
         return vm.selectedDataPeriod === 'month';
     };
@@ -669,7 +677,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     vm.showViewBy = function () {
         return !(vm.isChildBeneficiaryListSelected() || vm.isIncentiveReportSelected() ||
             vm.isLadySupervisorSelected() || vm.isDashboardUsageSelected() ||
-            vm.isChildGrowthTrackerSelected() || vm.isTakeHomeRationReportSelected() || vm.isAwwActivityReportSelected());
+            vm.isChildGrowthTrackerSelected() || vm.isTakeHomeRationReportSelected() || vm.isAwwActivityReportSelected() || vm.isMTRSelected());
     };
 
     vm.showLocationFilter = function () {
