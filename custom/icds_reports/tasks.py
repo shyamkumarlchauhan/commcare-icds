@@ -70,7 +70,8 @@ from custom.icds_reports.const import (
     SERVICE_DELIVERY_REPORT,
     CHILD_GROWTH_TRACKER_REPORT,
     POSHAN_PROGRESS_REPORT,
-    AWW_ACTIVITY_REPORT
+    AWW_ACTIVITY_REPORT,
+    MALNUTRITION_TRACKING_REPORT
 )
 from custom.icds_reports.models import (
     AggAwc,
@@ -126,6 +127,7 @@ from custom.icds_reports.reports.issnip_monthly_register import (
 )
 from custom.icds_reports.reports.take_home_ration import TakeHomeRationExport
 from custom.icds_reports.reports.service_delivery_report import ServiceDeliveryReport
+from custom.icds_reports.reports.malnutrition_tracker_report import MalnutritionTrackerReport
 from custom.icds_reports.sqldata.exports.awc_infrastructure import (
     AWCInfrastructureExport,
 )
@@ -158,7 +160,8 @@ from custom.icds_reports.utils import (
     create_service_delivery_report,
     create_child_growth_tracker_report,
     create_poshan_progress_report,
-    create_aww_activity_report
+    create_aww_activity_report,
+    create_malnutrition_tracker_report
 )
 from custom.icds_core.view_utils import icds_pre_release_features
 from custom.icds_reports.utils.aggregation_helpers.distributed import (
@@ -1110,9 +1113,27 @@ def prepare_excel_reports(config, aggregation_level, include_test, beta, locatio
         else:
             cache_key = create_excel_file(excel_data, data_type, file_format)
 
+    elif indicator == MALNUTRITION_TRACKING_REPORT:
+        data_type = 'Malnutrition_Tracking_Report'
+        excel_data = MalnutritionTrackerReport(
+            config=config,
+            beta=beta,
+            location=location
+        ).get_excel_data()
+        export_info = excel_data[1][1]
+        generated_timestamp = date_parser.parse(export_info[0][1])
+        formatted_timestamp = generated_timestamp.strftime("%d-%m-%Y__%H-%M-%S")
+        data_type = 'Malnutrition Tracking Report__{formatted_timestamp}'.format(
+            formatted_timestamp=formatted_timestamp)
+
+        if file_format == 'xlsx':
+            cache_key = create_malnutrition_tracker_report(excel_data, data_type, config, aggregation_level)
+        else:
+            cache_key = create_excel_file(excel_data, data_type, file_format)
+
     if indicator not in (AWW_INCENTIVE_REPORT, LS_REPORT_EXPORT, THR_REPORT_EXPORT, CHILDREN_EXPORT,
                          DASHBOARD_USAGE_EXPORT, SERVICE_DELIVERY_REPORT, CHILD_GROWTH_TRACKER_REPORT,
-                         AWW_ACTIVITY_REPORT, POSHAN_PROGRESS_REPORT):
+                         AWW_ACTIVITY_REPORT, POSHAN_PROGRESS_REPORT, MALNUTRITION_TRACKING_REPORT):
         if file_format == 'xlsx' and beta:
             cache_key = create_excel_file_in_openpyxl(excel_data, data_type)
         else:

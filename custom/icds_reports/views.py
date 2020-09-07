@@ -67,7 +67,8 @@ from custom.icds_reports.const import (
     SERVICE_DELIVERY_REPORT,
     CHILD_GROWTH_TRACKER_REPORT,
     POSHAN_PROGRESS_REPORT,
-    AWW_ACTIVITY_REPORT
+    AWW_ACTIVITY_REPORT,
+    MALNUTRITION_TRACKING_REPORT
 )
 from custom.icds_reports.dashboard_utils import get_dashboard_template_context
 from custom.icds_reports.models.aggregate import AwcLocation
@@ -1082,7 +1083,7 @@ class ExportIndicatorView(View):
                          AWC_INFRASTRUCTURE_EXPORT, GROWTH_MONITORING_LIST_EXPORT, AWW_INCENTIVE_REPORT,
                          LS_REPORT_EXPORT, THR_REPORT_EXPORT, DASHBOARD_USAGE_EXPORT,
                          SERVICE_DELIVERY_REPORT, CHILD_GROWTH_TRACKER_REPORT, AWW_ACTIVITY_REPORT,
-                         POSHAN_PROGRESS_REPORT):
+                         POSHAN_PROGRESS_REPORT, MALNUTRITION_TRACKING_REPORT):
             task = prepare_excel_reports.delay(
                 config,
                 aggregation_level,
