@@ -376,6 +376,7 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
+    birth_weight_kg = models.PositiveSmallIntegerFieldDecimalField(max_digits=64, decimal_places=20, blank=True, null=True, help_text="birth weight in kg")
 
     class Meta:
         managed = False

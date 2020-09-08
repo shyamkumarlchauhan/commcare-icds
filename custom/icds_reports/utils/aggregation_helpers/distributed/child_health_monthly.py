@@ -370,6 +370,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("state_id", "child_health.state_id"),
             ("opened_on", "child_health.opened_on"),
             ("birth_weight", "child_health.birth_weight"),
+            ("birth_weight_kg", "CASE WHEN child_health.birth_weight>=10 THEN child_health.birth_weight/1000.0 ELSE child_health.birth_weight END")
             ("child_person_case_id", "child_health.mother_id"),
             ("delivery_nature", "del_form.delivery_nature"),
             ("term_days", "(del_form.add::DATE - del_form.edd::DATE) + 280"),
