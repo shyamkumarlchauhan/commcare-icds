@@ -35,10 +35,10 @@ class SMSUsageReport(BaseMessagingSectionView):
         context = {}
         disable_submit = not _can_add_new_report(report_count)
         if disable_submit:
-            messages.error(self.request, _('Only {max_report_count} concurrent reports are allowed at a time.\
-                Please wait for them to finish.').format(
+            context['max_report_error'] = 'Only {max_report_count} concurrent reports are allowed at a time.\
+                Please wait for them to finish.'.format(
                 max_report_count=MAX_CONCURRENT_SMS_REPORTS_ALLOWED
-            ))
+            )
         if report_count > 0:
             context['reports_in_progress'] = ',  '.join(report_ids)
 

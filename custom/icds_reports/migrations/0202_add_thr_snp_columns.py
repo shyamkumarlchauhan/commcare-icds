@@ -13,7 +13,7 @@ from custom.icds_reports.utils.migrations import get_view_migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0202_add_caste_columns'),
+        ('icds_reports', '0202_add_new_column_agg_child'),
     ]
 
     operations = [
