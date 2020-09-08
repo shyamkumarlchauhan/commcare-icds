@@ -288,107 +288,90 @@ class MPRAWCDetails(ICDSMixin, MPRData):
         )
 
 
-class MPRAWCDetailsBeta(ICDSMixin, MPRData):
+class MPRAWCDetailsBeta(MPRAWCDetails):
 
-    title = '3. Details of new registrations at AWC during the month'
-    slug = 'awc_details'
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(self.config['location_id'], self.config['domain'])
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        if filters['aggregation_level'] > 1:
+            filters['aggregation_level'] -= 1
+        data = dict()
 
-    @property
-    def headers(self):
-        return DataTablesHeader(
-            DataTablesColumn(_('Category')),
-            DataTablesColumnGroup(
-                _('Among permanent residents of AWC area'),
-                ICDSDataTableColumn(_('Girls/Women'), sortable=False, span=1),
-                ICDSDataTableColumn(_('Boys'), sortable=False, span=1),
+        ccs_data = AggCcsRecord.objects.filter(**filters).values('month').annotate(
+            pregnant_resident_count=Sum('pregnant_permanent_resident'),
+            pregnant_migrant_count=Sum('pregnant_temp_resident')
+        ).order_by('month').first()
+
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            live_F_resident_birth_count=Sum(
+                Case(
+                    When(gender='F', then='live_birth_permanent_resident'), default=Value(0)
+                )
             ),
-            DataTablesColumnGroup(
-                _('Among temporary residents of AWC area'),
-                ICDSDataTableColumn(_('Girls/Women'), sortable=False, span=1),
-                ICDSDataTableColumn(_('Boys'), sortable=False, span=1),
-            )
-        )
+            live_M_resident_birth_count=Sum(
+                Case(
+                    When(gender='M', then='live_birth_permanent_resident'), default=Value(0)
+                )
+            ),
+            live_F_migrant_birth_count=Sum(
+                Case(
+                    When(gender='F', then='live_birth_temp_resident'), default=Value(0)
+                )
+            ),
+            live_M_migrant_birth_count=Sum(
+                Case(
+                    When(gender='M', then='live_birth_temp_resident'), default=Value(0)
+                )
+            ),
+            F_resident_count=Sum(
+                Case(
+                    When(gender='F', age_tranche__lte=36, then='permanent_resident'), default=Value(0)
+                )
+            ),
+            M_resident_count=Sum(
+                Case(
+                    When(gender='F', then='permanent_resident'), default=Value(0)
+                )
+            ),
+            F_migrant_count=Sum(
+                Case(
+                    When(gender='F', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+            M_migrant_count=Sum(
+                Case(
+                    When(gender='M', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+            F_resident_count_1=Sum(
+                Case(
+                    When(gender='F', age_tranche__gt=36,  then='permanent_resident'), default=Value(0)
+                )
+            ),
+            M_resident_count_1=Sum(
+                Case(
+                    When(gender='M', age_tranche__gt=36, then='permanent_resident'), default=Value(0)
+                )
+            ),
+            F_migrant_count_1=Sum(
+                Case(
+                    When(gender='F', age_tranche__gt=36,  then='temp_resident'), default=Value(0)
+                )
+            ),
+            M_migrant_count_1=Sum(
+                Case(
+                    When(gender='M', age_tranche__gt=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+        ).order_by('month').first()
 
-    @property
-    def rows(self):
-        if self.config['location_id']:
-            filters = get_location_filter(self.config['location_id'], self.config['domain'])
-            filters['month'] = date(self.config['year'], self.config['month'], 1)
-            if filters['aggregation_level'] > 1:
-                filters['aggregation_level'] -= 1
-
-            data = AggCcsRecord.objects.filter(**filters).values('awc_id').annotate(
-                pregnant_resident=Sum('pregnant_permanent_resident'),
-                pregnant_migrant=Sum('pregnant_temp_resident')
-            ).order_by('month').first()
-
-            child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
-                live_birth_F_permanent_resident=Case(When(gender='F', then=Sum('live_birth_permanent_resident'))),
-                live_birth_M_permanent_resident=Case(When(gender='M', then=Sum('live_birth_permanent_resident'))),
-                live_birth_F_temp_resident=Case(When(gender='F', then=Sum('live_birth_temp_resident'))),
-                live_birth_M_temp_resident=Case(When(gender='M', then=Sum('live_birth_temp_resident'))),
-                child_0_3_F_permanent_resident=Case(When(gender='F',
-                                                         age_tranche__lte=36, then=Sum('permanent_resident'))),
-                child_0_3_M_permanent_resident=Case(
-                    When(gender='M', age_tranche__lte=36, then=Sum('permanent_resident'))),
-                child_0_3_F_temp_resident=Case(
-                    When(gender='F', age_tranche__lte=36, then=Sum('temp_resident'))),
-                child_0_3_M_temp_resident=Case(
-                    When(gender='M', age_tranche__lte=36, then=Sum('temp_resident'))),
-
-                child_3_6_F_permanent_resident=Case(
-                    When(gender='F', age_tranche__gt=36, then=Sum('permanent_resident'))),
-                child_3_6_M_permanent_resident=Case(
-                    When(gender='M', age_tranche__gt=36, then=Sum('permanent_resident'))),
-                child_3_6_F_temp_resident=Case(
-                    When(gender='F', age_tranche__gt=36, then=Sum('temp_resident'))),
-                child_3_6_M_temp_resident=Case(
-                    When(gender='M', age_tranche__gt=36, then=Sum('temp_resident'))),
-            ).order_by('month').first()
-
+        if child_data:
             data.update(child_data)
-            rows = []
-            data = { key: value if value else 0 for key, value in data.item()}
-            for row in self.row_config:
-                row_data = []
-                for idx, cell in enumerate(row):
-                    indicator_value = data.get(cell, cell if cell == '--' or idx == 0 else 0)
-                    row_data.append(indicator_value if indicator_value else 0)
-                rows.append(row_data)
-            return rows
 
-    @property
-    def row_config(self):
-        return (
-            (
-                _('a. Pregnant Women'),
-                'pregnant_resident',
-                '--',
-                'pregnant_migrant',
-                '--'
-            ),
-            (
-                _('b. Live Births'),
-                'live_birth_F_permanent_resident',
-                'live_birth_M_permanent_resident',
-                'live_birth_F_temp_resident',
-                'live_birth_M_temp_resident'
-            ),
-            (
-                _('c. 0-3 years children (excluding live births)'),
-                'child_0_3_F_permanent_resident',
-                'child_0_3_M_permanent_resident',
-                'child_0_3_F_temp_resident',
-                'child_0_3_M_temp_resident'
-            ),
-            (
-                _('d. 3-6 years children'),
-                'child_3_6_F_permanent_resident',
-                'child_3_6_M_permanent_resident',
-                'child_3_6_F_temp_resident',
-                'child_3_6_M_temp_resident'
-            ),
-        )
+        if ccs_data:
+            data.update(ccs_data)
+
+        return {key: value if value else 0 for key, value in data.items()}
 
 
 class MPRSupplementaryNutrition(ICDSMixin, MPRData):

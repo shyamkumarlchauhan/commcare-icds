@@ -376,7 +376,7 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
-    live_birth = models.SmallIntegerField(null=True)
+    birth_status_in_month = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
