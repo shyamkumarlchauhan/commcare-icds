@@ -467,7 +467,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                                       alias='valid_in_month'
                                                   )
                                               ],
-                                              slug='cf_eligible'
+                                              slug='cf_eligible_1'
                                               ))
 
         agg_columns.insert(52, DatabaseColumn('No.of children receiving complementary feeding with adequate diet diversity',
@@ -487,7 +487,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                                       alias='valid_in_month'
                                                   )
                                               ],
-                                              slug='cf_eligible'
+                                              slug='cf_eligible_2'
                                               ))
 
         agg_columns.insert(55, DatabaseColumn('No. of children initiated complementary feeding with adequate diet quantity',
@@ -507,7 +507,7 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                                       alias='valid_in_month'
                                                   )
                                               ],
-                                              slug='cf_eligible'
+                                              slug='cf_eligible_3'
                                               ))
 
         agg_columns.insert(58, DatabaseColumn('Total Number of children receiving complementary feeding '
@@ -528,6 +528,6 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
                                                       alias='valid_in_month'
                                                   )
                                               ],
-                                              slug='cf_eligible'
+                                              slug='cf_eligible_4'
                                               ))
         return columns + agg_columns
