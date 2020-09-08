@@ -470,7 +470,6 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
         if self.config['location_id']:
             data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
             sections = []
-            print(self.row_config)
             for section in self.row_config:
                 rows = []
                 for row in section['rows_config']:
