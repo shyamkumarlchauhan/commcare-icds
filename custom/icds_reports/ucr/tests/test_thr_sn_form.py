@@ -15,5 +15,5 @@ class TestTHRSNForm(BaseFormsTest):
             'thr_sn_form',
             [{'doc_id': None, 'timeend': None,
               'ag_care_case_id': '7408dd27-884f-46b0-b32b-05fd7e960dc1',
-              'check_ag_given_meal': 25}]
+              'days_ration_given': 25}]
             )
