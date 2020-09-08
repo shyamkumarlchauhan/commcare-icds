@@ -516,7 +516,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
         return [
             {
                 'title': "a. Supplementary Nutrition beneficiaries (number of those among "
-                         "residents who were given supplementary nutrition for 21+ days "
+                         "residents who were given supplementary nutrition for 25+ days "
                          "during the reporting month)",
                 'slug': 'programme_coverage_1',
                 'rows_config': (
@@ -591,7 +591,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
                         ('thr_rations_male_st_1', 'thr_rations_male_sc_1', 'thr_rations_male_others_1'),
                         ('rations_female_st', 'rations_female_sc', 'rations_female_others'),
                         ('rations_male_st', 'rations_male_sc', 'rations_male_others'),
-                        ('all_rations_st' 'all_rations_sc', 'all_rations_others'),
+                        ('all_rations_st', 'all_rations_sc', 'all_rations_others'),
                         ('thr_rations_pregnant_st', 'thr_rations_pregnant_sc', 'thr_rations_pregnant_others'),
                         ('thr_rations_lactating_st', 'thr_rations_lactating_sc', 'thr_rations_lactating_others'),
                     ),
@@ -910,6 +910,7 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
         if filters.get('aggregation_level') > 1:
             filters['aggregation_level'] -= 1
 
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
         data = dict()
         child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
             thr_rations_female_st=Sum(Case(When(gender='F', then='thr_25_days_st_resident'))),
@@ -944,10 +945,10 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
             thr_rations_absent_male=Sum(Case(When(gender='M', then='thr_0_days_resident'))),
             thr_rations_absent_female_1=Sum(Case(When(gender='F', then='lunch_0_days_resident'))),
             thr_rations_absent_male_1=Sum(Case(When(gender='M', then='lunch_0_days_resident'))),
-            thr_rations_partial_female=Sum(Case(When(gender='F', then='thr_1_days_resident'))),
-            thr_rations_partial_male=Sum(Case(When(gender='M', then='thr_1_days_resident'))),
-            thr_rations_partial_female_1=Sum(Case(When(gender='F', then='lunch_1_days_resident'))),
-            thr_rations_partial_male_1=Sum(Case(When(gender='M', then='lunch_1_days_resident'))),
+            sum_thr_rations_female=Sum(Case(When(gender='F', then='thr_1_days_resident'))),
+            sum_thr_rations_male=Sum(Case(When(gender='M', then='thr_1_days_resident'))),
+            sum_thr_rations_female_1=Sum(Case(When(gender='F', then='lunch_1_days_resident'))),
+            sum_thr_rations_male_1=Sum(Case(When(gender='M', then='lunch_1_days_resident'))),
             thr_total_rations_female=Sum(Case(When(gender='F', then='total_thr_resident'))),
             thr_total_rations_male=Sum(Case(When(gender='M', then='total_thr_resident'))),
             thr_total_rations_female_1=Sum(Case(When(gender='F', then='total_lunch_resident'))),
@@ -985,7 +986,7 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
             data.update(child_data)
         if mother_data:
             data.update(mother_data)
-
+        data = {key: value if value else 0 for key, value in data.items()}
         return data
 
     @property
@@ -999,42 +1000,10 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
 
         feeding_efficiency[2] = (
             _('III. Total present for at least one day during the month'),
-            {
-                'columns': (
-                    'thr_rations_partial_female',
-                    'thr_rations_female_sc',
-                    'thr_rations_female_st',
-                    'thr_rations_female_others'
-                ),
-                'alias': 'sum_thr_rations_female'
-            },
-            {
-                'columns': (
-                    'thr_rations_partial_male',
-                    'thr_rations_male_sc',
-                    'thr_rations_male_st',
-                    'thr_rations_male_others'
-                ),
-                'alias': 'sum_thr_rations_male'
-            },
-            {
-                'columns': (
-                    'thr_rations_partial_female_1',
-                    'thr_rations_female_sc_1',
-                    'thr_rations_female_st_1',
-                    'thr_rations_female_others_1'
-                ),
-                'alias': 'sum_thr_rations_female_1'
-            },
-            {
-                'columns': (
-                    'thr_rations_partial_male_1',
-                    'thr_rations_male_sc_1',
-                    'thr_rations_male_st_1',
-                    'thr_rations_male_others_1'
-                ),
-                'alias': 'sum_thr_rations_male_1'
-            },
+            'sum_thr_rations_female',
+            'sum_thr_rations_male',
+            'sum_thr_rations_female_1',
+            'sum_thr_rations_male_1',
             {
                 'columns': ('sum_thr_rations_female', 'sum_thr_rations_female_1'),
                 'alias': 'total_rations_partial_female',
@@ -1047,22 +1016,8 @@ class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
                 'columns': ('total_rations_partial_female', 'total_rations_partial_male'),
                 'alias': 'all_rations_partial'
             },
-            {
-                'columns': (
-                    'thr_rations_partial_pregnant',
-                    'thr_rations_pregnant_sc',
-                    'thr_rations_pregnant_st',
-                    'thr_rations_pregnant_others',
-                )
-            },
-            {
-                'columns': (
-                    'thr_rations_partial_lactating',
-                    'thr_rations_lactating_sc',
-                    'thr_rations_lactating_st',
-                    'thr_rations_lactating_others',
-                )
-            }
+            'thr_rations_partial_pregnant',
+            'thr_rations_partial_lactating'
         )
 
         parent_row_config[1]['rows_config'] = tuple(feeding_efficiency)
