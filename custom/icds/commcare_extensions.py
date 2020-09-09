@@ -3,6 +3,7 @@ import os
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
+from corehq.apps.reports.extension_points import user_query_mutators
 from custom.icds import icds_toggles
 from corehq.apps.domain.extension_points import custom_domain_module
 from corehq.apps.userreports.extension_points import (
@@ -91,7 +92,7 @@ def icds_ucr_data_sources():
 @static_ucr_report_paths.extend()
 def icds_ucr_reports():
     return [os.path.join(ICDS_APPS_ROOT, path) for path in [
-        "icds_reports/ucr/reports/dashboard/*.j,son",
+        "icds_reports/ucr/reports/dashboard/*.json",
         "icds_reports/ucr/reports/asr/*.json",
         "icds_reports/ucr/reports/asr/ucr_v2/*.json",
         "icds_reports/ucr/reports/mpr/*.json",
@@ -157,4 +158,12 @@ def icds_tabs():
     from custom.icds.uitab import HostedCCZTab
     return [
         HostedCCZTab,
+    ]
+
+
+@user_query_mutators.extend(domains=["icds-cas"])
+def icds_emwf_options_user_query_mutators(domain):
+    from custom.icds.report_filters import filter_users_in_test_locations
+    return [
+        filter_users_in_test_locations,
     ]

@@ -107,7 +107,8 @@ NORMAL_TASKS = {
     'update_child_vaccine_table': (None, update_child_vaccine_table, None),
     'aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None),
     '_daily_thr_ccs_record': (None, _daily_thr_ccs_record, None),
-    '_daily_thr_child_health': (None, _daily_thr_child_health, None)
+    '_daily_thr_child_health': (None, _daily_thr_child_health, None),
+    '_aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None)
 }
 
 

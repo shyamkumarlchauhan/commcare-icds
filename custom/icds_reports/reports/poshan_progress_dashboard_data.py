@@ -1,19 +1,22 @@
 from copy import deepcopy
-from datetime import date
-
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.const import (
     PPR_HEADERS_COMPREHENSIVE,
+    PPR_HEADERS_COMPREHENSIVE_BETA,
     PPR_COLS_COMPREHENSIVE,
     PPR_COLS_TO_FETCH,
     PPR_COLS_PERCENTAGE_RELATIONS,
     PPD_ICDS_CAS_COVERAGE_OVERVIEW,
     PPD_SERVICE_DELIVERY_OVERVIEW,
     PPD_ICDS_CAS_COVERAGE_COMPARATIVE_MAPPING,
-    PPD_SERVICE_DELIVERY_COMPARATIVE_MAPPING
+    PPD_SERVICE_DELIVERY_COMPARATIVE_MAPPING,
+    PPD_ICDS_CAS_COVERAGE_OVERVIEW_BETA,
+    PPR_COLS_PERCENTAGE_RELATIONS_BETA
 )
 from custom.icds_reports.models.views import PoshanProgressReportView
-from custom.icds_reports.utils import apply_exclude, generate_quarter_months, calculate_percent, handle_average
+from custom.icds_reports.utils import apply_exclude, generate_quarter_months, calculate_percent, handle_average, \
+    percent, percent_num
+from datetime import date
 
 
 def fetch_month_data(value_fields, order_by, filters, include_test, domain):
@@ -48,7 +51,24 @@ def calculate_percentage_single_row(row, truncate_out=True):
     return row
 
 
-def calculate_aggregated_row(data, aggregation_level):
+def calculate_percentage_single_row_beta(row, truncate_out=True):
+    for k, v in PPR_COLS_PERCENTAGE_RELATIONS_BETA.items():
+        num = row.get(v[0], 0)
+        den = row.get(v[1], 1)  # to avoid 0/0 division error
+        is_avg = v[2] if len(v) > 2 else False
+        if is_avg:
+            row[k] = round(num / den)
+        else:
+            row[k] = percent(num, den) if truncate_out else percent_num(num, den)
+        # calculation is done on decimal values
+        # and then round off to nearest integer
+        # and if not present defaulting them to zero
+        row[v[0]] = round(row.get(v[0], 0))
+        row[v[1]] = round(row.get(v[1], 0))
+    return row
+
+
+def calculate_aggregated_row(data, aggregation_level, beta):
     aggregated_row = {}
     cols = ['num_launched_states', 'num_launched_districts', 'num_launched_blocks', 'num_launched_awcs',
             'awc_days_open', 'expected_visits', 'valid_visits', 'pse_eligible', 'pse_attended_21_days',
@@ -61,20 +81,25 @@ def calculate_aggregated_row(data, aggregation_level):
                 aggregated_row[col] = round(row[col]) if row[col] else 0
             else:
                 aggregated_row[col] += round(row[col]) if row[col] else 0
-
-    aggregated_row = calculate_percentage_single_row(deepcopy(aggregated_row))
+    if beta:
+        aggregated_row = calculate_percentage_single_row_beta(deepcopy(aggregated_row))
+    else:
+        aggregated_row = calculate_percentage_single_row(deepcopy(aggregated_row))
     # rounding values
     for col in ['num_launched_districts', 'num_launched_blocks', 'num_launched_states']:
         aggregated_row[col] = round(aggregated_row.get(col, 0))
     aggregated_row = prepare_structure_aggregated_row(deepcopy(aggregated_row),
                                                       aggregated_row['num_launched_states'],
-                                                      aggregation_level)
+                                                      aggregation_level, beta)
     return aggregated_row
 
 
-def prepare_structure_aggregated_row(row, count, aggregation_level):
+def prepare_structure_aggregated_row(row, count, aggregation_level, beta):
     header_to_col_dict = dict(zip(PPR_HEADERS_COMPREHENSIVE, PPR_COLS_COMPREHENSIVE))
     icds_cas_coverage_overview = PPD_ICDS_CAS_COVERAGE_OVERVIEW[:]
+    if beta:
+        icds_cas_coverage_overview = PPD_ICDS_CAS_COVERAGE_OVERVIEW_BETA[:]
+        header_to_col_dict = dict(zip(PPR_HEADERS_COMPREHENSIVE_BETA, PPR_COLS_COMPREHENSIVE))
     # for district level we don't need state count
     if aggregation_level == 2:
         icds_cas_coverage_overview.remove("Number of States Covered")
@@ -95,12 +120,12 @@ def prepare_structure_aggregated_row(row, count, aggregation_level):
     return data
 
 
-def prepare_structure_comparative(data, aggregation_level):
+def prepare_structure_comparative(data, aggregation_level, beta):
     icds_cas_coverage_comparative_mapping = deepcopy(PPD_ICDS_CAS_COVERAGE_COMPARATIVE_MAPPING)
     icds_cas_coverage = []
     temp_array = []  # to add two indicators to one array (make frontend int. easy)
     for indicator, col in icds_cas_coverage_comparative_mapping.items():
-        temp_array.append(get_top_worst_cases(deepcopy(data), col, aggregation_level, indicator))
+        temp_array.append(get_top_worst_cases(deepcopy(data), col, aggregation_level, indicator, beta))
         if len(temp_array) == 2:
             icds_cas_coverage.append(temp_array[:])
             temp_array = []
@@ -108,7 +133,7 @@ def prepare_structure_comparative(data, aggregation_level):
     temp_array = []
     service_delivery = []
     for indicator, col in service_delivery_comparative_mapping.items():
-        temp_array.append(get_top_worst_cases(deepcopy(data), col, aggregation_level, indicator))
+        temp_array.append(get_top_worst_cases(deepcopy(data), col, aggregation_level, indicator, beta))
         if len(temp_array) == 2:
             service_delivery.append(temp_array[:])
             temp_array = []
@@ -149,15 +174,18 @@ def prepare_quarter_dict(data, data_period, unique_id):
     return data
 
 
-def calculate_comparative_rows(data, aggregation_level):
+def calculate_comparative_rows(data, aggregation_level, beta):
     response = []
     for i in range(0, len(data)):
-        response.append(calculate_percentage_single_row(deepcopy(data[i]), False))
-    response = prepare_structure_comparative(deepcopy(response), aggregation_level)
+        if beta:
+            response.append(calculate_percentage_single_row_beta(deepcopy(data[i]), False))
+        else:
+            response.append(calculate_percentage_single_row(deepcopy(data[i]), False))
+    response = prepare_structure_comparative(deepcopy(response), aggregation_level, beta)
     return response
 
 
-def get_top_worst_cases(data, key, aggregation_level, indicator_name):
+def get_top_worst_cases(data, key, aggregation_level, indicator_name, beta=False):
     if aggregation_level == 1:
         place_key = "state_name"
     else:
@@ -168,13 +196,17 @@ def get_top_worst_cases(data, key, aggregation_level, indicator_name):
     for per in worst_performers[:3]:
         worst.append({
             "place": per[place_key],
-            "value": "{}%".format("%.2f" % per[key])
+            "value": "{}".format(
+                "%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{} %".format(
+                "%.2f" % per[key])
         })
     best = []
     for per in best_performers[:3]:
         best.append({
             "place": per[place_key],
-            "value": "{}%".format("%.2f" % per[key])
+            "value": "{}".format(
+                "%d" % per[key]) if beta and key == 'avg_days_awc_open_percent' else "{} %".format(
+                "%.2f" % per[key])
         })
     ret = {
         "indicator": indicator_name,
@@ -185,10 +217,10 @@ def get_top_worst_cases(data, key, aggregation_level, indicator_name):
 
 
 @icds_quickcache([
-    'domain', 'year', 'month', 'quarter', 'data_period', 'step', 'location_filters', 'include_test'
+    'domain', 'year', 'month', 'quarter', 'data_period', 'step', 'location_filters', 'include_test', 'beta'
 ], timeout=30 * 60)
 def get_poshan_progress_dashboard_data(domain, year, month, quarter, data_period, step, location_filters,
-                                       include_test=False):
+                                       include_test=False, beta=False):
     aggregation_level = location_filters.get('aggregation_level', 1)
     filters = location_filters
     value_fields = PPR_COLS_TO_FETCH[:]
@@ -217,12 +249,12 @@ def get_poshan_progress_dashboard_data(domain, year, month, quarter, data_period
         else:
             data = fetch_quarter_data(value_fields, order_by, filters, include_test, domain, months, data_period,
                                       unique_id)
-        response = calculate_aggregated_row(data, aggregation_level)
+        response = calculate_aggregated_row(data, aggregation_level, beta)
     elif step == 'comparative':
         if data_period == 'month':
             data = fetch_month_data(value_fields, order_by, filters, include_test, domain)
         else:
             data = fetch_quarter_data(value_fields, order_by, filters, include_test, domain, months, data_period,
                                       unique_id)
-        response = calculate_comparative_rows(data, aggregation_level)
+        response = calculate_comparative_rows(data, aggregation_level, beta)
     return response

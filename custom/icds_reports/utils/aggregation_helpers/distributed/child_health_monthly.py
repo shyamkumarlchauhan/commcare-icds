@@ -103,10 +103,10 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             "(child_health.opened_on::date <= {end_month_string}) "
             "AND (child_health.closed = 0 OR child_health.closed_on::date > {end_month_string})"
         ).format(end_month_string=end_month_string)
-        alive_in_month = "(child_health.date_death IS NULL OR child_health.date_death - {} >= 0)".format(
+        alive_in_month = "(person_cases.date_death IS NULL OR person_cases.date_death - {} >= 0)".format(
             start_month_string
         )
-        alive_status_daily = "(child_health.date_death IS NULL OR child_health.date_death > {end_month_string})"\
+        alive_status_daily = "(person_cases.date_death IS NULL OR person_cases.date_death > {end_month_string})"\
             .format(end_month_string=end_month_string)
         not_migrated = (
             "(agg_migration.is_migrated IS DISTINCT FROM 1 "
@@ -378,7 +378,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
                   THEN 1 ELSE NULL END
             """),
             ("mother_phone_number", "mother_person_cases.phone_number"),
-            ("date_death", "child_health.date_death"),
+            ("date_death", "person_cases.date_death"),
             ("mother_case_id", "child_health.mother_case_id"),
             ("state_id", "child_health.state_id"),
             ("opened_on", "child_health.opened_on"),
