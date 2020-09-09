@@ -285,6 +285,124 @@
               "constant": null
           }
         }
+      },
+      {
+        "column_id": "username",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": [
+            "form",
+            "meta",
+            "username"
+          ]
+        }
+      },
+      {
+        "column_id": "received_on",
+        "datatype": "date",
+        "type": "expression",
+        "expression": {
+          "type": "property_name",
+          "property_name": "received_on"
+        }
+      },
+      {
+        "column_id": "edd",
+        "datatype": "date",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": [ "form", "edd"] 
+        }
+      },
+      {
+        "column_id": "delivery_nature",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "delivery_nature"]
+        }
+      },
+      {
+        "column_id": "person_case_id",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": [
+            "form",
+            "update_mother_person_case",
+            "update_mother_person_case",
+            "case",
+            "@case_id"
+          ]
+        }
+      },
+      {
+        "column_id": "total_children_died",
+        "datatype": "small_integer",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "total_children_died"]
+        }
+      },
+      {
+        "column_id": "how_many_children",
+        "datatype": "small_integer",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "how_many_children"]
+        }
+      },
+      {
+        "column_id": "mother_alive",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "mother_alive"]
+        }
+      },
+      {
+        "column_id": "mother_dob",
+        "datatype": "date",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "mother_dob"]
+        }
+      },
+      {
+        "column_id": "owner_id",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "owner_id"]
+        }
+      },
+      {
+        "column_id": "safe",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "safe"]
+        }
+      },
+      {
+        "column_id": "timestart",
+        "datatype": "datetime",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "meta", "timeStart"]
+        }
       }
     ],
     "named_expressions": {
@@ -311,6 +429,9 @@
       },
       {
         "column_ids": ["state_id", "timeend_with_time"]
+      },
+      {
+        "column_ids": ["received_on", "state_id" ]
       }
     ],
     "sql_settings": {
