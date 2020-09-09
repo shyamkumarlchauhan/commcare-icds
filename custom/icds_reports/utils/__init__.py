@@ -1889,7 +1889,7 @@ def create_malnutrition_tracker_report(excel_data, data_type, config, aggregatio
     worksheet.merge_cells('A2:{0}2'.format(last_column))
     title_cell = worksheet['A2']
     title_cell.fill = PatternFill("solid", fgColor="4472C4")
-    title_cell.value = "Malnutrition Tracking Report for the {}".format(config['month'])
+    title_cell.value = "Malnutrition Tracking Report for the {}".format(config['month'].strftime("%B, %Y"))
     title_cell.font = Font(size=18, color="FFFFFF")
     title_cell.alignment = Alignment(horizontal="center")
 
