@@ -278,6 +278,8 @@ class CcsRecordMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribute
             ('new_ifa_tablets_total_bp', 'agg_bp.new_ifa_tablets_total'),  # backfilled for only Bihar
             ('new_ifa_tablets_total_pnc', 'agg_pnc.new_ifa_tablets_total'),  # backfilled for only Bihar
             ('ifa_last_seven_days', 'agg_bp.ifa_last_seven_days'),  # backfilled for only Bihar
+            ('bpl_apl','case_list.bpl_apl'),
+            ('religion','case_list.religion'),
         )
         return """
         INSERT INTO "{tablename}" (
