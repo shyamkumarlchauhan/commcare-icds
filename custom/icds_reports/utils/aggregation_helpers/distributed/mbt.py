@@ -9,6 +9,9 @@ from dateutil.relativedelta import relativedelta
 
 class MBTDistributedHelper(AggregationHelper):
 
+
+    base_class = None
+
     def __init__(self, state_id, month):
         self.state_id = state_id
         self.month = month
@@ -34,6 +37,13 @@ class MBTDistributedHelper(AggregationHelper):
     @property
     def location_columns(self):
         return ('awc.state_name', 'awc.district_name', 'awc.block_name', 'awc.awc_name', 'awc.awc_site_code')
+
+    @property
+    def get_month_range(self):
+        start_datetime = datetime.strptime(self.month, '%Y-%m-%d')\
+            if isinstance(self.month, str) else self.month
+        end_datetime = start_datetime + relativedelta(months=1)
+        return [str(start_datetime.date()), str(end_datetime.date())]
 
     def query(self):
         return """
@@ -437,19 +447,8 @@ class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
         return 'birth_preparedness'
 
     @property
-    def base_class(self):
-        return None
-
-    @property
     def birth_preparedness_ucr_tablename(self):
         return get_table_name(self.domain, 'static-dashboard_birth_preparedness_forms')
-
-    @property
-    def get_month_range(self):
-        start_datetime = datetime.strptime(self.month, '%Y-%m-%d')\
-            if isinstance(self.month, str) else self.month
-        end_datetime = start_datetime + relativedelta(months=1)
-        return [str(start_datetime.date()), str(end_datetime.date())]
 
     def query(self):
         requested_month, next_month = self.get_month_range
@@ -475,19 +474,8 @@ class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
         return get_table_name(self.domain, 'static-child_delivery_forms')
 
     @property
-    def base_class(self):
-        return None
-
-    @property
     def base_tablename(self):
         return 'delivery_child'
-    
-    @property
-    def get_month_range(self):
-        start_datetime = datetime.strptime(self.month, '%Y-%m-%d')\
-            if isinstance(self.month, str) else self.month
-        end_datetime = start_datetime + relativedelta(months=1)
-        return [str(start_datetime.date()), str(end_datetime.date())]
 
     def query(self):
         requested_month, next_month = self.get_month_range
