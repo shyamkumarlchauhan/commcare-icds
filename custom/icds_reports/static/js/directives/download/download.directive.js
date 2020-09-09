@@ -1,5 +1,4 @@
 /* global moment */
-
 function DownloadController($scope, $rootScope, $location, locationHierarchy, locationsService, userLocationId, haveAccessToFeatures,
     downloadService, isAlertActive, userLocationType, haveAccessToAllLocations, allUserLocationId) {
     var vm = this;
@@ -228,7 +227,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     };
 
     vm.userLocationIdIsNull = function () {
-        return ["null", "undefined"].indexOf(vm.userLocationId) !== -1;
+        return ["null", "undefined", null, undefined].indexOf(vm.userLocationId) !== -1;
     };
 
     vm.isUserLocationIn = function (locations) {
@@ -758,15 +757,11 @@ DownloadController.$inject = ['$scope', '$rootScope', '$location', 'locationHier
     'userLocationId', 'haveAccessToFeatures', 'downloadService', 'isAlertActive', 'userLocationType',
     'haveAccessToAllLocations','allUserLocationId'];
 
-window.angular.module('icdsApp').directive("download", function () {
-    var url = hqImport('hqwebapp/js/initial_page_data').reverse;
-    return {
-        restrict: 'E',
-        scope: {
-        },
-        bindToController: true,
-        templateUrl: url('icds-ng-template', 'download.directive'),
-        controller: DownloadController,
-        controllerAs: "$ctrl",
-    };
+window.angular.module('icdsApp').component("download", {
+    templateUrl: function () {
+        var url = hqImport('hqwebapp/js/initial_page_data').reverse;
+        return url('icds-ng-template', 'download.directive');
+    },
+    controller: DownloadController,
+    controllerAs: "$ctrl",
 });

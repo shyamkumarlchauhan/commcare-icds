@@ -52,6 +52,7 @@ def get_dashboard_template_context(domain, couch_user):
     context['fact_sheet_sections'] = _get_factsheet_sections()
     context['MAPBOX_ACCESS_TOKEN'] = settings.MAPBOX_ACCESS_TOKEN
     context['support_email'] = settings.SUPPORT_EMAIL
+    context['implement_password_obfuscation'] = settings.OBFUSCATE_PASSWORD_FOR_NIC_COMPLIANCE
 
     if couch_user.is_commcare_user() and _has_helpdesk_role(domain, couch_user):
         build_id = get_latest_issue_tracker_build_id()
