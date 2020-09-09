@@ -1716,8 +1716,10 @@ def create_mbt_for_month(state_id, month):
     for helper_class in helpers:
         helper = helper_class(state_id, month)
         # run on primary DB to avoid "conflict with recovery" errors
-        db_cursor = get_cursor(helper.base_class, write=True)\
-            if helper.base_class else connections[get_icds_ucr_citus_db_alias()].cursor()
+        if helper.base_class:
+            db_cursor = get_cursor(helper.base_class, write=True)
+        else:
+            db_cursor = connections[get_icds_ucr_citus_db_alias()].cursor()
         with db_cursor as cursor, tempfile.TemporaryFile() as f:
             cursor.copy_expert(helper.query(), f)
             f.seek(0)
