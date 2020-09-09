@@ -157,8 +157,9 @@ class ResetMissingCaseNameDocProcessor(DataManagementDocProcessor):
         for case in cases:
             if self.should_process(case):
                 update_to_name = get_last_non_blank_value(case, 'name')
-                updates[case.case_id] = {'name': update_to_name}
-                cases_updated[case.case_id] = case
+                if update_to_name:
+                    updates[case.case_id] = {'name': update_to_name}
+                    cases_updated[case.case_id] = case
         if updates:
             for case_id, case in cases_updated.items():
                 progress_logger.document_processed(case, updates[case_id])
