@@ -329,11 +329,12 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             });
         }
 
-        if (vm.isSDRSelected()) {
+        if (vm.isSDRSelected() || vm.isMTRSelected()) {
             vm.years = _.filter(vm.yearsCopy, function (y) {
                 return y.id >= 2020;
             });
         }
+
 
         if (vm.isTakeHomeRationReportSelected()) {
             vm.years = _.filter(vm.yearsCopy, function (y) {
@@ -365,7 +366,18 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             vm.selectedQuarter = vm.selectedQuarter >= 2 ? vm.selectedQuarter : 2;
             vm.setPPRYears();
 
-        } else if (year.id === latest.getFullYear()) {
+        } else if (year.id === 2020 && vm.isMTRSelected()) {
+            var currentMonth = latest.getMonth() + 1;
+            var currentYear = latest.getFullYear();
+            vm.months = _.filter(vm.monthsCopy, function (month) {
+                if (currentYear === 2020) {
+                    return month.id >= 9 && month.id <= currentMonth;
+                } else {
+                    return month.id >= 9;
+                }
+            });
+            vm.selectedMonth = vm.selectedMonth >= 9 ? vm.selectedMonth : 9;
+        }else if (year.id === latest.getFullYear()) {
             var maxQuarter = Math.floor(latest.getMonth() / 3);
             vm.months = _.filter(vm.monthsCopy, function (month) {
                 return month.id <= latest.getMonth() + 1;
@@ -444,10 +456,9 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
                 var currentYear  = new Date().getFullYear();
                 vm.selectedYear = vm.selectedYear >= 2019 ? vm.selectedYear : currentYear;
                 locationsService.resetLevelsBelow(3, vm);
-            } else if (vm.isSDRSelected()) {
-                if (vm.selectedYear < 2020) {
-                    vm.selectedYear = new Date().getFullYear();
-                }
+            } else if (vm.isSDRSelected() || vm.isMTRSelected()) {
+                var currentYear  = new Date().getFullYear();
+                vm.selectedYear = vm.selectedYear >= 2020 ? vm.selectedYear : currentYear;
             } else if (vm.isPPRSelected()) {
                 vm.groupByLevels = vm.groupByLevelValuesPPR();
                 var currentYear  = new Date().getFullYear();

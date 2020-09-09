@@ -26,14 +26,16 @@ class MalnutritionTrackerReport(object):
         get_status_args = {
             'second_part': 'Acute Malnutritioned',
             'normal_value': 'Normal',
-            'color_scheme': {'severe': 'Red', 'moderate': 'Yello', 'normal': 'Green', 'no_data': DATA_NOT_ENTERED}
+            'color_scheme': {'severe': 'Red', 'moderate': 'Yellow', 'normal': 'Green', 'no_data': DATA_NOT_ENTERED}
         }
 
         def _get_wasting_status(wasting_status):
             if wasting_status == 'severe':
                 padding_string = ' (SAM)'
-            else:
+            elif wasting_status == 'moderate':
                 padding_string = ' (MAM)'
+            else:
+                padding_string = ''
 
             return get_status(wasting_status, **get_status_args)['value'] + padding_string
 
@@ -52,7 +54,7 @@ class MalnutritionTrackerReport(object):
             ('Name of the Child', "person_name"),
             ('Gender', 'sex'),
             ('Name of Mother','mother_name'),
-            ('Mobile Number of Father','mother_phone_number'),
+            ('Mobile Number of Mother','mother_phone_number'),
             ('Date of Birth', 'dob'),
             ('Age in Months', 'age_in_months'),
             ('Height (in cm)', 'last_recorded_height'),
