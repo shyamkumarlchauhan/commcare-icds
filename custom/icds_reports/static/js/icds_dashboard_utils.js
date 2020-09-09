@@ -45,10 +45,10 @@ hqDefine("js/icds_dashboard_utils", function () {
             {id: 'quarter', name: 'Quarterly'},
         ]);
         angular.module(appName).constant('quartersOfYear', [
-            {id: '1', name: 'Jan-Mar'},
-            {id: '2', name: 'Apr-Jun'},
-            {id: '3', name: 'Jul-Sep'},
-            {id: '4', name: 'Oct-Dec'},
+            {id: 1, name: 'Jan-Mar'},
+            {id: 2, name: 'Apr-Jun'},
+            {id: 3, name: 'Jul-Sep'},
+            {id: 4, name: 'Oct-Dec'},
         ]);
     }
 
