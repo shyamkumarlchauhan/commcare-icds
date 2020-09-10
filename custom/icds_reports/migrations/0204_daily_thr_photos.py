@@ -10,7 +10,7 @@ from custom.icds_reports.utils.migrations import get_view_migrations, get_compos
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0202_update_ccs_record_monthly'),
+        ('icds_reports', '0203_daily_feeding_indicator'),
     ]
 
     operations = [
@@ -61,10 +61,6 @@ class Migration(migrations.Migration):
     operations += [
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CCS_RECORD_THR_TABLE}', 'supervisor_id')"),
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CHILD_HEALTH_THR_TABLE}', 'supervisor_id')"),
-        migrations.RunSQL(f"CREATE INDEX IF NOT EXISTS thr_ccs_record_daily_idx ON {AGG_DAILY_CCS_RECORD_THR_TABLE}"
-                          f" (month, state_id, case_id, supervisor_id)"),
-        migrations.RunSQL(f"CREATE INDEX IF NOT EXISTS thr_child_health_daily_idx ON {AGG_DAILY_CHILD_HEALTH_THR_TABLE}"
-                          f" (month, state_id, case_id, supervisor_id)"),
     ]
 
     operations.extend(get_view_migrations())

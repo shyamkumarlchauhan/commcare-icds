@@ -77,4 +77,3 @@ class Migration(migrations.Migration):
         migrations.RunSQL("ALTER TABLE daily_attendance ADD COLUMN days_thr_provided_count integer"),
         migrations.RunSQL("ALTER TABLE daily_attendance ADD COLUMN open_pse_count integer"),
     ]
-    operations.extend(get_view_migrations())
