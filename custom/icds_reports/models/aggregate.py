@@ -213,6 +213,8 @@ class CcsRecordMonthly(models.Model, AggregateMixin):
     new_ifa_tablets_total_bp = models.SmallIntegerField(blank=True, null=True)
     new_ifa_tablets_total_pnc = models.SmallIntegerField(blank=True, null=True)
     ifa_last_seven_days = models.PositiveSmallIntegerField(blank=True, null=True)
+    bpl_apl = models.TextField(blank=True, null=True)
+    religion = models.TextField(blank=True, null=True)
 
     class Meta(object):
         managed = False
