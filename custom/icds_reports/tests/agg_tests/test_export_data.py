@@ -25,7 +25,8 @@ from custom.icds_reports.sqldata.exports.poshan_progress_report import PoshanPro
 from custom.icds_reports.sqldata.exports.pregnant_women import PregnantWomenExport
 from custom.icds_reports.sqldata.exports.system_usage import SystemUsageExport
 from custom.icds_reports.tasks import _aggregate_inactive_aww_agg
-
+from decimal import Decimal as Decimal_
+import django
 
 class TestExportData(TestCase):
     maxDiff = None
@@ -4581,7 +4582,7 @@ class TestExportData(TestCase):
         )
 
     def test_mtr_report_data(self):
-
+        Decimal = Decimal_ if django.__version__ >= "2.2" else float
         excel_data = MalnutritionTrackerReport(
             config={
                 'state_id': 'st1',
@@ -4608,8 +4609,8 @@ class TestExportData(TestCase):
     'Child Health Case ID',
     'Name of the Child',
     'Gender',
-    'Name of Mother',
-    'Mobile Number of Mother',
+    'Name of Mother/ Father',
+    'Mobile Number of Mother/ Father',
     'Date of Birth',
     'Age in Months',
     'Height (in cm)',
@@ -4643,7 +4644,7 @@ class TestExportData(TestCase):
                 date(2016, 10, 14),
                 7,
                 'N/A',
-                6.3000000000000000,
+                Decimal('6.3000000000000000'),
                 'Severely Acute Malnutritioned (SAM)',
                 'Red',
                 'No',
@@ -4672,8 +4673,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2014, 1, 18),
                     40,
-                    92.0000000000000000,
-                    11.0000000000000000,
+                    Decimal('92.0000000000000000'),
+                    Decimal('11.0000000000000000'),
                     'Moderately Acute Malnutritioned (MAM)',
                     'Yellow',
                     'No',
@@ -4702,8 +4703,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2013, 12, 13),
                     41,
-                    92.0000000000000000,
-                    11.0000000000000000,
+                    Decimal('92.0000000000000000'),
+                    Decimal('11.0000000000000000'),
                     'Moderately Acute Malnutritioned (MAM)',
                     'Yellow',
                     'No',
@@ -4732,8 +4733,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2012, 6, 3),
                     59,
-                    95.0000000000000000,
-                    12.8000000000000000,
+                    Decimal('95.0000000000000000'),
+                    Decimal('12.8000000000000000'),
                     'Normal',
                     'Green',
                     'No',
@@ -4762,8 +4763,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2013, 1, 2),
                     52,
-                    94.0000000000000000,
-                    11.0000000000000000,
+                    Decimal('94.0000000000000000'),
+                    Decimal('11.0000000000000000'),
                     'Moderately Acute Malnutritioned (MAM)',
                     'Yellow',
                     'No',
@@ -4792,8 +4793,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2012, 11, 28),
                     54,
-                    87.0000000000000000,
-                    9.7000000000000000,
+                    Decimal('87.0000000000000000'),
+                    Decimal('9.7000000000000000'),
                     'Moderately Acute Malnutritioned (MAM)',
                     'Yellow',
                     'Yes',
@@ -4822,8 +4823,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2013, 11, 20),
                     42,
-                    87.0000000000000000,
-                    11.4000000000000000,
+                    Decimal('87.0000000000000000'),
+                    Decimal('11.4000000000000000'),
                     'Normal',
                     'Green',
                     'No',
@@ -4852,8 +4853,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2012, 5, 4),
                     60,
-                    100.0000000000000000,
-                    13.9000000000000000,
+                    Decimal('100.0000000000000000'),
+                    Decimal('13.9000000000000000'),
                     'Normal',
                     'Green',
                     'No',
@@ -4882,8 +4883,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2014, 1, 3),
                     40,
-                    88.0000000000000000,
-                    11.8000000000000000,
+                    Decimal('88.0000000000000000'),
+                    Decimal('11.8000000000000000'),
                     'Normal',
                     'Green',
                     'No',
@@ -4912,8 +4913,8 @@ class TestExportData(TestCase):
                     'N/A',
                     date(2013, 7, 27),
                     46,
-                    83.0000000000000000,
-                    9.7000000000000000,
+                    Decimal('83.0000000000000000'),
+                    Decimal('9.7000000000000000'),
                     'Normal',
                     'Green',
                     'No',
