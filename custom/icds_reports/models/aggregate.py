@@ -854,6 +854,10 @@ class DailyAttendance(models.Model, AggregateMixin):
     form_location_long = models.DecimalField(max_digits=64, decimal_places=16, null=True)
     image_name = models.TextField(null=True)
     pse_conducted = models.SmallIntegerField(null=True)
+    open_bfast_count = models.IntegerField(null=True)
+    open_hotcooked_count = models.IntegerField(null=True)
+    days_thr_provided_count = models.IntegerField(null=True)
+    open_pse_count = models.IntegerField(null=True)
     state_id = models.TextField(null=True)
 
     class Meta:
@@ -1846,6 +1850,18 @@ class AggServiceDeliveryReport(models.Model, AggregateMixin):
     suposhan_diwas_count = models.IntegerField(null=True)
     coming_of_age_count = models.IntegerField(null=True)
     public_health_message_count = models.IntegerField(null=True)
+    awc_days_open = models.IntegerField(null=True)
+    awc_num_open = models.IntegerField(null=True)
+    breakfast_served = models.IntegerField(null=True)
+    hcm_served = models.IntegerField(null=True)
+    thr_served = models.IntegerField(null=True)
+    pse_provided = models.IntegerField(null=True)
+    breakfast_25_days = models.IntegerField(null=True)
+    hcm_25_days = models.IntegerField(null=True)
+    pse_awc_25_days = models.IntegerField(null=True)
+    breakfast_9_days = models.IntegerField(null=True)
+    hcm_9_days = models.IntegerField(null=True)
+    pse_awc_9_days = models.IntegerField(null=True)
 
     class Meta(object):
         db_table = AGG_SDR_TABLE
