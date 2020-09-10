@@ -2,6 +2,7 @@ import dateutil
 import os
 from custom.icds_reports.models.aggregate import AwcLocation
 from custom.icds_reports.utils.connections import get_icds_ucr_citus_db_alias
+from custom.icds_reports.tasks import update_service_delivery_report
 from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand
 from django.db import connections, transaction
@@ -73,6 +74,8 @@ class Command(BaseCommand):
             self.state_wise_query(state_ids, start_month, next_month, 'fix_thr_data_2.sql')
             # normal queries
             query = self.sql_to_execute(start_month, next_month, 'fix_thr_data_1.sql')
+            # fix sdr
+            update_service_delivery_report(start_month)
             for quer in query.split(';'):
                 _run_custom_sql_script(quer)
             start_month += relativedelta(months=1)
