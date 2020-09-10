@@ -4596,7 +4596,7 @@ class TestExportData(TestCase):
 
         data = excel_data[0]
 
-        self.assertDictEqual([
+        self.assertListEqual([
             'Malnutrition Tracking Report',
             [['State',
     'District',
