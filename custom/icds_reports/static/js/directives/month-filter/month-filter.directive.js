@@ -245,7 +245,7 @@ function MonthFilterController($scope, $location, $uibModal, storageService, dat
         if ((($location.path().indexOf('service_delivery_dashboard') !== -1 &&
             selectedDate < new Date(2019, 1)) ||
             ($location.path().indexOf('awc_reports/take_home_ration') !== -1 &&
-            selectedDate < new Date(2020, 7)) ||
+            selectedDate < new Date(2020, 8)) ||
             (($location.path().indexOf('poshan_progress_dashboard') !== -1 &&
             selectedDate < new Date(2019, 3)) && !isQuarterlyDataPeriodSelected)) && !isMobile) {
             vm.open();

@@ -4,7 +4,7 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
     var reportStartDates = {
         'sdd': new Date(2019, 1),
         'ppd': new Date(2019, 3),
-        'thr_photos': new Date(2020, 7),
+        'thr_photos': new Date(2020, 8),
     };
 
     var quarterlyDataAvailabilityDates = {
@@ -69,12 +69,12 @@ window.angular.module('icdsApp').factory('dateHelperService', ['$location', func
             if (isAwcThr && selectedYear === 2020) {
                 months = _.filter(monthsCopy, function (month) {
                     if (addCurrentMonth) {
-                        return (month.id <= new Date().getMonth() + 1) && (month.id >= 8);
+                        return (month.id <= new Date().getMonth() + 1) && (month.id >= 9);
                     } else {
-                        return month.id <= new Date().getMonth() && (month.id >= 8);
+                        return month.id <= new Date().getMonth() && (month.id >= 9);
                     }
                 });
-                selectedMonth = ((selectedMonth <= maxMonthInCurrentYear) && (selectedMonth >= 8)) ? selectedMonth : maxMonthInCurrentYear;
+                selectedMonth = ((selectedMonth <= maxMonthInCurrentYear) && (selectedMonth >= 9)) ? selectedMonth : maxMonthInCurrentYear;
             }
         } else {
 
