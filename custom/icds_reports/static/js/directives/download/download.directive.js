@@ -166,9 +166,8 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     if (vm.userLocationType.toLowerCase() !== 'block'  && vm.userLocationType.toLowerCase() !== 'district') {
         vm.indicators.push({id: 15, name: 'Poshan Progress Report'});
     }
-    if (vm.haveAccessToFeatures) {
-        vm.indicators.push({id: 16, name: 'Malnutrition Tracking Report'});
-    }
+    vm.indicators.push({id: 16, name: 'Malnutrition Tracking Report'});
+
     vm.reportLayouts = [
         {id: 'comprehensive', name: 'Comprehensive'},
         {id: 'summary', name: 'Summary'},
