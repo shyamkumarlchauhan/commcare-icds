@@ -1768,3 +1768,43 @@ class PoshanProgressReportView(models.Model):
         db_table = 'poshan_progress_report_view'
         managed = False
 
+
+class DailyTHRChildHealthView(models.Model):
+    doc_id = models.TextField()
+    awc_id = models.TextField(null=True)
+    district_id = models.TextField(null=True)
+    block_id = models.TextField(null=True)
+    state_id = models.CharField(max_length=40, blank=True, null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+    case_id = models.CharField(max_length=40, primary_key=True)
+    person_name = models.TextField(blank=True, null=True)
+    submitted_on = models.DateTimeField()
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        app_label = 'icds_reports'
+        db_table = 'daily_thr_child_health_view'
+        managed = False
+
+
+class DailyTHRCCSRecordView(models.Model):
+    doc_id = models.TextField()
+    awc_id = models.TextField(null=True)
+    district_id = models.TextField(null=True)
+    block_id = models.TextField(null=True)
+    state_id = models.CharField(max_length=40, blank=True, null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+    case_id = models.CharField(max_length=40, primary_key=True)
+    person_name = models.TextField(blank=True, null=True)
+    submitted_on = models.DateTimeField()
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        app_label = 'icds_reports'
+        db_table = 'daily_thr_ccs_record_view'
+        managed = False
+
