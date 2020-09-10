@@ -287,10 +287,10 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
             pse_provided = ut.pse_provided,
             breakfast_25_days = ut.breakfast_25_days,
             hcm_25_days = ut.hcm_25_days,
-            pse_25_days = ut.pse_25_days,
+            pse_awc_25_days = ut.pse_awc_25_days,
             breakfast_9_days = ut.breakfast_9_days,
             hcm_9_days = ut.hcm_9_days,
-            pse_9_days = ut.pse_9_days
+            pse_awc_9_days = ut.pse_awc_9_days
         FROM (
             SELECT
                 awc_id,
@@ -301,10 +301,10 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
                 sum(open_pse_count) as pse_provided,
                 CASE WHEN (sum(open_bfast_count) >=25) THEN 1 ELSE 0 END AS breakfast_25_days,
                 CASE WHEN (sum(open_hotcooked_count) >=25) THEN 1 ELSE 0 END AS hcm_25_days,
-                CASE WHEN (sum(open_pse_count) >=25) THEN 1 ELSE 0 END AS pse_25_days,
+                CASE WHEN (sum(open_pse_count) >=25) THEN 1 ELSE 0 END AS pse_awc_25_days,
                 CASE WHEN (sum(open_bfast_count) <=9) THEN 1 ELSE 0 END AS breakfast_9_days,
                 CASE WHEN (sum(open_hotcooked_count) <=9) THEN 1 ELSE 0 END AS hcm_9_days,
-                CASE WHEN (sum(open_pse_count) <=9) THEN 1 ELSE 0 END AS pse_9_days
+                CASE WHEN (sum(open_pse_count) <=9) THEN 1 ELSE 0 END AS pse_awc_9_days
             FROM "{daily_attendance}"
             WHERE month = %(start_date)s GROUP BY awc_id, month, supervisor_id
         ) ut
@@ -388,10 +388,10 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
             ('pse_provided',),
             ('breakfast_25_days',),
             ('hcm_25_days',),
-            ('pse_25_days',),
+            ('pse_awc_25_days',),
             ('breakfast_9_days',),
             ('hcm_9_days',),
-            ('pse_9_days',),
+            ('pse_awc_9_days',),
             ('state_is_test', 'MAX(state_is_test)'),
             ('district_is_test', column_value_as_per_agg_level(aggregation_level, 1,'MAX(district_is_test)', "0")),
             ('block_is_test', column_value_as_per_agg_level(aggregation_level, 2,'MAX(block_is_test)', "0")),

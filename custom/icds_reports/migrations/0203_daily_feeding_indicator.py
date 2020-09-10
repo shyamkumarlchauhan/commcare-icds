@@ -54,12 +54,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='aggservicedeliveryreport',
-            name='pse_25_days',
+            name='pse_awc_25_days',
             field=models.IntegerField(null=True),
         ),
         migrations.AddField(
             model_name='aggservicedeliveryreport',
-            name='pse_9_days',
+            name='pse_awc_9_days',
             field=models.IntegerField(null=True),
         ),
         migrations.AddField(

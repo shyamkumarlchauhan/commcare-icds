@@ -467,10 +467,10 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 'pse_provided',
                 'breakfast_25_days',
                 'hcm_25_days',
-                'pse_25_days',
+                'pse_awc_25_days',
                 'breakfast_9_days',
                 'hcm_9_days',
-                'pse_9_days',
+                'pse_awc_9_days',
                 'num_launched_awcs').order_by('month').first()
 
             self.awc_open_count = data.get('awc_days_open', 0)
@@ -543,7 +543,7 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 '--',
                 '--',
                 {
-                    'column': 'pse_25_days',
+                    'column': 'pse_awc_25_days',
                     'func': truediv,
                     'second_value': "num_launched_awcs",
                     'format': 'percent'
@@ -565,7 +565,7 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 },
                 '',
                 {
-                    'column': 'pse_9_days',
+                    'column': 'pse_awc_9_days',
                     'func': truediv,
                     'second_value': "num_launched_awcs",
                     'format': 'percent'
