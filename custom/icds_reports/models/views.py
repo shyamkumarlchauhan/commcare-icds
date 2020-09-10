@@ -1479,10 +1479,10 @@ class ServiceDeliveryReportView(models.Model):
     pse_provided = models.IntegerField(null=True)
     breakfast_25_days = models.IntegerField(null=True)
     hcm_25_days = models.IntegerField(null=True)
-    pse_25_days = models.IntegerField(null=True)
+    pse_awc_25_days = models.IntegerField(null=True)
     breakfast_9_days = models.IntegerField(null=True)
     hcm_9_days = models.IntegerField(null=True)
-    pse_9_days = models.IntegerField(null=True)
+    pse_awc_9_days = models.IntegerField(null=True)
 
     class Meta(object):
         app_label = 'icds_reports'
