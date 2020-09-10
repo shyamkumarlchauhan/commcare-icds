@@ -26,7 +26,7 @@ class MalnutritionTrackerReport(object):
         get_status_args = {
             'second_part': 'Acute Malnutritioned',
             'normal_value': 'Normal',
-            'color_scheme': {'severe': 'Red', 'moderate': 'Yellow', 'normal': 'Green', 'no_data': DATA_NOT_ENTERED}
+            'color_scheme': {'severe': 'Red', 'moderate': 'Yellow', 'normal': 'Green', 'no_data': 'N/A'}
         }
 
         def _get_wasting_status(wasting_status):
@@ -92,7 +92,7 @@ class MalnutritionTrackerReport(object):
 
         def get_readable_value(value):
             if value is None or value == '':
-                return DATA_NOT_ENTERED
+                return 'N/A'
             else:
                 return value
 
