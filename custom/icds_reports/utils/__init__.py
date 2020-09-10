@@ -2011,6 +2011,13 @@ def create_malnutrition_tracker_report(excel_data, data_type, config, aggregatio
     for column, width in widths.items():
         worksheet.column_dimensions[column].width = width
 
+    # Export info
+    worksheet2 = workbook.create_sheet("Export Info")
+    worksheet2.column_dimensions['A'].width = 14
+    for n, export_info_item in enumerate(export_info, start=1):
+        worksheet2['A{0}'.format(n)].value = export_info_item[0]
+        worksheet2['B{0}'.format(n)].value = export_info_item[1]
+
     # saving file
     file_hash = uuid.uuid4().hex
     export_file = BytesIO()
