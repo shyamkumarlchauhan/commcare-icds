@@ -177,6 +177,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed.mbt import (
     AwcMbtDistributedHelper,
     CcsMbtDistributedHelper,
     ChildHealthMbtDistributedHelper,
+    BirthPreparednessMbtDistributedHelper,
+    DeliveryChildMbtDistributedHelper,
 )
 
 celery_task_logger = logging.getLogger('celery.task')
@@ -1731,11 +1733,15 @@ def create_all_mbt(month, state_ids):
 
 @task(queue='icds_dashboard_reports_queue')
 def create_mbt_for_month(state_id, month):
-    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper)
+    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper, BirthPreparednessMbtDistributedHelper, DeliveryChildMbtDistributedHelper)
     for helper_class in helpers:
         helper = helper_class(state_id, month)
         # run on primary DB to avoid "conflict with recovery" errors
-        with get_cursor(helper.base_class, write=True) as cursor, tempfile.TemporaryFile() as f:
+        if helper.base_class:
+            db_cursor = get_cursor(helper.base_class, write=True)
+        else:
+            db_cursor = connections[get_icds_ucr_citus_db_alias()].cursor()
+        with db_cursor as cursor, tempfile.TemporaryFile() as f:
             cursor.copy_expert(helper.query(), f)
             f.seek(0)
             icds_file, _ = IcdsFile.objects.get_or_create(

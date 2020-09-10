@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models.query_utils import Q
+from django.http import HttpResponseNotFound
 from django.http.response import (
     Http404,
     HttpResponse,
@@ -456,6 +457,8 @@ class DownloadReleaseNotes(View):
         release_notes_file = IcdsFile.objects.filter(blob_id="dashboard_release_notes.pdf",
                                                      data_type='dashboard_release_notes')\
             .order_by('file_added').last()
+        if not release_notes_file:
+            return HttpResponseNotFound()
         request_type = request.GET.get('type')
         if request_type == 'date':
             release_date = release_notes_file.file_added
@@ -2444,7 +2447,7 @@ class CasDataExportAPIView(View):
 
     @property
     def valid_types(self):
-        return ('woman', 'child', 'awc')
+        return ('woman', 'child', 'awc', 'birth', 'deliverychild')
 
     @staticmethod
     def get_type_code(data_type):
@@ -2452,6 +2455,8 @@ class CasDataExportAPIView(View):
             "child": 'child_health_monthly',
             "woman": 'ccs_record_monthly',
             "awc": 'agg_awc',
+            "birth": 'birth_preparedness',
+            "deliverychild": 'delivery_child'
         }
         return type_map[data_type]
 
@@ -2843,6 +2848,7 @@ class PoshanProgressDashboardView(BaseReportView):
 
         location_filters = get_location_filter(location, domain)
         location_filters['aggregation_level'] = location_filters.get('aggregation_level', 1)
+        pre_release_features = icds_pre_release_features(self.request.couch_user)
 
         data = get_poshan_progress_dashboard_data(
             domain,
@@ -2852,6 +2858,7 @@ class PoshanProgressDashboardView(BaseReportView):
             data_period,
             step,
             location_filters,
-            include_test
+            include_test,
+            pre_release_features
         )
         return JsonResponse(data=data)

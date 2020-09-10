@@ -107,7 +107,7 @@ NORMAL_TASKS = {
     'update_service_delivery_report': (None, update_service_delivery_report, None),
     'update_bihar_api_table': (None, update_bihar_api_table, None),
     'update_child_vaccine_table': (None, update_child_vaccine_table, None),
-    'aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None)
+    '_aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None)
 }
 
 
