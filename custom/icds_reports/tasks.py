@@ -2099,10 +2099,10 @@ def update_child_vaccine_table(target_date):
 
 
 @track_time
-def _daily_thr_ccs_record(day, state_id):
+def _daily_thr_ccs_record(state_id, day):
     AggregateDailyCcsRecordTHRForms.aggregate(state_id, force_to_date(day))
 
 
 @track_time
-def _daily_thr_child_health(day, state_id):
+def _daily_thr_child_health(state_id, day):
     AggregateDailyChildHealthTHRForms.aggregate(state_id, force_to_date(day))
