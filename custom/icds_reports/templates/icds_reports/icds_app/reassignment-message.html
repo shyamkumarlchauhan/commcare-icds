@@ -1,6 +1,6 @@
-<div class="alert alert-info" ng-if="selectedLocation.archived_on">
-  {$ selectedLocation.name $} was inactive in the selected month. It was replaced by {$ selectedLocation.deprecated_to.join(' & ') $} on {$ selectedLocation.archived_on $}.
+<div class="alert alert-info" ng-if="$ctrl.archived_on">
+  {$ $ctrl.name $} was inactive in the selected month. It was replaced by {$ $ctrl.deprecated_to.join(' & ') $} on {$ $ctrl.archived_on $}.
 </div>
-<div class="alert alert-info" ng-if="selectedLocation.deprecates_at">
-  {$ selectedLocation.name $} was inactive in the selected month. It replaced {$ selectedLocation.deprecates.join(' & ') $} on {$ selectedLocation.deprecates_at $}.
+<div class="alert alert-info" ng-if="$ctrl.deprecates_at">
+  {$ $ctrl.name $} was inactive in the selected month. It replaced {$ $ctrl.deprecates.join(' & ') $} on {$ $ctrl.deprecates_at $}.
 </div>

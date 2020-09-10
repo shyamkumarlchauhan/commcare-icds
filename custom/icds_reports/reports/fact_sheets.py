@@ -491,7 +491,7 @@ class FactSheetsReport(object):
                             },
                             {
                                 'data_source': 'AggAWCMonthlyDataSource',
-                                'header': 'Total chldren (0-6 years) enrolled for Anganwadi Services',
+                                'header': 'Total children (0-6 years) enrolled for Anganwadi Services',
                                 'slug': 'cases_child_health',
                                 'average': [],
 

@@ -175,6 +175,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed.mbt import (
     AwcMbtDistributedHelper,
     CcsMbtDistributedHelper,
     ChildHealthMbtDistributedHelper,
+    BirthPreparednessMbtDistributedHelper,
+    DeliveryChildMbtDistributedHelper,
 )
 
 celery_task_logger = logging.getLogger('celery.task')
@@ -885,6 +887,7 @@ def prepare_excel_reports(config, aggregation_level, include_test, beta, locatio
                 data_type,
                 config['month'].strftime("%B %Y"),
                 aggregation_level,
+                beta=beta
             )
         else:
             cache_key = create_excel_file(excel_data, data_type, file_format)
@@ -894,7 +897,8 @@ def prepare_excel_reports(config, aggregation_level, include_test, beta, locatio
         excel_data = PregnantWomenExport(
             config=config,
             loc_level=aggregation_level,
-            show_test=include_test
+            show_test=include_test,
+            beta=beta
         ).get_excel_data(location)
     elif indicator == DEMOGRAPHICS_EXPORT:
         data_type = 'Demographics'
@@ -909,7 +913,8 @@ def prepare_excel_reports(config, aggregation_level, include_test, beta, locatio
         excel_data = SystemUsageExport(
             config=config,
             loc_level=aggregation_level,
-            show_test=include_test
+            show_test=include_test,
+            beta=beta
         ).get_excel_data(
             location,
             system_usage_num_launched_awcs_formatting_at_awc_level=aggregation_level > 4 and beta,
@@ -1707,11 +1712,15 @@ def create_all_mbt(month, state_ids):
 
 @task(queue='icds_dashboard_reports_queue')
 def create_mbt_for_month(state_id, month):
-    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper)
+    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper, BirthPreparednessMbtDistributedHelper, DeliveryChildMbtDistributedHelper)
     for helper_class in helpers:
         helper = helper_class(state_id, month)
         # run on primary DB to avoid "conflict with recovery" errors
-        with get_cursor(helper.base_class, write=True) as cursor, tempfile.TemporaryFile() as f:
+        if helper.base_class:
+            db_cursor = get_cursor(helper.base_class, write=True)
+        else:
+            db_cursor = connections[get_icds_ucr_citus_db_alias()].cursor()
+        with db_cursor as cursor, tempfile.TemporaryFile() as f:
             cursor.copy_expert(helper.query(), f)
             f.seek(0)
             icds_file, _ = IcdsFile.objects.get_or_create(

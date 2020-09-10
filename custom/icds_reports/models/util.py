@@ -148,7 +148,26 @@ UCR_MAPPING = {
         ],
         'static-thr_forms_v2': [
             'http://openrosa.org/formdesigner/F1B73934-8B70-4CEE-B462-3E4C81F80E4A',
-        ]
+        ],
+        'static-availing_service_form': [
+            'http://openrosa.org/formdesigner/4E595618-E830-4D51-B0D9-A489D02E79C6',
+        ],
+        'static-dashboard_birth_preparedness_forms': [
+            'http://openrosa.org/formdesigner/2864010F-B1B1-4711-8C59-D5B2B81D65DB',
+        ],
+        'static-complementary_feeding_forms': [
+            'http://openrosa.org/formdesigner/792DAF2B-E117-424A-A673-34E1513ABD88',
+        ],
+        'static-dashboard_delivery_forms': [
+            'http://openrosa.org/formdesigner/376FA2E1-6FD1-4C9E-ACB4-E046038CD5E2',
+        ],
+        'static-migration_form': [
+            'http://openrosa.org/formdesigner/ca72a6b77b7b122c090667f8ec6e94e8adaf0609',
+        ],
+        'static-postnatal_care_forms': [
+            'http://openrosa.org/formdesigner/D4A7ABD2-A7B8-431B-A88B-38245173B0AE',
+            'http://openrosa.org/formdesigner/89097FB1-6C08-48BA-95B2-67BCF0C5091D',
+        ],
     },
     "CommCareCase": {
         'static-commcare_user_cases': ['commcare-user'],

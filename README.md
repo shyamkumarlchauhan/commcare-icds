@@ -77,13 +77,13 @@ The configuration for deploying the repo is found in `<env>/meta.yml`
 ### Deploying a specific branch
 
 ```bash
-cchq icds deploy --icds-rev <my-branch>
+cchq icds-cas deploy --icds-rev <my-branch>
 ```
 
 or to setup a limited release:
 
 ```bash
-cchq icds fab setup_limited_release --set icds_code_branch=my-branch
+cchq icds-cas fab setup_limited_release --set icds_code_branch=my-branch
 ```
 
 ### Deploying to staging
@@ -360,9 +360,9 @@ The difference is cancel is SIGTERM and terminate is SIGKILL described in more d
 
 ## Reducing load on the database
 
-Stopping all ucr_indicator_queue to reduce load: `cchq icds celery stop --only ucr_indicator_queue`
+Stopping all ucr_indicator_queue to reduce load: `cchq icds-cas celery stop --only ucr_indicator_queue`
 
-Stopping pillows: `cchq icds pillowtop stop`
+Stopping pillows: `cchq icds-cas pillowtop stop`
 
 
 Useful references

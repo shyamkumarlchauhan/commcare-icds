@@ -135,7 +135,7 @@ class ICDSData(object):
 class ICDSMixin(object):
     has_sections = False
     posttitle = None
-    resource_file = None  # tuple path to resource file
+
 
     def __init__(self, config, allow_conditional_agg=False):
         self.config = config
@@ -1128,7 +1128,10 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
 
     thr_days_info = ""
     if report_type == THR_REPORT_DAY_BENEFICIARY_TYPE:
-        total_column_count = 30
+        if beta:
+            total_column_count = 31
+        else:
+            total_column_count = 30
         data_start_row_diff = 3
         secondary_headers = ['Not provided',
                              'Provided for 1-7 days',
@@ -1139,11 +1142,17 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
 
     else:
         if report_type == THR_REPORT_BENEFICIARY_TYPE:
-            total_column_count = 15
+            if beta:
+                total_column_count = 16
+            else:
+                total_column_count = 15
             data_start_row_diff = 2
 
         else:
-            total_column_count = 11
+            if beta:
+                total_column_count = 12
+            else:
+                total_column_count = 11
             data_start_row_diff = 1
 
         if parse(month).date() <= THR_21_DAYS_THRESHOLD_DATE:
@@ -1203,9 +1212,11 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
     table_header_position_row = 5
     headers = ["S.No"]
     main_headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name', 'AWW Phone No.',
-                   'Total No. of Beneficiaries eligible for THR',
-                   f'Total No. of beneficiaries received THR {thr_days_info} in given month',
-                   'Total No of Pictures taken by AWW']
+                    'Total No. of Beneficiaries eligible for THR',
+                    f'Total No. of beneficiaries received THR {thr_days_info} in given month',
+                    'Total No of Pictures taken by AWW']
+    if beta:
+        main_headers.insert(5, 'AWC Site Code')
     headers.extend(main_headers[aggregation_level:])
 
     def set_beneficiary_columns(start_column_index, end_column_index, row):
@@ -1344,11 +1355,17 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
     return file_hash
 
 
-def create_child_report_excel_file(excel_data, data_type, month, aggregation_level):
+def create_child_report_excel_file(excel_data, data_type, month, aggregation_level, beta=False):
     export_info = excel_data[1][1]
+    max_merged_column_no = aggregation_level
+    if aggregation_level == 5:
+        if beta:
+            max_merged_column_no = aggregation_level + 2
+        else:
+            max_merged_column_no = aggregation_level + 1
 
-    primary_headers = ['Children weighed','Height measured for Children', '', 'Severely Underweight Children',
-                       'Moderately Underweight Children','Children with normal weight for age (WfA)',
+    primary_headers = ['Children weighed', 'Height measured for Children', '', 'Severely Underweight Children',
+                       'Moderately Underweight Children', 'Children with normal weight for age (WfA)',
                        'Severely wasted Children(SAM)', 'Moderately wasted children(MAM)',
                        'Children with normal weight for height',
                        'Severely stunted children', 'Moderately Stunted Children',
@@ -1362,7 +1379,7 @@ def create_child_report_excel_file(excel_data, data_type, month, aggregation_lev
                        'Children initiated with complementary feeding with appropriate handwashing before feeding'
                        ]
 
-    location_padding_columns = ([''] * aggregation_level)
+    location_padding_columns = ([''] * max_merged_column_no)
     primary_headers = location_padding_columns + primary_headers
 
     workbook = Workbook()
@@ -1405,8 +1422,7 @@ def create_child_report_excel_file(excel_data, data_type, month, aggregation_lev
             cell.fill = cell_pattern_blue
             cell.font = bold_font
 
-
-        if current_column_location<=aggregation_level or current_column_location == aggregation_level + 7:
+        if current_column_location <= max_merged_column_no or current_column_location == max_merged_column_no + 7:
             worksheet.merge_cells('{}1:{}2'.format(get_column_letter(current_column_location),
                                                    get_column_letter(current_column_location)))
             current_column_location += 1
@@ -1422,12 +1438,12 @@ def create_child_report_excel_file(excel_data, data_type, month, aggregation_lev
     bold_font_black = Font(size=14)
     for index, header in enumerate(headers):
         location_column = get_column_letter(index + 1)
-        cell = worksheet['{}{}'.format(location_column, 1 if index+1 <= aggregation_level or
-                                                             index == aggregation_level + 6 else 2)]
+        cell = worksheet['{}{}'.format(location_column, 1 if index+1 <= max_merged_column_no or
+                                                             index == max_merged_column_no + 6 else 2)]
         cell.alignment = text_alignment
         worksheet.column_dimensions[location_column].width = 30
         cell.value = header
-        if index != aggregation_level + 6 and index + 1 > aggregation_level:
+        if index != max_merged_column_no + 6 and index + 1 > max_merged_column_no:
             cell.fill = cell_pattern
             cell.font = bold_font_black
             cell.border = thin_border
