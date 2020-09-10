@@ -2,10 +2,10 @@ from dateutil.relativedelta import relativedelta
 
 from custom.icds_reports.const import AGG_DAILY_CHILD_HEALTH_THR_TABLE
 from custom.icds_reports.utils.aggregation_helpers import month_formatter, transform_day_to_month
-from custom.icds_reports.utils.aggregation_helpers.distributed.base import BaseICDSAggregationDistributedHelper
+from custom.icds_reports.utils.aggregation_helpers.distributed.base import StateBasedAggregationDistributedHelper
 
 
-class DailyTHRChildHealthHelper(BaseICDSAggregationDistributedHelper):
+class DailyTHRChildHealthHelper(StateBasedAggregationDistributedHelper):
     helper_key = 'daily-thr-child-health'
     ucr_data_source_id = 'static-dashboard_thr_forms'
     tablename = AGG_DAILY_CHILD_HEALTH_THR_TABLE
