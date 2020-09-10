@@ -268,7 +268,22 @@ class ChildHealthMonthlyView(models.Model):
         blank=True, null=True,
         help_text="fully_immunized_eligible AND task_case.immun_one_year_date after one year old"
     )
+    last_referral_date = models.DateField(blank=True, null=True)
+    referral_health_problem = models.TextField(blank=True, null=True)
+    referral_reached_date = models.DateField(blank=True, null=True)
+    last_referral_discharge_date = models.DateField(blank=True, null=True)
+    last_recorded_weight = models.DecimalField(max_digits=64, decimal_places=20, blank=True, null=True)
+    last_recorded_height = models.DecimalField(max_digits=64, decimal_places=20, blank=True, null=True)
+    sam_mam_visit_date_1 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_2 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_3 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_4 = models.DateField(blank=True, null=True)
 
+    poshan_panchayat_date_1 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_2 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_3 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_4 = models.DateField(blank=True, null=True)
+    wasting_last_recorded = models.TextField(blank=True, null=True)
     class Meta(object):
         app_label = 'icds_reports'
         managed = False

@@ -28,6 +28,7 @@ from custom.icds_reports.const import (
     BIHAR_API_DEMOGRAPHICS_TABLE,
     AGG_AVAILING_SERVICES_TABLE,
     CHILD_VACCINE_TABLE,
+    AGG_SAM_MAM_TABLE,
     AGG_DAILY_CCS_RECORD_THR_TABLE,
     AGG_DAILY_CHILD_HEALTH_THR_TABLE
 )
@@ -66,6 +67,7 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     BiharApiDemographicsHelper,
     AvailingServiceFormsAggregationDistributedHelper,
     ChildVaccineHelper,
+    SamMamFormAggregationDistributedHelper,
     DailyTHRCCSRecordHelper,
     DailyTHRChildHealthHelper
 )
@@ -383,6 +385,21 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
+    last_referral_date = models.DateField(blank=True, null=True)
+    referral_health_problem = models.TextField(blank=True, null=True)
+    referral_reached_date = models.DateField(blank=True, null=True)
+    last_referral_discharge_date = models.DateField(blank=True, null=True)
+    last_recorded_weight = models.DecimalField(max_digits=64, decimal_places=20, blank=True, null=True)
+    last_recorded_height = models.DecimalField(max_digits=64, decimal_places=20, blank=True, null=True)
+    sam_mam_visit_date_1 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_2 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_3 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_4 = models.DateField(blank=True, null=True)
+
+    poshan_panchayat_date_1 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_2 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_3 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_4 = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -2001,3 +2018,28 @@ class ChildVaccines(models.Model, AggregateMixin):
     _agg_helper_cls = ChildVaccineHelper
     _agg_atomic = False
 
+
+class AggregateSamMamForm(models.Model, AggregateMixin):
+    state_id = models.TextField(null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    child_health_case_id = models.TextField(primary_key=True)
+
+    sam_mam_visit_date_1 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_2 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_3 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_4 = models.DateField(blank=True, null=True)
+
+    poshan_panchayat_date_1 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_2 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_3 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_4 = models.DateField(blank=True, null=True)
+
+    class Meta(object):
+        db_table = AGG_SAM_MAM_TABLE
+        unique_together = ('month', 'state_id', 'supervisor_id', 'child_health_case_id')  # pkey
+
+    _agg_helper_cls = SamMamFormAggregationDistributedHelper
+    _agg_atomic = False

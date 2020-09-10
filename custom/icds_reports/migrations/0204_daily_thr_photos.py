@@ -63,5 +63,3 @@ class Migration(migrations.Migration):
         migrations.RunSQL(f"SELECT create_distributed_table('{AGG_DAILY_CHILD_HEALTH_THR_TABLE}', 'supervisor_id')"),
     ]
 
-    operations.extend(get_view_migrations())
-
