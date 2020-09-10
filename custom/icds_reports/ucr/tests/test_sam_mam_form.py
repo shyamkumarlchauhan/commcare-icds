@@ -11,7 +11,7 @@ from custom.icds_reports.ucr.tests.test_base_form_ucr import BaseFormsTest
 class TestSamMamForm(BaseFormsTest):
     ucr_name = "static-icds-cas-static-sam_mam_visit"
 
-    def test_with_image_taken(self):
+    def test_sam_mam_form(self):
         self._test_data_source_results(
             'sam_mam_form',
             [{
