@@ -1,6 +1,6 @@
 from datetime import date
 from operator import mul, truediv, sub
-
+from datetime import date
 from corehq.apps.locations.models import SQLLocation
 from corehq.apps.reports.datatables import DataTablesHeader, DataTablesColumn, DataTablesColumnGroup
 
@@ -11,7 +11,10 @@ from custom.icds_reports.sqldata.base_operationalization import BaseOperationali
 from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
 from custom.icds_reports.models.views import ServiceDeliveryReportView
+from custom.icds_reports.models.aggregate import AggChildHealth
 from custom.icds_reports.utils import get_location_filter
+from django.db.models.aggregates import Sum
+from django.db.models import Case, When, Value
 
 
 class MPRIdentification(BaseIdentification):
@@ -1786,8 +1789,408 @@ class MPRGrowthMonitoring(ICDSMixin, MPRData):
         )
 
 
-class MPRImmunizationCoverage(ICDSMixin, MPRData):
+class MPRGrowthMonitoringBeta(MPRGrowthMonitoring):
 
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+        child_data = AggChildHealth.objects.filter(**filters).values('gender').annotate(
+            weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                  then='nutrition_status_weighed',
+                                  ), default=Value(0))),
+            weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                    then='nutrition_status_weighed',
+                                    ), default=Value(0))),
+            weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                    then='nutrition_status_weighed',
+                                    ), default=Value(0))),
+            child_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                      then='valid_in_month',
+                                      ), default=Value(0))),
+            child_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                        then='valid_in_month',
+                                        ), default=Value(0))),
+            child_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                        then='valid_in_month',
+                                        ), default=Value(0))),
+            norm_weight_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                     then='nutrition_status_normal',
+                                     ), default=Value(0))),
+            norm_weight_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                       then='nutrition_status_normal',
+                                       ), default=Value(0))),
+            norm_weight_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                       then='nutrition_status_normal',
+                                       ), default=Value(0))),
+            mod_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                            then='nutrition_status_moderately_underweight',
+                                            ), default=Value(0))),
+            mod_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                              then='nutrition_status_moderately_underweight',
+                                              ), default=Value(0))),
+            mod_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                              then='nutrition_status_moderately_underweight',
+                                              ), default=Value(0))),
+            sev_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                            then='nutrition_status_severely_underweight',
+                                            ), default=Value(0))),
+            sev_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                              then='nutrition_status_severely_underweight',
+                                              ), default=Value(0))),
+            sev_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                              then='nutrition_status_severely_underweight',
+                                              ), default=Value(0))),
+        )
+        data = dict()
+
+        for row in child_data:
+            data.update({
+                f"{row['gender']}_{key}": value
+                for key, value in row.items()
+            })
+        data = {key: value if value else 0 for key, value in data.items()}
+        return data
+
+    @property
+    def row_config(self):
+        return (
+            (
+                'I. Total number of children weighed',
+                '',
+                'F_weighed_count',
+                'M_weighed_count',
+                'F_weighed_count_1',
+                'M_weighed_count_1',
+                'F_weighed_count_2',
+                'M_weighed_count_2',
+                {
+                    'columns': (
+                        'F_weighed_count',
+                        'F_weighed_count_1',
+                        'F_weighed_count_2'
+                    ),
+                    'alias': 'resident_female_weight'
+                },
+                {
+                    'columns': (
+                        'M_weighed_count',
+                        'M_weighed_count_1',
+                        'M_weighed_count_2'
+                    ),
+                    'alias': 'resident_male_weight'
+                },
+                {
+                    'columns': ('resident_female_weight', 'resident_male_weight'),
+                    'alias': 'all_resident_weight'
+                },
+            ),
+            (
+                'II. Annual Population Totals',
+                '',
+                'F_child_count',
+                'M_child_count',
+                'F_child_count_1',
+                'M_child_count_1',
+                'F_child_count_2',
+                'M_child_count_2',
+                {
+                    'columns': ('F_child_count', 'F_child_count_1', 'F_child_count_2'),
+                    'alias': 'child_female'
+                },
+                {
+                    'columns': ('M_child_count', 'M_child_count_1', 'M_child_count_2'),
+                    'alias': 'child_male'
+                },
+                {
+                    'columns': ('child_female', 'child_male'),
+                    'alias': 'all_child'
+                },
+            ),
+            (
+                'III. Weighing Efficiency (%)',
+                '',
+                {
+                    'columns': ('F_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_child_count'
+                },
+                {
+                    'columns': ('M_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_child_count'
+                },
+                {
+                    'columns': ('F_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_child_count_1'
+                },
+                {
+                    'columns': ('M_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_child_count_1'
+                },
+                {
+                    'columns': ('F_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_child_count_2'
+                },
+                {
+                    'columns': ('M_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_child_count_2'
+                },
+                {
+                    'columns': ('resident_female_weight',),
+                    'func': truediv,
+                    'second_value': 'child_female'
+                },
+                {
+                    'columns': ('resident_male_weight',),
+                    'func': truediv,
+                    'second_value': 'child_male'
+                },
+                {
+                    'columns': ('all_resident_weight',),
+                    'func': truediv,
+                    'second_value': 'all_child'
+                }
+            ),
+            (
+                'IV. Out of the children weighed, no of children found:',
+            ),
+            (
+                'a. Normal (Green)',
+                'Num',
+                'F_norm_weight_count',
+                'M_norm_weight_count',
+                'F_norm_weight_count_1',
+                'M_norm_weight_count_1',
+                'F_norm_weight_count_2',
+                'M_norm_weight_count_2',
+                {
+                    'columns': ('F_norm_weight_count', 'F_norm_weight_count_1', 'F_norm_weight_count_2'),
+                    'alias': 'all_F_sub_weight'
+                },
+                {
+                    'columns': ('M_norm_weight_count', 'M_norm_weight_count_1', 'M_norm_weight_count_2'),
+                    'alias': 'all_M_sub_weight'
+                },
+                {
+                    'columns': ('all_F_sub_weight', 'all_M_sub_weight'),
+                    'alias': 'all_sub_weight'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_norm_weight_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_norm_weight_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_norm_weight_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_norm_weight_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_norm_weight_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_norm_weight_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('all_F_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('all_M_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            ),
+            (
+                'b. Moderately underweight (Yellow)',
+                'Num',
+                'F_mod_weighed_count',
+                'M_mod_weighed_count',
+                'F_mod_weighed_count_1',
+                'M_mod_weighed_count_1',
+                'F_mod_weighed_count_2',
+                'M_mod_weighed_count_2',
+                {
+                    'columns': (
+                        'F_mod_weighed_count',
+                        'F_mod_weighed_count_1',
+                        'F_mod_weighed_count_2'),
+                    'alias': 'F_sum_mod_resident_weighted'
+                },
+                {
+                    'columns': (
+                        'M_mod_weighed_count',
+                        'M_mod_weighed_count_1',
+                        'M_mod_weighed_count_2'),
+                    'alias': 'M_sum_mod_resident_weighted'
+                },
+                {
+                    'columns': ('F_sum_mod_resident_weighted', 'M_sum_mod_resident_weighted'),
+                    'alias': 'all_mod_resident_weighted'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_mod_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_mod_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_mod_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_mod_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_mod_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_mod_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('F_sum_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('M_sum_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            ),
+            (
+                'Severely Underweight (Orange)',
+                'Num',
+                'F_sev_weighed_count',
+                'M_sev_weighed_count',
+                'F_sev_weighed_count_1',
+                'M_sev_weighed_count_1',
+                'F_sev_weighed_count_2',
+                'M_sev_weighed_count_2',
+                {
+                    'columns': (
+                        'F_sev_weighed_count',
+                        'F_sev_weighed_count_1',
+                        'F_sev_weighed_count_2'),
+                    'alias': 'F_sum_sev_resident_weighted'
+                },
+                {
+                    'columns': (
+                        'M_sev_weighed_count',
+                        'M_sev_weighed_count_1',
+                        'M_sev_weighed_count_2'),
+                    'alias': 'M_sev_mod_resident_weighted'
+                },
+                {
+                    'columns': ('F_sum_sev_resident_weighted', 'M_sev_mod_resident_weighted'),
+                    'alias': 'all_sev_resident_weighted'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_sev_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_sev_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_sev_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_sev_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_sev_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_sev_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('F_sum_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('M_sum_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            )
+        )
+
+
+class MPRImmunizationCoverage(ICDSMixin, MPRData):
     title = '9. Immunization Coverage'
     slug = 'immunization_coverage'
 
