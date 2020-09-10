@@ -463,7 +463,7 @@ def get_latest_issue_tracker_build_id():
 
 def get_status(value, second_part='', normal_value='', exportable=False, data_entered=False, color_scheme=None):
     if color_scheme is None:
-        color_scheme = {'severe': 'red', 'moderate': 'black', 'normal': 'black', 'not_data':'black'}
+        color_scheme = {'severe': 'red', 'moderate': 'black', 'normal': 'black', 'no_data':'black'}
 
     status = {'value': DATA_NOT_VALID if data_entered else DATA_NOT_ENTERED,
               'color': color_scheme.get('no_data')}
