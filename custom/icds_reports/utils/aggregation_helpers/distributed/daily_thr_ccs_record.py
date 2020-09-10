@@ -85,8 +85,11 @@ class DailyTHRCCSRecordHelper(StateBasedAggregationDistributedHelper):
 
     def aggregation_queries(self):
         return [
-            """DELETE FROM "{tablename}" WHERE month = '{current_month}';""".format(tablename=self.tablename,
-                                                                                    current_month=self.month),
+            """DELETE FROM "{tablename}" WHERE month = '{current_month}' AND state_id = '{state_id}';""".format(
+                tablename=self.tablename,
+                current_month=self.month,
+                state_id=self.state_id
+            ),
             """INSERT INTO "{tablename}" SELECT * from "{temporary_tablename}";""".format(
                 tablename=self.tablename,
                 temporary_tablename=self.temporary_tablename
