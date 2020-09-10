@@ -114,7 +114,9 @@ from custom.icds_reports.models.aggregate import (
     AggregateMigrationForms,
     AggregateAvailingServiceForms,
     BiharAPIDemographics,
-    ChildVaccines
+    ChildVaccines,
+    AggregateDailyChildHealthTHRForms,
+    AggregateDailyCcsRecordTHRForms
 
 )
 from custom.icds_reports.models.helper import IcdsFile
@@ -177,6 +179,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed.mbt import (
     AwcMbtDistributedHelper,
     CcsMbtDistributedHelper,
     ChildHealthMbtDistributedHelper,
+    BirthPreparednessMbtDistributedHelper,
+    DeliveryChildMbtDistributedHelper,
 )
 
 celery_task_logger = logging.getLogger('celery.task')
@@ -373,6 +377,23 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
 
             res_inactive_aww.get(disable_sync_subtasks=False)
 
+            daily_thr_ccs_tasks = list()
+            daily_thr_ccs_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
+                                                                       func_name='_daily_thr_ccs_record')
+                                        for state_id in state_ids])
+            daily_thr_ccs_tasks_results = [daily_thr_ccs_task.delay() for daily_thr_ccs_task in daily_thr_ccs_tasks]
+            for daily_thr_ccs_task_result in daily_thr_ccs_tasks_results:
+                daily_thr_ccs_task_result.get(disable_sync_subtasks=False)
+
+            daily_thr_child_tasks = list()
+            daily_thr_child_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
+                                                                         func_name='_daily_thr_child_health')
+                                          for state_id in state_ids])
+            daily_thr_child_tasks_results = [daily_thr_child_task.delay() for daily_thr_child_task in
+                                             daily_thr_child_tasks]
+            for daily_thr_child_task_result in daily_thr_child_tasks_results:
+                daily_thr_child_task_result.get(disable_sync_subtasks=False)
+
             res_awc = chain(icds_aggregation_task.si(date=calculation_date, func_name='_agg_awc_table'),
                             *res_ls_tasks
                             ).apply_async()
@@ -505,7 +526,9 @@ def icds_state_aggregation_task(self, state_id, date, func_name):
         '_agg_thr_table': _agg_thr_table,
         '_agg_adolescent_girls_registration_table': _agg_adolescent_girls_registration_table,
         '_agg_migration_table': _agg_migration_table,
-        '_agg_availing_services_table': _agg_availing_services_table
+        '_agg_availing_services_table': _agg_availing_services_table,
+        '_daily_thr_ccs_record': _daily_thr_ccs_record,
+        '_daily_thr_child_health': _daily_thr_child_health
     }[func_name]
 
     db_alias = get_icds_ucr_citus_db_alias()
@@ -1718,11 +1741,15 @@ def create_all_mbt(month, state_ids):
 
 @task(queue='icds_dashboard_reports_queue')
 def create_mbt_for_month(state_id, month):
-    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper)
+    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper, BirthPreparednessMbtDistributedHelper, DeliveryChildMbtDistributedHelper)
     for helper_class in helpers:
         helper = helper_class(state_id, month)
         # run on primary DB to avoid "conflict with recovery" errors
-        with get_cursor(helper.base_class, write=True) as cursor, tempfile.TemporaryFile() as f:
+        if helper.base_class:
+            db_cursor = get_cursor(helper.base_class, write=True)
+        else:
+            db_cursor = connections[get_icds_ucr_citus_db_alias()].cursor()
+        with db_cursor as cursor, tempfile.TemporaryFile() as f:
             cursor.copy_expert(helper.query(), f)
             f.seek(0)
             icds_file, _ = IcdsFile.objects.get_or_create(
@@ -2082,3 +2109,13 @@ def update_child_vaccine_table(target_date):
 @track_time
 def _aggregate_child_health_sam_mam_form(state_id, day):
     AggregateSamMamForm.aggregate(state_id, day)
+
+
+@track_time
+def _daily_thr_ccs_record(state_id, day):
+    AggregateDailyCcsRecordTHRForms.aggregate(state_id, force_to_date(day))
+
+
+@track_time
+def _daily_thr_child_health(state_id, day):
+    AggregateDailyChildHealthTHRForms.aggregate(state_id, force_to_date(day))

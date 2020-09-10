@@ -1333,6 +1333,7 @@ class ServiceDeliveryReportView(models.Model):
     state_map_location_name = models.TextField(blank=True, null=True)
     month = models.DateField(blank=True, null=True)
     num_launched_awcs = models.IntegerField(help_text='Number of AWC launched')
+    awc_days_open = models.IntegerField()
     valid_visits = models.IntegerField(help_text='valid home visits')
     expected_visits= models.IntegerField(help_text='expected home visits')
     num_awcs_conducted_cbe = models.IntegerField(help_text='Number of AWC conducted atleast one CBE')
@@ -1486,6 +1487,17 @@ class ServiceDeliveryReportView(models.Model):
     suposhan_diwas_count = models.IntegerField(null=True)
     coming_of_age_count = models.IntegerField(null=True)
     public_health_message_count = models.IntegerField(null=True)
+
+    breakfast_served = models.IntegerField(null=True)
+    hcm_served = models.IntegerField(null=True)
+    thr_served = models.IntegerField(null=True)
+    pse_provided = models.IntegerField(null=True)
+    breakfast_25_days = models.IntegerField(null=True)
+    hcm_25_days = models.IntegerField(null=True)
+    pse_awc_25_days = models.IntegerField(null=True)
+    breakfast_9_days = models.IntegerField(null=True)
+    hcm_9_days = models.IntegerField(null=True)
+    pse_awc_9_days = models.IntegerField(null=True)
 
     class Meta(object):
         app_label = 'icds_reports'
@@ -1769,5 +1781,45 @@ class PoshanProgressReportView(models.Model):
     class Meta(object):
         app_label = 'icds_reports'
         db_table = 'poshan_progress_report_view'
+        managed = False
+
+
+class DailyTHRChildHealthView(models.Model):
+    doc_id = models.TextField()
+    awc_id = models.TextField(null=True)
+    district_id = models.TextField(null=True)
+    block_id = models.TextField(null=True)
+    state_id = models.CharField(max_length=40, blank=True, null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+    case_id = models.CharField(max_length=40, primary_key=True)
+    person_name = models.TextField(blank=True, null=True)
+    submitted_on = models.DateTimeField()
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        app_label = 'icds_reports'
+        db_table = 'daily_thr_child_health_view'
+        managed = False
+
+
+class DailyTHRCCSRecordView(models.Model):
+    doc_id = models.TextField()
+    awc_id = models.TextField(null=True)
+    district_id = models.TextField(null=True)
+    block_id = models.TextField(null=True)
+    state_id = models.CharField(max_length=40, blank=True, null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+    case_id = models.CharField(max_length=40, primary_key=True)
+    person_name = models.TextField(blank=True, null=True)
+    submitted_on = models.DateTimeField()
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        app_label = 'icds_reports'
+        db_table = 'daily_thr_ccs_record_view'
         managed = False
 

@@ -106,6 +106,7 @@ from custom.icds_reports.reports.awc_reports import (
     get_awc_reports_system_usage,
     get_beneficiary_details,
     get_pregnant_details,
+    get_awc_report_thr,
 )
 from custom.icds_reports.reports.children_initiated_data import (
     get_children_initiated_data_chart,
@@ -964,6 +965,13 @@ class AwcReportsView(BaseReportView):
                     reversed_order,
                     config['awc_id']
                 )
+        elif step == 'take_home_ration':
+            data = get_awc_report_thr(
+                config,
+                tuple(current_month.timetuple())[:3],
+                self.kwargs.get('domain'),
+                include_test
+            )
         return JsonResponse(data=data)
 
 
@@ -2439,7 +2447,7 @@ class CasDataExportAPIView(View):
 
     @property
     def valid_types(self):
-        return ('woman', 'child', 'awc')
+        return ('woman', 'child', 'awc', 'birth', 'deliverychild')
 
     @staticmethod
     def get_type_code(data_type):
@@ -2447,6 +2455,8 @@ class CasDataExportAPIView(View):
             "child": 'child_health_monthly',
             "woman": 'ccs_record_monthly',
             "awc": 'agg_awc',
+            "birth": 'birth_preparedness',
+            "deliverychild": 'delivery_child'
         }
         return type_map[data_type]
 
