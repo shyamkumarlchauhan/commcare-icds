@@ -10,6 +10,7 @@ from custom.icds_reports.const import (
     THR_REPORT_BENEFICIARY_TYPE,
     THR_REPORT_DAY_BENEFICIARY_TYPE
 )
+from custom.icds_reports.reports.malnutrition_tracker_report import MalnutritionTrackerReport
 from custom.icds_reports.reports.incentive import IncentiveReport
 from custom.icds_reports.reports.service_delivery_report import ServiceDeliveryReport
 from custom.icds_reports.reports.take_home_ration import TakeHomeRationExport
