@@ -11,7 +11,8 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
     tablename = AGG_DAILY_CCS_RECORD_THR_TABLE
     temporary_tablename = 'temp_daily_thr_ccs_record'
 
-    def __init__(self, month):
+    def __init__(self, state_id, month):
+        self.state_id = state_id
         self.month = transform_day_to_month(month)
         self.next_month_start = self.month + relativedelta(months=1)
         self.current_month_start = self.month
@@ -47,6 +48,7 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
     def aggregation_query(self):
         query_params = {
             "month": self.current_month_start,
+            "state_id": self.state_id,
             "current_month_start": self.current_month_start,
             "next_month_start": self.next_month_start,
         }
@@ -58,14 +60,15 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
                 ) (
                   SELECT
                     doc_id,
-                    state_id,
+                    %(state_id)s AS state_id,
                     supervisor_id,
                     %(month)s AS month,
                     ccs_record_case_id as case_id,
                     timeend AS latest_time_end_processed,
                     photo_thr_packets_distributed
                   FROM "{ucr_tablename}"
-                  WHERE timeend >= %(current_month_start)s AND timeend < %(next_month_start)s AND
+                  WHERE state_id = %(state_id)s AND
+                        timeend >= %(current_month_start)s AND timeend < %(next_month_start)s AND
                         ccs_record_case_id IS NOT NULL AND days_ration_given_mother IS NOT NULL
                 )
                 """.format(
@@ -82,12 +85,13 @@ class DailyTHRCCSRecordHelper(BaseICDSAggregationDistributedHelper):
 
     def aggregation_queries(self):
         return [
-            """DROP TABLE IF EXISTS "local_tmp_agg_app";"""
-            """CREATE TABLE "local_tmp_agg_app" AS SELECT * FROM "{temporary_tablename}";""".format(
+            """DELETE FROM "{tablename}" WHERE month = '{current_month}';""".format(tablename=self.tablename,
+                                                                                    current_month=self.month),
+            """INSERT INTO "{tablename}" SELECT * from "{temporary_tablename}";""".format(
+                tablename=self.tablename,
                 temporary_tablename=self.temporary_tablename
             ),
-            """DELETE FROM "{tablename}" WHERE month = '{current_month}';""".format(tablename=self.tablename,
-                                                                                          current_month=self.month),
-            """INSERT INTO "{tablename}" SELECT * from "local_tmp_agg_app";""".format(tablename=self.tablename),
-            """DROP TABLE "local_tmp_agg_app";"""
+            """DROP TABLE "{temporary_tablename}";""".format(
+                temporary_tablename=self.temporary_tablename
+            )
         ]

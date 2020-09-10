@@ -81,7 +81,9 @@ STATE_TASKS = {
     'aggregate_df_forms': (drop_df_indices, _aggregate_df_forms, create_df_indices),
     'aggregate_ag_forms': (ag_pre_queries, _agg_adolescent_girls_registration_table, None),
     'aggregate_migration_forms': (migration_pre_queries, _agg_migration_table, None),
-    'aggregate_availing_services_forms': (availing_pre_queries, _agg_availing_services_table, None)
+    'aggregate_availing_services_forms': (availing_pre_queries, _agg_availing_services_table, None),
+    '_daily_thr_ccs_record': (None, _daily_thr_ccs_record, None),
+    '_daily_thr_child_health': (None, _daily_thr_child_health, None)
 }
 
 ALL_STATES_TASKS = {
@@ -105,9 +107,7 @@ NORMAL_TASKS = {
     'update_service_delivery_report': (None, update_service_delivery_report, None),
     'update_bihar_api_table': (None, update_bihar_api_table, None),
     'update_child_vaccine_table': (None, update_child_vaccine_table, None),
-    'aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None),
-    '_daily_thr_ccs_record': (None, _daily_thr_ccs_record, None),
-    '_daily_thr_child_health': (None, _daily_thr_child_health, None)
+    'aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None)
 }
 
 

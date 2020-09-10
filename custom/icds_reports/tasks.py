@@ -368,13 +368,22 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
 
             res_inactive_aww.get(disable_sync_subtasks=False)
 
-            res_daily_thr_ccs = chain(
-                icds_aggregation_task.si(date=calculation_date, func_name='_daily_thr_ccs_record'),).apply_async()
-            res_daily_thr_ccs.get(disable_sync_subtasks=False)
+            daily_thr_ccs_tasks = list()
+            daily_thr_ccs_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
+                                                                       func_name='_daily_thr_ccs_record')
+                                        for state_id in state_ids])
+            daily_thr_ccs_tasks_results = [daily_thr_ccs_task.delay() for daily_thr_ccs_task in daily_thr_ccs_tasks]
+            for daily_thr_ccs_task_result in daily_thr_ccs_tasks_results:
+                daily_thr_ccs_task_result.get(disable_sync_subtasks=False)
 
-            res_daily_thr_child = chain(
-                icds_aggregation_task.si(date=calculation_date, func_name='_daily_thr_child_health'), ).apply_async()
-            res_daily_thr_child.get(disable_sync_subtasks=False)
+            daily_thr_child_tasks = list()
+            daily_thr_child_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
+                                                                         func_name='_daily_thr_child_health')
+                                          for state_id in state_ids])
+            daily_thr_child_tasks_results = [daily_thr_child_task.delay() for daily_thr_child_task in
+                                             daily_thr_child_tasks]
+            for daily_thr_child_task_result in daily_thr_child_tasks_results:
+                daily_thr_child_task_result.get(disable_sync_subtasks=False)
 
             res_awc = chain(icds_aggregation_task.si(date=calculation_date, func_name='_agg_awc_table'),
                             *res_ls_tasks
@@ -460,9 +469,7 @@ def icds_aggregation_task(self, date, func_name):
         '_agg_awc_table': _agg_awc_table,
         'aggregate_awc_daily': aggregate_awc_daily,
         'update_service_delivery_report': update_service_delivery_report,
-        '_aggregate_inactive_aww_agg': _aggregate_inactive_aww_agg,
-        '_daily_thr_ccs_record': _daily_thr_ccs_record,
-        '_daily_thr_child_health': _daily_thr_child_health
+        '_aggregate_inactive_aww_agg': _aggregate_inactive_aww_agg
     }[func_name]
 
     db_alias = get_icds_ucr_citus_db_alias()
@@ -509,7 +516,9 @@ def icds_state_aggregation_task(self, state_id, date, func_name):
         '_agg_thr_table': _agg_thr_table,
         '_agg_adolescent_girls_registration_table': _agg_adolescent_girls_registration_table,
         '_agg_migration_table': _agg_migration_table,
-        '_agg_availing_services_table': _agg_availing_services_table
+        '_agg_availing_services_table': _agg_availing_services_table,
+        '_daily_thr_ccs_record': _daily_thr_ccs_record,
+        '_daily_thr_child_health': _daily_thr_child_health
     }[func_name]
 
     db_alias = get_icds_ucr_citus_db_alias()
@@ -2084,10 +2093,10 @@ def update_child_vaccine_table(target_date):
 
 
 @track_time
-def _daily_thr_ccs_record(day):
-    AggregateDailyCcsRecordTHRForms.aggregate(force_to_date(day))
+def _daily_thr_ccs_record(day, state_id):
+    AggregateDailyCcsRecordTHRForms.aggregate(state_id, force_to_date(day))
 
 
 @track_time
-def _daily_thr_child_health(day):
-    AggregateDailyChildHealthTHRForms.aggregate(force_to_date(day))
+def _daily_thr_child_health(day, state_id):
+    AggregateDailyChildHealthTHRForms.aggregate(state_id, force_to_date(day))
