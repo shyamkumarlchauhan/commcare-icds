@@ -1866,6 +1866,9 @@ def create_malnutrition_tracker_report(excel_data, data_type, config, aggregatio
     state = export_info[1][1] if aggregation_level > 0 else ''
     district = export_info[2][1] if aggregation_level > 1 else ''
     block = export_info[3][1] if aggregation_level > 2 else ''
+    supervisor = export_info[4][1] if aggregation_level > 3 else ''
+    awc = export_info[5][1] if aggregation_level > 4 else ''
+
     excel_data = [line[aggregation_level:] for line in excel_data[0][1]]
     thin_border = Border(
         left=Side(style='thin'),
@@ -1908,6 +1911,12 @@ def create_malnutrition_tracker_report(excel_data, data_type, config, aggregatio
         worksheet['C3'].value = "District: {}".format(district)
     if block:
         worksheet['D3'].value = "Block: {}".format(block)
+    if supervisor:
+        worksheet['E3'].value = "Sector: {}".format(supervisor)
+    if awc:
+        worksheet['F3'].value = "AWC: {}".format(awc)
+
+
     date_cell = '{0}3'.format(last_column)
     date_description_cell = '{0}3'.format(get_column_letter(amount_of_columns - 1))
     worksheet[date_description_cell].value = "Date when downloaded:"
@@ -1980,11 +1989,10 @@ def create_malnutrition_tracker_report(excel_data, data_type, config, aggregatio
     widths = {}
     widths_columns = list()
     widths_columns.extend(columns)
-    standard_widths = [15, 15]
-    standard_widths.extend([15] * (4 - aggregation_level))
-    standard_widths.extend([15]* (len(columns)-aggregation_level))
+    standard_widths = [15] * len(columns)
     for col, width in zip(widths_columns, standard_widths):
         widths[col] = width
+
     widths['C'] = max(widths['C'], len(state) * 4 // 3 if state else 0)
     widths['D'] = 9 + (len(district) * 4 // 3 if district else 0)
     widths['E'] = 8 + (len(block) * 4 // 3 if district else 0)
