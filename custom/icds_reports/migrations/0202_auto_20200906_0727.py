@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AggregateSamMamForm',
             fields=[
-                ('state_id', models.CharField(max_length=40)),
+                ('state_id', models.TextField(null=True)),
                 ('supervisor_id', models.TextField(null=True)),
                 ('month', models.DateField(help_text='Will always be YYYY-MM-01')),
                 ('child_health_case_id', models.TextField(primary_key=True, serialize=False)),

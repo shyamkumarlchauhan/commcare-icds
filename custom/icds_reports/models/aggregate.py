@@ -1947,8 +1947,7 @@ class ChildVaccines(models.Model, AggregateMixin):
 
 
 class AggregateSamMamForm(models.Model, AggregateMixin):
-
-    state_id = models.CharField(max_length=40)
+    state_id = models.TextField(null=True)
     supervisor_id = models.TextField(null=True)
     month = models.DateField(help_text="Will always be YYYY-MM-01")
 

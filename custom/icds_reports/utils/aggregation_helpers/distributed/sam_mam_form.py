@@ -17,10 +17,11 @@ class SamMamFormAggregationDistributedHelper(StateBasedAggregationDistributedHel
         current_month_start = month_formatter(self.month)
         next_month_start = month_formatter(self.month + relativedelta(months=1))
 
-        # We need many windows here because we want the last time changed for each of these columns
-        # Window definitions inspired by https://stackoverflow.com/a/47223416
-        # The CASE/WHEN's are needed, because time end should be NULL when a form has not changed the value,
-        # but the windows include all forms (this works because we use LAST_VALUE and NULLs are sorted to the top
+        # We need two windows here because we want to filter the forms differently for two different
+        #   columns.
+        # Window definitions inspired by https://stackoverflow.com/a/47223416.
+        # rank() is used because we want to find the dates of first 4 forms submitted for each case with
+        #  last_visit_date and poshan_panchayat_date in the month separately.
         return """
             SELECT
                 supervisor_id,
