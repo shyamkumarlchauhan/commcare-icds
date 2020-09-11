@@ -4243,7 +4243,7 @@ class TestExportData(TestCase):
                 'data_period': 'month'
             },
             loc_level=1,
-            beta=True
+            beta=False
         ).get_excel_data(location)
 
         self.assertListEqual(
@@ -4318,7 +4318,7 @@ class TestExportData(TestCase):
                 'data_period': 'month'
             },
             loc_level=1,
-            beta=True
+            beta=False
         ).get_excel_data(location)
         self.assertListEqual(
             data,
@@ -4360,7 +4360,7 @@ class TestExportData(TestCase):
                 'year': 2017
             },
             loc_level=2,
-            beta=True
+            beta=False
         ).get_excel_data(location)
         self.assertListEqual(
             data,
@@ -4407,7 +4407,7 @@ class TestExportData(TestCase):
                 'year': 2017
             },
             loc_level=1,
-            beta=True
+            beta=False
         ).get_excel_data(location)
         self.assertListEqual(
             data,
