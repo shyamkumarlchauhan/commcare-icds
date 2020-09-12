@@ -1,4 +1,3 @@
-from datetime import date
 from operator import mul, truediv, sub
 from datetime import date
 from corehq.apps.locations.models import SQLLocation
@@ -10,11 +9,12 @@ from custom.icds_reports.sqldata.base_operationalization import BaseOperationali
     BaseOperationalizationBeta
 from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
+
 from custom.icds_reports.models.views import ServiceDeliveryReportView
-from custom.icds_reports.models.aggregate import AggChildHealth
+from custom.icds_reports.models.aggregate import AggChildHealth, AggMPRAwc, AggAwc
 from custom.icds_reports.utils import get_location_filter
 from django.db.models.aggregates import Sum
-from django.db.models import Case, When, Value
+from django.db.models import Case, When, Value, F
 
 
 class MPRIdentification(BaseIdentification):
@@ -2383,6 +2383,42 @@ class MPRVhnd(ICDSMixin, MPRData):
         )
 
 
+class MPRVhndBeta(MPRVhnd):
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            done_when_planned=F('vhnd_done_when_planned'),
+            aww_present=F('vhnd_with_aww_present'),
+            icds_sup=F('vhnd_with_icds_sup'),
+            asha_present=F('vhnd_with_asha_present'),
+            anm_mpw=F('vhnd_with_anm_mpw'),
+            health_edu_org=F('vhnd_with_health_edu_org'),
+            display_tools=F('vhnd_with_display_tools'),
+            thr_distr=F('vhnd_with_thr_distr'),
+            child_immu=F('vhnd_with_child_immu'),
+            vit_a_given=F('vhnd_with_vit_a_given'),
+            anc_today=F('vhnd_with_anc_today'),
+            local_leader=F('vhnd_with_local_leader'),
+            due_list_prep_immunization=F('vhnd_with_due_list_prep_immunization'),
+            due_list_prep_vita_a=F('vhnd_with_due_list_prep_vita_a'),
+            due_list_prep_antenatal_checkup=F('vhnd_with_due_list_prep_antenatal_checkup'),
+        ).order_by('month').first()
+
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+        return {key: value if value else 0 for key,value in data.items() }
+
+
 class MPRReferralServices(ICDSMixin, MPRData):
 
     title = '11. Referral Services'
@@ -2920,6 +2956,35 @@ class MPRMonitoring(ICDSMixin, MPRData):
                 }
             )
         )
+
+
+class MPRMonitoringBeta(MPRMonitoring):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values(
+            'visitor_icds_sup',
+            'visitor_anm',
+            'visitor_health_sup',
+            'visitor_cdpo',
+            'visitor_med_officer',
+            'visitor_dpo',
+            'visitor_officer_state',
+            'visitor_officer_central'
+        ).order_by('month').first()
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+        return {key: value if value else 0 for key,value in data.items() }
 
 
 def _get_percent(a, b):

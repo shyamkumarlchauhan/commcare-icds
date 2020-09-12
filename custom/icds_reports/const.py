@@ -127,6 +127,7 @@ AGG_THR_V2_TABLE = 'icds_dashboard_thr_v2'
 AGG_DASHBOARD_ACTIVITY = 'icds_dashboard_user_activity'
 AGG_ADOLESCENT_GIRLS_REGISTRATION_TABLE = 'icds_dashboard_adolescent_girls_registration'
 AGG_GOV_DASHBOARD_TABLE = 'agg_gov_dashboard'
+AGG_MPR_AWC_TABLE = 'agg_mpr_awc'
 AGG_MIGRATION_TABLE = 'icds_dashboard_migration_forms'
 AGG_AVAILING_SERVICES_TABLE = 'icds_dashboard_availing_service_forms'
 
