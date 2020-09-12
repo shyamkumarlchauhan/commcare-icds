@@ -1,17 +1,21 @@
 from datetime import date
 from operator import mul, truediv, sub
-
+from datetime import date
 from corehq.apps.locations.models import SQLLocation
 from corehq.apps.reports.datatables import DataTablesHeader, DataTablesColumn, DataTablesColumnGroup
 
 from django.utils.translation import ugettext as _
 from custom.icds_reports.sqldata.base_identification import BaseIdentification
-from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization
-from custom.icds_reports.sqldata.base_populations import BasePopulation
+from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization, \
+    BaseOperationalizationBeta
+from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
-from custom.icds_reports.models.aggregate import AggChildHealth
+
+from custom.icds_reports.models.views import ServiceDeliveryReportView
+from custom.icds_reports.models.aggregate import AggChildHealth, AggMPRAwc, AggAwc
 from custom.icds_reports.utils import get_location_filter
-from django.db.models import F
+from django.db.models.aggregates import Sum
+from django.db.models import Case, When, Value, F
 
 
 class MPRIdentification(BaseIdentification):
@@ -36,9 +40,13 @@ class MPROperationalization(BaseOperationalization, MPRData):
     pass
 
 
+class MPROperationalizationBeta(BaseOperationalizationBeta, MPRData):
+    pass
+
+
 class MPRSectors(object):
 
-    title = 'd. No of Sectors'
+    title = 'c. No of Sectors'
     slug = 'sectors'
     has_sections = False
     subtitle = []
@@ -73,9 +81,14 @@ class MPRSectors(object):
             ]
 
 
+
 class MPRPopulation(BasePopulation, MPRData):
 
-    title = 'e. Total Population of Project'
+    title = 'd. Total Population of Project'
+
+
+class MPRPopulationBeta(BasePopulationBeta, MPRData):
+    title = 'd. Total Population of Project'
 
 
 class MPRBirthsAndDeaths(ICDSMixin, MPRData):
@@ -416,6 +429,155 @@ class MPRSupplementaryNutrition(ICDSMixin, MPRData):
         )
 
 
+class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
+
+    title = '4. Delivery of Supplementary Nutrition and Pre-School Education (PSE)'
+    slug = 'supplementary_nutrition'
+
+    def __init__(self, config, allow_conditional_agg=False):
+        super(MPRSupplementaryNutritionBeta, self).__init__(config, allow_conditional_agg)
+        self.awc_open_count = 0
+
+    @property
+    def subtitle(self):
+        return 'Average no. days AWCs were open during the month? %.1f' % (
+            self.awc_open_count / (self.awc_number or 1)
+        ),
+
+    @property
+    def headers(self):
+        return DataTablesHeader(
+            DataTablesColumn(''),
+            DataTablesColumn(_('Morning snacks/ breakfast')),
+            DataTablesColumn(_('Hot cooked meals/RTE')),
+            DataTablesColumn(_('Take home ration (THR')),
+            DataTablesColumn(_('PSE'))
+        )
+
+    @property
+    def rows(self):
+        if self.config['location_id']:
+            filters = get_location_filter(self.config['location_id'], self.config['domain'])
+            if filters.get('aggregation_level') > 1:
+                filters['aggregation_level'] -= 1
+
+            filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+            data = ServiceDeliveryReportView.objects.filter(**filters).values(
+                'num_launched_awcs',
+                'breakfast_served',
+                'hcm_served',
+                'thr_served',
+                'pse_provided',
+                'breakfast_25_days',
+                'hcm_25_days',
+                'pse_awc_25_days',
+                'breakfast_9_days',
+                'hcm_9_days',
+                'pse_awc_9_days',
+                'num_launched_awcs').order_by('month').first()
+
+            self.awc_open_count = data.get('awc_days_open', 0)
+            rows = []
+            for row in self.row_config:
+                row_data = []
+                for idx, cell in enumerate(row):
+                    if isinstance(cell, dict):
+                        num = data.get(cell['column'], 0)
+                        if cell['second_value'] == 'location_number':
+                            denom = self.awc_number
+                        else:
+                            denom = data.get(cell['second_value'], 1)
+                        if 'format' in cell:
+                            cell_data = '%.1f%%' % (cell['func'](num, float(denom or 1)) * 100)
+                        else:
+                            cell_data = '%.1f' % cell['func'](num, float(denom or 1))
+                        row_data.append(cell_data)
+                    else:
+                        row_data.append(data.get(cell, cell if cell == '--' or idx == 0 else 0))
+                rows.append(row_data)
+            return rows
+
+    @property
+    def row_config(self):
+        return (
+            (
+                _('a. Average number of days services were provided'),
+                {
+                    'column': 'breakfast_served',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                },
+                {
+                    'column': 'hcm_served',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                },
+                {
+                    'column': 'thr_served',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                },
+                {
+                    'column': 'pse_provided',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                }
+            ),
+            (
+                _('b. % of AWCs provided supplementary food for 25 or more days'),
+                {
+                    'column': 'breakfast_25_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                {
+                    'column': 'hcm_25_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                '--',
+                '--'
+            ),
+            (
+                _('c. % of AWCs providing PSE for 25 or more days'),
+                '--',
+                '--',
+                '--',
+                {
+                    'column': 'pse_awc_25_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                }
+            ),
+            (
+                _('d. % of AWCs providing services for 9 days or less'),
+                {
+                    'column': 'breakfast_9_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                {
+                    'column': 'hcm_9_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                '',
+                {
+                    'column': 'pse_awc_9_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                }
+            ),
+        )
+
+
 class MPRUsingSalt(ICDSMixin, MPRData):
 
     slug = 'using_salt'
@@ -427,6 +589,34 @@ class MPRUsingSalt(ICDSMixin, MPRData):
             data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
             use_salt = data.get('use_salt', 0)
             percent = "%.2f" % ((use_salt or 0) * 100 / float(self.awc_number or 1))
+            return [
+                ["Number of AWCs using Iodized Salt:", use_salt],
+                ["% of AWCs:", percent + " %"]
+            ]
+
+        return []
+
+
+class MPRUsingSaltBeta(ICDSMixin, MPRData):
+
+    slug = 'using_salt'
+    title = "5. Number of AWCs using Iodized Salt"
+
+    @property
+    def rows(self):
+        if self.config['location_id']:
+            filters = get_location_filter(self.config['location_id'], self.config['domain'])
+            if filters.get('aggregation_level') > 1:
+                filters['aggregation_level'] -= 1
+
+            filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+            awc_data = AggAwc.objects.filter(**filters).values(
+                'use_salt',
+                'num_launched_awcs').order_by('month').first()
+
+            use_salt = awc_data.get('use_salt', 0)
+            percent = "%.2f" % ((use_salt or 0) * 100 / float(awc_data.get('num_launched_awcs', 0) or 1))
             return [
                 ["Number of AWCs using Iodized Salt:", use_salt],
                 ["% of AWCs:", percent + " %"]
@@ -1628,8 +1818,408 @@ class MPRGrowthMonitoring(ICDSMixin, MPRData):
         )
 
 
-class MPRImmunizationCoverage(ICDSMixin, MPRData):
+class MPRGrowthMonitoringBeta(MPRGrowthMonitoring):
 
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+        child_data = AggChildHealth.objects.filter(**filters).values('gender').annotate(
+            weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                  then='nutrition_status_weighed',
+                                  ), default=Value(0))),
+            weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                    then='nutrition_status_weighed',
+                                    ), default=Value(0))),
+            weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                    then='nutrition_status_weighed',
+                                    ), default=Value(0))),
+            child_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                      then='valid_in_month',
+                                      ), default=Value(0))),
+            child_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                        then='valid_in_month',
+                                        ), default=Value(0))),
+            child_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                        then='valid_in_month',
+                                        ), default=Value(0))),
+            norm_weight_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                     then='nutrition_status_normal',
+                                     ), default=Value(0))),
+            norm_weight_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                       then='nutrition_status_normal',
+                                       ), default=Value(0))),
+            norm_weight_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                       then='nutrition_status_normal',
+                                       ), default=Value(0))),
+            mod_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                            then='nutrition_status_moderately_underweight',
+                                            ), default=Value(0))),
+            mod_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                              then='nutrition_status_moderately_underweight',
+                                              ), default=Value(0))),
+            mod_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                              then='nutrition_status_moderately_underweight',
+                                              ), default=Value(0))),
+            sev_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                            then='nutrition_status_severely_underweight',
+                                            ), default=Value(0))),
+            sev_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                              then='nutrition_status_severely_underweight',
+                                              ), default=Value(0))),
+            sev_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                              then='nutrition_status_severely_underweight',
+                                              ), default=Value(0))),
+        )
+        data = dict()
+
+        for row in child_data:
+            data.update({
+                f"{row['gender']}_{key}": value
+                for key, value in row.items()
+            })
+        data = {key: value if value else 0 for key, value in data.items()}
+        return data
+
+    @property
+    def row_config(self):
+        return (
+            (
+                'I. Total number of children weighed',
+                '',
+                'F_weighed_count',
+                'M_weighed_count',
+                'F_weighed_count_1',
+                'M_weighed_count_1',
+                'F_weighed_count_2',
+                'M_weighed_count_2',
+                {
+                    'columns': (
+                        'F_weighed_count',
+                        'F_weighed_count_1',
+                        'F_weighed_count_2'
+                    ),
+                    'alias': 'resident_female_weight'
+                },
+                {
+                    'columns': (
+                        'M_weighed_count',
+                        'M_weighed_count_1',
+                        'M_weighed_count_2'
+                    ),
+                    'alias': 'resident_male_weight'
+                },
+                {
+                    'columns': ('resident_female_weight', 'resident_male_weight'),
+                    'alias': 'all_resident_weight'
+                },
+            ),
+            (
+                'II. Annual Population Totals',
+                '',
+                'F_child_count',
+                'M_child_count',
+                'F_child_count_1',
+                'M_child_count_1',
+                'F_child_count_2',
+                'M_child_count_2',
+                {
+                    'columns': ('F_child_count', 'F_child_count_1', 'F_child_count_2'),
+                    'alias': 'child_female'
+                },
+                {
+                    'columns': ('M_child_count', 'M_child_count_1', 'M_child_count_2'),
+                    'alias': 'child_male'
+                },
+                {
+                    'columns': ('child_female', 'child_male'),
+                    'alias': 'all_child'
+                },
+            ),
+            (
+                'III. Weighing Efficiency (%)',
+                '',
+                {
+                    'columns': ('F_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_child_count'
+                },
+                {
+                    'columns': ('M_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_child_count'
+                },
+                {
+                    'columns': ('F_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_child_count_1'
+                },
+                {
+                    'columns': ('M_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_child_count_1'
+                },
+                {
+                    'columns': ('F_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_child_count_2'
+                },
+                {
+                    'columns': ('M_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_child_count_2'
+                },
+                {
+                    'columns': ('resident_female_weight',),
+                    'func': truediv,
+                    'second_value': 'child_female'
+                },
+                {
+                    'columns': ('resident_male_weight',),
+                    'func': truediv,
+                    'second_value': 'child_male'
+                },
+                {
+                    'columns': ('all_resident_weight',),
+                    'func': truediv,
+                    'second_value': 'all_child'
+                }
+            ),
+            (
+                'IV. Out of the children weighed, no of children found:',
+            ),
+            (
+                'a. Normal (Green)',
+                'Num',
+                'F_norm_weight_count',
+                'M_norm_weight_count',
+                'F_norm_weight_count_1',
+                'M_norm_weight_count_1',
+                'F_norm_weight_count_2',
+                'M_norm_weight_count_2',
+                {
+                    'columns': ('F_norm_weight_count', 'F_norm_weight_count_1', 'F_norm_weight_count_2'),
+                    'alias': 'all_F_sub_weight'
+                },
+                {
+                    'columns': ('M_norm_weight_count', 'M_norm_weight_count_1', 'M_norm_weight_count_2'),
+                    'alias': 'all_M_sub_weight'
+                },
+                {
+                    'columns': ('all_F_sub_weight', 'all_M_sub_weight'),
+                    'alias': 'all_sub_weight'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_norm_weight_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_norm_weight_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_norm_weight_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_norm_weight_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_norm_weight_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_norm_weight_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('all_F_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('all_M_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            ),
+            (
+                'b. Moderately underweight (Yellow)',
+                'Num',
+                'F_mod_weighed_count',
+                'M_mod_weighed_count',
+                'F_mod_weighed_count_1',
+                'M_mod_weighed_count_1',
+                'F_mod_weighed_count_2',
+                'M_mod_weighed_count_2',
+                {
+                    'columns': (
+                        'F_mod_weighed_count',
+                        'F_mod_weighed_count_1',
+                        'F_mod_weighed_count_2'),
+                    'alias': 'F_sum_mod_resident_weighted'
+                },
+                {
+                    'columns': (
+                        'M_mod_weighed_count',
+                        'M_mod_weighed_count_1',
+                        'M_mod_weighed_count_2'),
+                    'alias': 'M_sum_mod_resident_weighted'
+                },
+                {
+                    'columns': ('F_sum_mod_resident_weighted', 'M_sum_mod_resident_weighted'),
+                    'alias': 'all_mod_resident_weighted'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_mod_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_mod_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_mod_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_mod_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_mod_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_mod_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('F_sum_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('M_sum_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            ),
+            (
+                'Severely Underweight (Orange)',
+                'Num',
+                'F_sev_weighed_count',
+                'M_sev_weighed_count',
+                'F_sev_weighed_count_1',
+                'M_sev_weighed_count_1',
+                'F_sev_weighed_count_2',
+                'M_sev_weighed_count_2',
+                {
+                    'columns': (
+                        'F_sev_weighed_count',
+                        'F_sev_weighed_count_1',
+                        'F_sev_weighed_count_2'),
+                    'alias': 'F_sum_sev_resident_weighted'
+                },
+                {
+                    'columns': (
+                        'M_sev_weighed_count',
+                        'M_sev_weighed_count_1',
+                        'M_sev_weighed_count_2'),
+                    'alias': 'M_sev_mod_resident_weighted'
+                },
+                {
+                    'columns': ('F_sum_sev_resident_weighted', 'M_sev_mod_resident_weighted'),
+                    'alias': 'all_sev_resident_weighted'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_sev_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_sev_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_sev_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_sev_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_sev_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_sev_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('F_sum_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('M_sum_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            )
+        )
+
+
+class MPRImmunizationCoverage(ICDSMixin, MPRData):
     title = '9. Immunization Coverage'
     slug = 'immunization_coverage'
 
@@ -1839,6 +2429,42 @@ class MPRVhnd(ICDSMixin, MPRData):
                 }
             )
         )
+
+
+class MPRVhndBeta(MPRVhnd):
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            done_when_planned=F('vhnd_done_when_planned'),
+            aww_present=F('vhnd_with_aww_present'),
+            icds_sup=F('vhnd_with_icds_sup'),
+            asha_present=F('vhnd_with_asha_present'),
+            anm_mpw=F('vhnd_with_anm_mpw'),
+            health_edu_org=F('vhnd_with_health_edu_org'),
+            display_tools=F('vhnd_with_display_tools'),
+            thr_distr=F('vhnd_with_thr_distr'),
+            child_immu=F('vhnd_with_child_immu'),
+            vit_a_given=F('vhnd_with_vit_a_given'),
+            anc_today=F('vhnd_with_anc_today'),
+            local_leader=F('vhnd_with_local_leader'),
+            due_list_prep_immunization=F('vhnd_with_due_list_prep_immunization'),
+            due_list_prep_vita_a=F('vhnd_with_due_list_prep_vita_a'),
+            due_list_prep_antenatal_checkup=F('vhnd_with_due_list_prep_antenatal_checkup'),
+        ).order_by('month').first()
+
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+        return {key: value if value else 0 for key,value in data.items() }
 
 
 class MPRReferralServices(ICDSMixin, MPRData):
@@ -2378,6 +3004,35 @@ class MPRMonitoring(ICDSMixin, MPRData):
                 }
             )
         )
+
+
+class MPRMonitoringBeta(MPRMonitoring):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values(
+            'visitor_icds_sup',
+            'visitor_anm',
+            'visitor_health_sup',
+            'visitor_cdpo',
+            'visitor_med_officer',
+            'visitor_dpo',
+            'visitor_officer_state',
+            'visitor_officer_central'
+        ).order_by('month').first()
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+        return {key: value if value else 0 for key,value in data.items() }
 
 
 def _get_percent(a, b):
