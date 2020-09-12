@@ -13,7 +13,8 @@ from custom.icds_reports.const import AADHAR_SEEDED_BENEFICIARIES, CHILDREN_ENRO
     OUT_OF_SCHOOL_ADOLESCENT_GIRLS_11_14_YEARS
 from custom.icds_reports.reports.awc_reports import get_beneficiary_details, get_awc_reports_system_usage, \
     get_awc_reports_pse, get_awc_reports_maternal_child, get_awc_report_demographics, \
-    get_awc_report_beneficiary, get_awc_report_pregnant, get_pregnant_details, get_awc_report_lactating
+    get_awc_report_beneficiary, get_awc_report_pregnant, get_pregnant_details, get_awc_report_lactating, \
+    get_awc_report_thr
 from custom.icds_reports.messages import new_born_with_low_weight_help_text, wasting_help_text, \
     exclusive_breastfeeding_help_text, early_initiation_breastfeeding_help_text, \
     children_initiated_appropriate_complementary_feeding_help_text, institutional_deliveries_help_text, \
@@ -2375,3 +2376,77 @@ class TestAWCReport(TestCase):
                      'is_ebf': u'No', 'institutional_delivery': u'No'}
                 ]
             )
+
+    def test_awc_reports_thr_images(self):
+        data = get_awc_report_thr(
+            {
+                'state_id': 'st1',
+                'district_id': 'd1',
+                'block_id': 'b1',
+                'supervisor_id': 's1',
+                'awc_id': 'a49'
+            },
+            (2017, 5, 1),
+            'icds-cas',
+            now_date=(2017, 6, 1)
+        )
+        images = data['images'][0] + data['images'][1]
+        self.assertCountEqual(
+            images,
+            [
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2233/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2618/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2632/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_2667/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_3353/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_3593/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_5537/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": None
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_84/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": "Name 2793"
+                },
+                {
+                    "image": "http://localhost:8000/a/icds-cas/icds_dashboard/icds_image_accessor/"
+                             "thr_form_80/image1.jpg",
+                    "date": "01/05/2017",
+                    "person_name": "Name 2828"
+                }
+            ]
+        )

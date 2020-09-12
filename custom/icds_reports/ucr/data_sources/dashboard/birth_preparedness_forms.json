@@ -524,6 +524,42 @@
           "type": "property_path",
           "property_path": ["form", "bp1", "new_ifa_tablets_total"]
         }
+      },
+      {
+        "column_id": "username",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "meta", "username"]
+        }
+      },
+      {
+        "column_id": "timestart",
+        "datatype": "datetime",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "meta", "timeStart"]
+        }
+      },
+      {
+        "column_id": "tt_complete",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "bp1", "tt_complete"]
+        }
+      },
+      {
+        "column_id": "num_anc_complete",
+        "datatype": "integer",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": ["form", "bp1", "num_anc_complete"]
+        }
       }
     ],
     "named_expressions": {
@@ -580,6 +616,9 @@
     "sql_column_indexes": [
       {
         "column_ids": ["state_id", "timeend"]
+      },
+      {
+        "column_ids": ["received_on", "state_id" ]
       }
     ],
     "disable_destructive_rebuild": true

@@ -70,7 +70,8 @@ from custom.icds_reports.const import (
     SERVICE_DELIVERY_REPORT,
     CHILD_GROWTH_TRACKER_REPORT,
     POSHAN_PROGRESS_REPORT,
-    AWW_ACTIVITY_REPORT
+    AWW_ACTIVITY_REPORT,
+    MALNUTRITION_TRACKING_REPORT
 )
 from custom.icds_reports.models import (
     AggAwc,
@@ -96,6 +97,8 @@ from custom.icds_reports.models import (
     ICDSAuditEntryRecord,
     IcdsMonths,
     UcrTableNameMapping,
+    AggregateSamMamForm
+
 )
 from custom.icds_reports.models.aggregate import (
     AggAwcDaily,
@@ -113,8 +116,9 @@ from custom.icds_reports.models.aggregate import (
     AggregateAvailingServiceForms,
     BiharAPIDemographics,
     ChildVaccines,
-    AggMPRAwc
-
+    AggMPRAwc,
+    AggregateDailyChildHealthTHRForms,
+    AggregateDailyCcsRecordTHRForms
 )
 from custom.icds_reports.models.helper import IcdsFile
 from custom.icds_reports.models.util import UcrReconciliationStatus
@@ -125,6 +129,7 @@ from custom.icds_reports.reports.issnip_monthly_register import (
 )
 from custom.icds_reports.reports.take_home_ration import TakeHomeRationExport
 from custom.icds_reports.reports.service_delivery_report import ServiceDeliveryReport
+from custom.icds_reports.reports.malnutrition_tracker_report import MalnutritionTrackerReport
 from custom.icds_reports.sqldata.exports.awc_infrastructure import (
     AWCInfrastructureExport,
 )
@@ -157,7 +162,8 @@ from custom.icds_reports.utils import (
     create_service_delivery_report,
     create_child_growth_tracker_report,
     create_poshan_progress_report,
-    create_aww_activity_report
+    create_aww_activity_report,
+    create_malnutrition_tracker_report
 )
 from custom.icds_core.view_utils import icds_pre_release_features
 from custom.icds_reports.utils.aggregation_helpers.distributed import (
@@ -176,6 +182,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed.mbt import (
     AwcMbtDistributedHelper,
     CcsMbtDistributedHelper,
     ChildHealthMbtDistributedHelper,
+    BirthPreparednessMbtDistributedHelper,
+    DeliveryChildMbtDistributedHelper,
 )
 
 celery_task_logger = logging.getLogger('celery.task')
@@ -280,6 +288,11 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
             ])
             stage_1_tasks.extend([
                 icds_state_aggregation_task.si(
+                    state_id=state_id, date=monthly_date, func_name='_aggregate_child_health_sam_mam_form'
+                ) for state_id in state_ids
+            ])
+            stage_1_tasks.extend([
+                icds_state_aggregation_task.si(
                     state_id=state_id, date=monthly_date, func_name='_aggregate_ccs_record_pnc_forms'
                 ) for state_id in state_ids
             ])
@@ -372,6 +385,23 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
             res_inactive_aww = chain(icds_aggregation_task.si(date=calculation_date, func_name='_aggregate_inactive_aww_agg'),).apply_async()
 
             res_inactive_aww.get(disable_sync_subtasks=False)
+
+            daily_thr_ccs_tasks = list()
+            daily_thr_ccs_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
+                                                                       func_name='_daily_thr_ccs_record')
+                                        for state_id in state_ids])
+            daily_thr_ccs_tasks_results = [daily_thr_ccs_task.delay() for daily_thr_ccs_task in daily_thr_ccs_tasks]
+            for daily_thr_ccs_task_result in daily_thr_ccs_tasks_results:
+                daily_thr_ccs_task_result.get(disable_sync_subtasks=False)
+
+            daily_thr_child_tasks = list()
+            daily_thr_child_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
+                                                                         func_name='_daily_thr_child_health')
+                                          for state_id in state_ids])
+            daily_thr_child_tasks_results = [daily_thr_child_task.delay() for daily_thr_child_task in
+                                             daily_thr_child_tasks]
+            for daily_thr_child_task_result in daily_thr_child_tasks_results:
+                daily_thr_child_task_result.get(disable_sync_subtasks=False)
 
             res_awc = chain(icds_aggregation_task.si(date=calculation_date, func_name='_agg_awc_table'),
                             *res_ls_tasks
@@ -493,6 +523,7 @@ def icds_state_aggregation_task(self, state_id, date, func_name):
         '_aggregate_child_health_thr_forms': _aggregate_child_health_thr_forms,
         '_aggregate_ccs_record_thr_forms': _aggregate_ccs_record_thr_forms,
         '_aggregate_child_health_pnc_forms': _aggregate_child_health_pnc_forms,
+        '_aggregate_child_health_sam_mam_form': _aggregate_child_health_sam_mam_form,
         '_aggregate_ccs_record_pnc_forms': _aggregate_ccs_record_pnc_forms,
         '_aggregate_delivery_forms': _aggregate_delivery_forms,
         '_aggregate_df_forms': _aggregate_df_forms,
@@ -505,7 +536,9 @@ def icds_state_aggregation_task(self, state_id, date, func_name):
         '_agg_thr_table': _agg_thr_table,
         '_agg_adolescent_girls_registration_table': _agg_adolescent_girls_registration_table,
         '_agg_migration_table': _agg_migration_table,
-        '_agg_availing_services_table': _agg_availing_services_table
+        '_agg_availing_services_table': _agg_availing_services_table,
+        '_daily_thr_ccs_record': _daily_thr_ccs_record,
+        '_daily_thr_child_health': _daily_thr_child_health
     }[func_name]
 
     db_alias = get_icds_ucr_citus_db_alias()
@@ -1110,9 +1143,27 @@ def prepare_excel_reports(config, aggregation_level, include_test, beta, locatio
         else:
             cache_key = create_excel_file(excel_data, data_type, file_format)
 
+    elif indicator == MALNUTRITION_TRACKING_REPORT:
+        data_type = 'Malnutrition_Tracking_Report'
+        excel_data = MalnutritionTrackerReport(
+            config=config,
+            beta=beta,
+            location=location
+        ).get_excel_data()
+        export_info = excel_data[1][1]
+        generated_timestamp = date_parser.parse(export_info[0][1])
+        formatted_timestamp = generated_timestamp.strftime("%d-%m-%Y__%H-%M-%S")
+        data_type = 'Malnutrition Tracking Report__{formatted_timestamp}'.format(
+            formatted_timestamp=formatted_timestamp)
+
+        if file_format == 'xlsx':
+            cache_key = create_malnutrition_tracker_report(excel_data, data_type, config, aggregation_level)
+        else:
+            cache_key = create_excel_file(excel_data, data_type, file_format)
+
     if indicator not in (AWW_INCENTIVE_REPORT, LS_REPORT_EXPORT, THR_REPORT_EXPORT, CHILDREN_EXPORT,
                          DASHBOARD_USAGE_EXPORT, SERVICE_DELIVERY_REPORT, CHILD_GROWTH_TRACKER_REPORT,
-                         AWW_ACTIVITY_REPORT, POSHAN_PROGRESS_REPORT):
+                         AWW_ACTIVITY_REPORT, POSHAN_PROGRESS_REPORT, MALNUTRITION_TRACKING_REPORT):
         if file_format == 'xlsx' and beta:
             cache_key = create_excel_file_in_openpyxl(excel_data, data_type)
         else:
@@ -1718,11 +1769,15 @@ def create_all_mbt(month, state_ids):
 
 @task(queue='icds_dashboard_reports_queue')
 def create_mbt_for_month(state_id, month):
-    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper)
+    helpers = (CcsMbtDistributedHelper, ChildHealthMbtDistributedHelper, AwcMbtDistributedHelper, BirthPreparednessMbtDistributedHelper, DeliveryChildMbtDistributedHelper)
     for helper_class in helpers:
         helper = helper_class(state_id, month)
         # run on primary DB to avoid "conflict with recovery" errors
-        with get_cursor(helper.base_class, write=True) as cursor, tempfile.TemporaryFile() as f:
+        if helper.base_class:
+            db_cursor = get_cursor(helper.base_class, write=True)
+        else:
+            db_cursor = connections[get_icds_ucr_citus_db_alias()].cursor()
+        with db_cursor as cursor, tempfile.TemporaryFile() as f:
             cursor.copy_expert(helper.query(), f)
             f.seek(0)
             icds_file, _ = IcdsFile.objects.get_or_create(
@@ -2079,6 +2134,22 @@ def update_child_vaccine_table(target_date):
     ChildVaccines.aggregate(current_month)
 
 
+@track_time
 def update_mpr_data(target_date):
     current_month = force_to_date(target_date).replace(day=1)
     AggMPRAwc.aggregate(current_month)
+
+
+@track_time
+def _aggregate_child_health_sam_mam_form(state_id, day):
+    AggregateSamMamForm.aggregate(state_id, day)
+
+
+@track_time
+def _daily_thr_ccs_record(state_id, day):
+    AggregateDailyCcsRecordTHRForms.aggregate(state_id, force_to_date(day))
+
+
+@track_time
+def _daily_thr_child_health(state_id, day):
+    AggregateDailyChildHealthTHRForms.aggregate(state_id, force_to_date(day))
