@@ -482,7 +482,7 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
                 CASE WHEN GREATEST(adult_scale_available, adult_scale_usable, baby_scale_available,
                               flat_scale_available, baby_scale_usable,
                               infantometer_usable, stadiometer_usable, 0) > 0 THEN 1 ELSE 0 END as awc_with_gm_devices,
-                CASE WHEN use_salt = 1 THEN 1 ELSE 0 END as use_salt
+                COALESCE(use_salt, 0) as use_salt
             FROM icds_dashboard_infrastructure_forms
             WHERE month = %(start_date)s
         ) ut
