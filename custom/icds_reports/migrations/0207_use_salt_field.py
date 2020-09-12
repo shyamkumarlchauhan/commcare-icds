@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0200_update_chm_ccs_view'),
+        ('icds_reports', '0206_add_agg_mpr_model'),
     ]
 
     operations = [

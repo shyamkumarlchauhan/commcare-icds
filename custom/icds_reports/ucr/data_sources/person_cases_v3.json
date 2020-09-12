@@ -236,6 +236,12 @@
         "property_name": "referral_reached_date"
       },
       {
+        "column_id": "last_referral_discharge_date",
+        "datatype": "date",
+        "type": "raw",
+        "property_name": "last_referral_discharge_date"
+      },
+      {
         "column_id": "referral_reached_facility",
         "datatype": "small_integer",
         "type": "expression",

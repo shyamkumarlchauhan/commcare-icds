@@ -103,6 +103,7 @@ SERVICE_DELIVERY_REPORT = 12
 CHILD_GROWTH_TRACKER_REPORT = 13
 AWW_ACTIVITY_REPORT = 14
 POSHAN_PROGRESS_REPORT = 15
+MALNUTRITION_TRACKING_REPORT = 16
 
 AGG_COMP_FEEDING_TABLE = 'icds_dashboard_comp_feed_form'
 AGG_CCS_RECORD_CF_TABLE = 'icds_dashboard_ccs_record_cf_forms'
@@ -112,8 +113,11 @@ AGG_CHILD_HEALTH_THR_TABLE = 'icds_dashboard_child_health_thr_forms'
 AGG_CCS_RECORD_THR_TABLE = 'icds_dashboard_ccs_record_thr_forms'
 AGG_CCS_RECORD_BP_TABLE = 'icds_dashboard_ccs_record_bp_forms'
 AGG_CCS_RECORD_DELIVERY_TABLE = 'icds_dashboard_ccs_record_delivery_forms'
+AGG_DAILY_CHILD_HEALTH_THR_TABLE = 'icds_dashboard_daily_child_health_thr_forms'
+AGG_DAILY_CCS_RECORD_THR_TABLE = 'icds_dashboard_daily_ccs_record_thr_forms'
 AGG_DAILY_FEEDING_TABLE = 'icds_dashboard_daily_feeding_forms'
 AGG_GROWTH_MONITORING_TABLE = 'icds_dashboard_growth_monitoring_forms'
+AGG_SAM_MAM_TABLE = 'icds_dashboard_sam_mam_forms'
 AGG_INFRASTRUCTURE_TABLE = 'icds_dashboard_infrastructure_forms'
 AWW_INCENTIVE_TABLE = 'icds_dashboard_aww_incentive'
 AGG_LS_AWC_VISIT_TABLE = 'icds_dashboard_ls_awc_visits_forms'
@@ -123,6 +127,7 @@ AGG_THR_V2_TABLE = 'icds_dashboard_thr_v2'
 AGG_DASHBOARD_ACTIVITY = 'icds_dashboard_user_activity'
 AGG_ADOLESCENT_GIRLS_REGISTRATION_TABLE = 'icds_dashboard_adolescent_girls_registration'
 AGG_GOV_DASHBOARD_TABLE = 'agg_gov_dashboard'
+AGG_MPR_AWC_TABLE = 'agg_mpr_awc'
 AGG_MIGRATION_TABLE = 'icds_dashboard_migration_forms'
 AGG_AVAILING_SERVICES_TABLE = 'icds_dashboard_availing_service_forms'
 
