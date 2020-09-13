@@ -39,7 +39,7 @@ class MPRReport(IcdsBaseReport):
             MPRProgrammeCoverage,
             MPRPreschoolEducation,
             MPRGrowthMonitoring if not self.icds_pre_release_features() else MPRGrowthMonitoringBeta,
-            MPRImmunizationCoverage if not self.icds_pre_release_features() else MPRImmunizationCoverageBeta,,
+            MPRImmunizationCoverage if not self.icds_pre_release_features() else MPRImmunizationCoverageBeta,
             MPRVhnd if not self.icds_pre_release_features() else MPRVhndBeta,
             MPRReferralServices,
             MPRMonitoring if not self.icds_pre_release_features() else MPRMonitoringBeta
