@@ -10,8 +10,6 @@ from custom.icds_reports.sqldata.base_operationalization import BaseOperationali
     BaseOperationalizationBeta
 from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
-from custom.icds_reports.models.aggregate import AggAwc
-from custom.icds_reports.utils import get_location_filter
 
 from custom.icds_reports.models.views import ServiceDeliveryReportView
 from custom.icds_reports.models.aggregate import AggChildHealth, AggMPRAwc, AggAwc
@@ -2230,13 +2228,32 @@ class MPRImmunizationCoverage(ICDSMixin, MPRData):
         if self.config['location_id']:
             data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
             children_completing = data.get('open_child_count', 0)
-            vaccination = data.get('open_child_1yr_immun_complete', 1)
+            vaccination = data.get('open_child_1yr_immun_complete', 0)
             immunization = "%.1f%%" % ((vaccination / float(children_completing or 1)) * 100)
             return [
                 ['(I)', 'Children Completing 12 months during the month:', children_completing],
                 ['(II)', 'Of this, number of children who have received all vaccinations:', vaccination],
                 ['(III)', 'Completed timely immunization coverage (%):', immunization]
             ]
+
+
+class MPRImmunizationCoverageBeta(MPRImmunizationCoverage):
+
+    title = '9. Immunization Coverage'
+    slug = 'immunization_coverage'
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        immunization_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            open_child_count=F('fully_immunized_eligible_in_month'),
+            open_child_1yr_immun_complete=F('fully_immun_before_month_end')
+        )
+
+        return immunization_data if immunization_data else {}
 
 
 class MPRVhnd(ICDSMixin, MPRData):
