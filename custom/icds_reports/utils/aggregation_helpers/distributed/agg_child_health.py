@@ -60,6 +60,8 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('pse_eligible', "SUM(chm.pse_eligible)"),
             ('pse_attended_16_days',
                 "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended >= 16)"),
+            ('pse_attended_21_days',
+             "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended >= 21)"),
             ('pse_attended_0_days',
              "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended = 0)"),
             ('pse_attended_1_days',
