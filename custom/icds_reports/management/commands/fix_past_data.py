@@ -1,12 +1,11 @@
 import os
-from datetime import date
-from dateutil.relativedelta import relativedelta
 
-from django.core.management.base import BaseCommand
-from corehq.util.argparse_types import date_type
-from django.db import connections, transaction
-
+import dateutil
+from custom.icds_reports.models.aggregate import AwcLocation
 from custom.icds_reports.utils.connections import get_icds_ucr_citus_db_alias
+from dateutil.relativedelta import relativedelta
+from django.core.management.base import BaseCommand
+from django.db import connections, transaction
 
 
 @transaction.atomic
@@ -21,66 +20,38 @@ def _run_custom_sql_script(command):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            'start_date',
-            type=date_type,
-            help='The start date (inclusive). format YYYY-MM-DD',
-            nargs='?'
+        parser.add_argument('start_month')
+        parser.add_argument('end_month')
+
+    def state_wise_query(self, state_ids, start_month, next_month, script_name):
+        for state_id in state_ids:
+            self.sql_to_execute(start_month, next_month, script_name, state_id)
+
+    def sql_to_execute(self, month, next_month, file, state_id=None):
+        path = os.path.join(
+            os.path.dirname(__file__), 'sql_scripts', file
         )
-        parser.add_argument(
-            'script_number',
-            type=int,
-            help='The number of script running 1-7',
-            nargs='?'
-        )
+        with open(path, "r", encoding='utf-8') as sql_file:
+            sql_query = sql_file.read()
+        query = sql_query.format(month=month, next_month=next_month, state_id=state_id)
+        for quer in query.split(';'):
+            _run_custom_sql_script(quer)
+        print(f"Executed file {file}")
+        if state_id:
+            print(f"Executed query {state_id}")
 
-    def build_data(self, monthly_date_dict, script_number):
-        date = monthly_date_dict['record_date']
-        print(f'\n======= Executing for month {date}======\n')
-        for i in range(script_number, 8):
-            print(f'==============Executing Script {i} =============')
-            if monthly_date_dict["default"] is False and i > 2:
-                path = os.path.join(os.path.dirname(__file__), 'sql_scripts',
-                                    'fix_past_data_part_1_{}.sql'.format(i))
-            else:
-                path = os.path.join(os.path.dirname(__file__), 'sql_scripts',
-                                    'fix_past_data_part_{}.sql'.format(i))
-            with open(path, "r", encoding='utf-8') as sql_file:
-                sql_to_execute = sql_file.read()
-                sql_to_execute = sql_to_execute.format(start_date=date.strftime("%Y-%m-%d"))
-                # special case as second script contains multiple queries
-                if i == 2:
-                    sql_to_execute = sql_to_execute.split(';')
-                    for j in range(0, len(sql_to_execute)):
-                        _run_custom_sql_script(sql_to_execute[j])
-                else:
-                    _run_custom_sql_script(sql_to_execute)
 
-    def handle(self, *args, **kwargs):
-        # start date is the date from which we gonna start
-        # by default its the start date of dashboard
-        start_date = kwargs['start_date'] if kwargs['start_date'] else date(2017, 3, 1)
-        # script number is to identify which script to run if we pause the command in between
-        # by default its 1
-        script_number = kwargs['script_number'] if kwargs['script_number'] else 1
-        self.run_task(start_date, script_number)
+    def handle(self, start_month, end_month, *args, **options):
+        state_ids = AwcLocation.objects.filter(aggregation_level=1).values_list('state_id', flat=True).distinct()
+        start_month = dateutil.parser.parse(start_month).date().replace(day=1)
+        end_month = dateutil.parser.parse(end_month).date().replace(day=1)
 
-    def run_task(self, start_date, script_number):
-        monthly_dates_list = []
-        part_tb_date_start = date(2017, 5, 1)
-        part_tb_date_end = date(2019, 7, 1)
-        end_date = date(2020, 5, 1)
-        end_date = end_date.replace(day=1)
-        # default is used to differentiate between the partitioned table monthly date
-        # false -> month got a partitioned table
-        # true -> month got a non partitioned table
-        default = False
-        date_itr = start_date
-        while date_itr <= end_date:
-            if date_itr >= part_tb_date_start and date_itr <= part_tb_date_end:
-                default = True
-            else:
-                default = False
-            monthly_date_dict = {"record_date": date_itr, "default": default}
-            self.build_data(monthly_date_dict, script_number)
-            date_itr = date_itr + relativedelta(months=1)
+        while start_month <= end_month:
+            print("PROCESSING MONTH {}".format(start_month))
+            next_month = start_month + relativedelta(months=1)
+            # state wise queries
+            self.sql_to_execute(start_month, next_month, 'fix_pse_data_3.sql')
+            self.state_wise_query(state_ids, start_month, next_month, 'fix_pse_data_2.sql')
+            # normal queries
+            self.sql_to_execute(start_month, next_month, 'fix_pse_data_1.sql')
+            start_month = next_month
