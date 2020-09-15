@@ -9,7 +9,7 @@ INSERT INTO "icds_dashboard_growth_monitoring_forms" (
     )(SELECT DISTINCT child_health_case_id AS case_id,
                 state_id As state_id,
                 supervisor_id AS supervisor_id,
-                '2020-01-01'::DATE AS month,
+                '{month}'::DATE AS month,
                 LAST_VALUE(weight_child) OVER weight_child AS weight_child,
                 CASE
                     WHEN LAST_VALUE(weight_child) OVER weight_child IS NULL THEN NULL
@@ -73,7 +73,8 @@ INSERT INTO "icds_dashboard_growth_monitoring_forms" (
                     '1970-01-01'
                 ) AS latest_time_end_processed
             FROM "ucr_icds-cas_static-dashboard_growth_moni_4ebf0625"
-            WHERE  timeend < '2020-01-01' AND child_health_case_id IS NOT NULL AND state_id IS NOT NULL AND state_id <> ''
+            WHERE  timeend < '{next_month}' AND child_health_case_id IS NOT NULL AND state_id IS NOT NULL AND state_id <> ''
+            AND child_health_case_id = '78feefc9-451f-4f35-8974-726915d414d6'
             WINDOW
                 weight_child AS (
                     PARTITION BY supervisor_id, child_health_case_id
@@ -202,17 +203,17 @@ UPDATE child_health_monthly child_health
  SET
     zscore_grading_hfa = gm.zscore_grading_hfa,
     zscore_grading_hfa_recorded_in_month = CASE
-            WHEN gm.zscore_grading_hfa_last_recorded>='2020-01-01' AND gm.zscore_grading_hfa_last_recorded<'2020-02-01' THEN 1
+            WHEN gm.zscore_grading_hfa_last_recorded>='{month}' AND gm.zscore_grading_hfa_last_recorded<'{next_month}' THEN 1
             ELSE 0
     END,
     zscore_grading_wfh = gm.zscore_grading_wfh,
     zscore_grading_wfh_recorded_in_month = CASE
-        WHEN gm.zscore_grading_wfh_last_recorded>='2020-01-01' AND gm.zscore_grading_wfh_last_recorded<'2020-02-01' THEN 1
+        WHEN gm.zscore_grading_wfh_last_recorded>='{month}' AND gm.zscore_grading_wfh_last_recorded<'{next_month}' THEN 1
         ELSE 0
     END,
     current_month_stunting = CASE
         WHEN NOT (valid_in_month=1 AND age_tranche::Integer <= 60) THEN NULL
-        WHEN NOT (gm.zscore_grading_hfa_last_recorded BETWEEN '2020-01-01' AND '2020-01-31') THEN 'unmeasured'
+        WHEN NOT (gm.zscore_grading_hfa_last_recorded>='{month}' AND gm.zscore_grading_hfa_last_recorded<'{next_month}') THEN 'unmeasured'
         WHEN gm.zscore_grading_hfa = 1 THEN 'severe'
         WHEN gm.zscore_grading_hfa = 2 THEN 'moderate'
         WHEN gm.zscore_grading_hfa = 3 THEN 'normal'
@@ -234,8 +235,8 @@ UPDATE child_health_monthly child_health
     END,
     current_month_wasting = CASE
         WHEN NOT (valid_in_month=1 AND age_tranche::Integer <= 60) THEN NULL
-        WHEN NOT (gm.zscore_grading_wfh_last_recorded>='2020-01-01' AND gm.zscore_grading_wfh_last_recorded<'2020-02-01') OR
-            NOT (gm.height_child_last_recorded>='2020-01-01' AND gm.height_child_last_recorded<'2020-02-01') THEN  'unmeasured'
+        WHEN NOT (gm.zscore_grading_wfh_last_recorded>='{month}' AND gm.zscore_grading_wfh_last_recorded<'{next_month}') OR
+            NOT (gm.height_child_last_recorded>='{month}' AND gm.height_child_last_recorded<'{next_month}') THEN  'unmeasured'
         WHEN gm.zscore_grading_wfh = 1 THEN 'severe'
         WHEN gm.zscore_grading_wfh = 2 THEN 'moderate'
         WHEN gm.zscore_grading_wfh = 3 THEN 'normal'
@@ -249,33 +250,33 @@ UPDATE child_health_monthly child_health
         ELSE 'unknown' END,
     current_month_nutrition_status = CASE
         WHEN wer_eligible <> 1 THEN NULL
-        WHEN NOT (gm.zscore_grading_wfa_last_recorded>='2020-01-01' AND gm.zscore_grading_wfa_last_recorded<'2020-02-01') THEN 'unweighed'
+        WHEN NOT (gm.zscore_grading_wfa_last_recorded>='{month}' AND gm.zscore_grading_wfa_last_recorded<'{next_month}') THEN 'unweighed'
         WHEN gm.zscore_grading_wfa = 1 THEN 'severely_underweight'
         WHEN gm.zscore_grading_wfa = 2 THEN 'moderately_underweight'
         WHEN gm.zscore_grading_wfa IN (3, 4) THEN 'normal'
         ELSE 'unweighed' END,
     nutrition_status_weighed = CASE
-        WHEN wer_eligible=1 AND (gm.zscore_grading_wfa_last_recorded BETWEEN '2020-01-01' AND '2020-01-31') THEN 1
+        WHEN wer_eligible=1 AND (gm.zscore_grading_wfa_last_recorded>='{month}' AND gm.zscore_grading_wfa_last_recorded<'{next_month}') THEN 1
         ELSE 0 END,
     recorded_weight = CASE
         WHEN wer_eligible <> 1 THEN NULL
-        WHEN gm.weight_child_last_recorded BETWEEN '2020-01-01' AND '2020-01-31') THEN gm.weight_child
+        WHEN gm.weight_child_last_recorded>='{month}' AND gm.weight_child_last_recorded<'{next_month}' THEN gm.weight_child
         ELSE NULL END,
     recorded_height = CASE
-        WHEN gm.height_child_last_recorded BETWEEN '2020-01-01' AND '2020-01-31') THEN gm.height_child
+        WHEN gm.height_child_last_recorded>='{month}' AND gm.height_child_last_recorded<'{next_month}' THEN gm.height_child
         ELSE NULL END,
     height_measured_in_month = CASE
-        WHEN gm.height_child_last_recorded BETWEEN '2020-01-01' AND '2020-01-31') AND (valid_in_month=1 AND age_tranche::Integer <= 60) THEN 1
+        WHEN gm.height_child_last_recorded>='{month}' AND gm.height_child_last_recorded<'{next_month}' AND (valid_in_month=1 AND age_tranche::Integer <= 60) THEN 1
         ELSE 0 END,
     muac_grading = gm.muac_grading,
     muac_grading_recorded_in_month = CASE
-        WHEN (gm.muac_grading_last_recorded BETWEEN '2020-01-01' AND '2020-01-31') THEN 1
+        WHEN (gm.muac_grading_last_recorded>='{month}' AND gm.muac_grading_last_recorded<'{next_month}') THEN 1
         ELSE 0 END
     FROM icds_dashboard_growth_monitoring_forms gm
     WHERE child_health.month=gm.month
     AND child_health.case_id=gm.case_id
-    AND child_health.month='2020-01-01'
-    AND gm.month='2020-01-01'
+    AND child_health.month='{month}'
+    AND gm.month='{month}'
     AND child_health.supervisor_id=gm.supervisor_id
     AND case_id='78feefc9-451f-4f35-8974-726915d414d6'
     AND supervisor_id='91e033b10a8441e0adfb87e27467cb2d';
@@ -337,7 +338,7 @@ SELECT
 
 	FROM
 	"child_health_monthly" chm
-	WHERE chm.month='2020-01-01' AND chm.awc_id='d4d302b0dc914e17a20f52da28a07d49' AND chm.supervisor_id='91e033b10a8441e0adfb87e27467cb2d'
+	WHERE chm.month='{month}' AND chm.awc_id='d4d302b0dc914e17a20f52da28a07d49' AND chm.supervisor_id='91e033b10a8441e0adfb87e27467cb2d'
 	GROUP BY chm.awc_id, chm.supervisor_id,
 					 chm.month, chm.sex, chm.age_tranche, chm.caste,
 					 coalesce_disabled, coalesce_minority, coalesce_resident
@@ -367,7 +368,7 @@ SELECT
 
 
 
-UPDATE "agg_child_health_2020-01-01" agg_child_health
+UPDATE "agg_child_health_{month}" agg_child_health
     SET wasting_moderate = ut.wasting_moderate,
         wasting_severe = ut.wasting_severe,
         stunting_moderate = ut.stunting_severe,
@@ -408,9 +409,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
         agg_child.aggregation_level=5
             );
 
-Roll ups:
-
-UPDATE "agg_child_health_2020-01-01" agg_child_health
+UPDATE "agg_child_health_{month}" agg_child_health
     SET wasting_moderate = ut.wasting_moderate,
         wasting_severe = ut.wasting_severe,
         stunting_moderate = ut.stunting_severe,
@@ -468,7 +467,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
         SUM(weighed_and_height_measured_in_month) as ut.weighed_and_height_measured_in_month,
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
-        FROM "agg_child_health_2020-01-01" agg_child
+        FROM "agg_child_health_{month}" agg_child
         WHERE agg_child.aggregation_level=5 AND agg_child.awc_id='d4d302b0dc914e17a20f52da28a07d49'
         GROUP BY state_id, district_id,block_id,supervisor_id, gender, age_tranche
     ) ut 
@@ -497,7 +496,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
 --                ->  Seq Scan on "agg_child_health_2018-05-01_4" agg_child_health  (cost=0.00..8827.09 rows=93809 width=355)
 
 
-UPDATE "agg_child_health_2020-01-01" agg_child_health
+UPDATE "agg_child_health_{month}" agg_child_health
     SET wasting_moderate = ut.wasting_moderate,
         wasting_severe = ut.wasting_severe,
         stunting_moderate = ut.stunting_severe,
@@ -555,7 +554,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
         SUM(weighed_and_height_measured_in_month) as ut.weighed_and_height_measured_in_month,
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
-        FROM "agg_child_health_2020-01-01" agg_child
+        FROM "agg_child_health_{month}" agg_child
         WHERE agg_child.aggregation_level=4 AND agg_child.supervisor_id='91e033b10a8441e0adfb87e27467cb2d'
         GROUP BY state_id, district_id,block_id, gender, age_tranche
     ) ut 
@@ -588,7 +587,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
 
 
 
-UPDATE "agg_child_health_2020-01-01" agg_child_health
+UPDATE "agg_child_health_{month}" agg_child_health
     SET wasting_moderate = ut.wasting_moderate,
         wasting_severe = ut.wasting_severe,
         stunting_moderate = ut.stunting_severe,
@@ -646,7 +645,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
         SUM(weighed_and_height_measured_in_month) as ut.weighed_and_height_measured_in_month,
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
-        FROM "agg_child_health_2020-01-01" agg_child
+        FROM "agg_child_health_{month}" agg_child
         WHERE agg_child.aggregation_level=3 AND agg_child.block_id='0ee077e98e594d1eb471dfe4978b38e9'
         GROUP BY state_id, district_id,gender, age_tranche
     ) ut 
@@ -676,7 +675,7 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
 --                ->  Seq Scan on "agg_child_health_2018-05-01_2" agg_child_health  (cost=0.00..118.94 rows=1194 width=297)
 -- (17 rows)
 
-UPDATE "agg_child_health_2020-01-01" agg_child_health
+UPDATE "agg_child_health_{month}" agg_child_health
     SET wasting_moderate = ut.wasting_moderate,
         wasting_severe = ut.wasting_severe,
         stunting_moderate = ut.stunting_severe,
@@ -734,14 +733,14 @@ UPDATE "agg_child_health_2020-01-01" agg_child_health
         SUM(weighed_and_height_measured_in_month) as ut.weighed_and_height_measured_in_month,
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
-        FROM "agg_child_health_2020-01-01" agg_child
+        FROM "agg_child_health_{month}" agg_child
         WHERE agg_child.aggregation_level=2 AND agg_child.district_id='e92cd85ec16e42c493dec30273333923'
         GROUP BY state_id, tt.district_id,gender, age_tranche
     ) ut 
     WHERE agg_child_health.state_id = ut.state_id and 
       agg_child_health.gender = ut.gender AND
       agg_child_health.age_tranche = ut.age_tranche AND
-      agg_child.aggregation_level=1;
+      agg_child.aggregation_level=1
 
 -- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --  Update on "agg_child_health_2018-05-01_1" agg_child_health  (cost=496.38..510.66 rows=1 width=488)
