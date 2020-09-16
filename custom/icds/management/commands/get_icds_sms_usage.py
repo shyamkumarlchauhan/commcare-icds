@@ -1,4 +1,7 @@
 import pytz
+
+from django.db.models import Q
+
 from corehq.apps.sms.models import SMS
 from corehq.apps.locations.models import SQLLocation
 from corehq.apps.users.models import CommCareUser
@@ -8,7 +11,7 @@ from corehq.util.argparse_types import date_type
 from corehq.util.timezones.conversions import UserTime
 from couchexport.export import export_raw
 from datetime import datetime, timedelta, time
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -41,45 +44,45 @@ class Command(BaseCommand):
 
         return location_id
 
-    def get_location(self, sms):
-        location_id = self.get_location_id(sms)
+    def get_state_code(self, domain, location_id):
         if not location_id:
-            return None
-
-        if location_id in self.location_id_to_location:
-            return self.location_id_to_location[location_id]
-
-        location = SQLLocation.by_location_id(location_id)
-        self.location_id_to_location[location_id] = location
-        return location
-
-    def get_state_code(self, location):
-        if not location:
             return 'unknown'
 
-        if location.location_id in self.location_id_to_state_code:
-            return self.location_id_to_state_code[location.location_id]
+        if location_id in self.location_id_to_state_code:
+            return self.location_id_to_state_code[location_id]
 
-        state = location.get_ancestors().filter(location_type__code='state').first()
+        try:
+            state = SQLLocation.objects.get_ancestors(
+                Q(domain=domain, location_id=location_id)
+            ).get(location_type__code='state')
+        except SQLLocation.DoesNotExist:
+            state = None
         if not state:
+            self.location_id_to_state_code[location_id] = 'unknown'
             return 'unknown'
 
-        self.location_id_to_state_code[location.location_id] = state.site_code
+        self.location_id_to_state_code[location_id] = state.site_code
         self.state_code_to_name[state.site_code] = state.name
         return state.site_code
 
-    def get_district_code(self, location):
-        if not location:
+    def get_district_code(self, domain, location_id):
+        if not location_id:
             return 'unknown'
 
-        if location.location_id in self.location_id_to_district_code:
-            return self.location_id_to_district_code[location.location_id]
+        if location_id in self.location_id_to_district_code:
+            return self.location_id_to_district_code[location_id]
 
-        district = location.get_ancestors().filter(location_type__code='district').first()
+        try:
+            district = SQLLocation.objects.get_ancestors(
+                Q(domain=domain, location_id=location_id)
+            ).get(location_type__code='district')
+        except SQLLocation.DoesNotExist:
+            district = None
         if not district:
+            self.location_id_to_district_code[location_id] = 'unknown'
             return 'unknown'
 
-        self.location_id_to_district_code[location.location_id] = district.site_code
+        self.location_id_to_district_code[location_id] = district.site_code
         self.district_code_to_name[district.site_code] = district.name
         return district.site_code
 
@@ -89,28 +92,22 @@ class Command(BaseCommand):
 
         return sms.custom_metadata.get('icds_indicator', 'unknown')
 
-    def get_start_and_end_timestamps(self, start_date, end_date):
+    def get_start_and_end_timestamps(self, for_date):
         timezone = pytz.timezone('Asia/Kolkata')
 
         start_timestamp = UserTime(
-            datetime.combine(start_date, time(0, 0)),
+            datetime.combine(for_date, time(0, 0)),
             timezone
         ).server_time().done().replace(tzinfo=None)
-
-        end_timestamp = UserTime(
-            datetime.combine(end_date, time(0, 0)),
-            timezone
-        ).server_time().done().replace(tzinfo=None)
-
-        # end_date is inclusive
-        end_timestamp += timedelta(days=1)
+        end_timestamp = start_timestamp + timedelta(days=1)
 
         return start_timestamp, end_timestamp
 
     def handle(self, domain, start_date, end_date, **options):
-        start_timestamp, end_timestamp = self.get_start_and_end_timestamps(start_date, end_date)
+        if end_date < start_date:
+            raise CommandError("Can not have end date before start date")
+
         self.recipient_id_to_location_id = {}
-        self.location_id_to_location = {}
         self.location_id_to_state_code = {}
         self.location_id_to_district_code = {}
         self.state_code_to_name = {'unknown': 'Unknown'}
@@ -124,31 +121,37 @@ class Command(BaseCommand):
             end_date.strftime('%Y-%m-%d'),
         )
 
-        for sms in SMS.objects.filter(
-            domain=domain,
-            processed_timestamp__gt=start_timestamp,
-            processed_timestamp__lte=end_timestamp,
-            backend_api=AirtelTCLBackend.get_api_id(),
-            direction='O',
-            processed=True,
-        ):
-            location = self.get_location(sms)
-            state_code = self.get_state_code(location)
-            district_code = self.get_district_code(location)
-            if state_code not in district_level_data:
-                state_level_data[state_code] = {}
-                district_level_data[state_code] = {}
-            if district_code not in district_level_data[state_code]:
-                district_level_data[state_code][district_code] = {}
+        on_date = start_date
+        while on_date <= end_date:
+            start_timestamp, end_timestamp = self.get_start_and_end_timestamps(on_date)
 
-            indicator_slug = self.get_indicator_slug(sms)
-            if indicator_slug not in state_level_data[state_code]:
-                state_level_data[state_code][indicator_slug] = 0
-            if indicator_slug not in district_level_data[state_code][district_code]:
-                district_level_data[state_code][district_code][indicator_slug] = 0
+            for sms in SMS.objects.filter(
+                domain=domain,
+                processed_timestamp__gt=start_timestamp,
+                processed_timestamp__lte=end_timestamp,
+                backend_api=AirtelTCLBackend.get_api_id(),
+                direction='O',
+                processed=True,
+            ):
+                location_id = self.get_location_id(sms)
+                state_code = self.get_state_code(domain, location_id)
+                district_code = self.get_district_code(domain, location_id)
+                if state_code not in district_level_data:
+                    state_level_data[state_code] = {}
+                    district_level_data[state_code] = {}
+                if district_code not in district_level_data[state_code]:
+                    district_level_data[state_code][district_code] = {}
 
-            district_level_data[state_code][district_code][indicator_slug] += 1
-            state_level_data[state_code][indicator_slug] += 1
+                indicator_slug = self.get_indicator_slug(sms)
+                if indicator_slug not in state_level_data[state_code]:
+                    state_level_data[state_code][indicator_slug] = 0
+                if indicator_slug not in district_level_data[state_code][district_code]:
+                    district_level_data[state_code][district_code][indicator_slug] = 0
+
+                district_level_data[state_code][district_code][indicator_slug] += 1
+                state_level_data[state_code][indicator_slug] += 1
+
+            on_date = on_date + timedelta(days=1)
 
         with open(filename, 'wb') as excel_file:
             state_headers = ('State Code', 'State Name', 'Indicator', 'SMS Count')

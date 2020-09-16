@@ -1175,13 +1175,13 @@ class TestFactSheetReportDemographics(TestCase):
                     'sort_key': 1287
                 },
                 'data': [
-                    {'html': 'Total chldren (0-6 years) enrolled for Anganwadi Services'},
+                    {'html': 'Total children (0-6 years) enrolled for Anganwadi Services'},
                     {'html': 1261, 'sort_key': 1261},
                     {'html': 1287, 'sort_key': 1287},
                     {'html': 0}
                 ],
                 'data_source': 'AggAWCMonthlyDataSource',
-                'header': 'Total chldren (0-6 years) enrolled for Anganwadi Services',
+                'header': 'Total children (0-6 years) enrolled for Anganwadi Services',
                 'slug': 'cases_child_health',
             }
         )

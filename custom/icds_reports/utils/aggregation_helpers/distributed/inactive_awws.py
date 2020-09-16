@@ -69,7 +69,7 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
             SELECT
                 loc.doc_id as awc_id,
                 loc.awc_name as awc_name,
-                'awc' || loc.awc_site_code as awc_site_code,
+                loc.awc_site_code as awc_site_code,
                 loc.supervisor_id as supervisor_id,
                 loc.supervisor_name as supervisor_name,
                 loc.block_id as block_id,

@@ -1,5 +1,4 @@
 /* global moment */
-
 function DownloadController($scope, $rootScope, $location, locationHierarchy, locationsService, userLocationId, haveAccessToFeatures,
     downloadService, isAlertActive, userLocationType, haveAccessToAllLocations, allUserLocationId) {
     var vm = this;
@@ -83,7 +82,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     //if report is requested in first three days of the month, then we will remove the current month in filter
     vm.excludeCurrentMonthIfInitialThreeDays = function () {
         var latest = new Date();
-        if (latest.getDate() <= 3 && vm.months[vm.months.length - 1].id === latest.getMonth() + 1 &&
+        if (latest.getDate() <= 2 && vm.months[vm.months.length - 1].id === latest.getMonth() + 1 &&
             vm.selectedYear === latest.getFullYear()) {
             if (vm.months.length === 1) {
                 // For January, reset to Dec last year
@@ -167,6 +166,8 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     if (vm.userLocationType.toLowerCase() !== 'block'  && vm.userLocationType.toLowerCase() !== 'district') {
         vm.indicators.push({id: 15, name: 'Poshan Progress Report'});
     }
+    vm.indicators.push({id: 16, name: 'Malnutrition Tracking Report'});
+
     vm.reportLayouts = [
         {id: 'comprehensive', name: 'Comprehensive'},
         {id: 'summary', name: 'Summary'},
@@ -225,7 +226,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     };
 
     vm.userLocationIdIsNull = function () {
-        return ["null", "undefined"].indexOf(vm.userLocationId) !== -1;
+        return ["null", "undefined", null, undefined].indexOf(vm.userLocationId) !== -1;
     };
 
     vm.isUserLocationIn = function (locations) {
@@ -250,7 +251,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     init();
 
     vm.disallowNational = function () {
-        return vm.isChildBeneficiaryListSelected() || vm.isChildGrowthTrackerSelected() || vm.isAwwActivityReportSelected();
+        return vm.isChildBeneficiaryListSelected() || vm.isChildGrowthTrackerSelected() || vm.isAwwActivityReportSelected() || vm.isMTRSelected();
     };
 
     vm.getPlaceholder = function (locationTypes) {
@@ -326,11 +327,12 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             });
         }
 
-        if (vm.isSDRSelected()) {
+        if (vm.isSDRSelected() || vm.isMTRSelected()) {
             vm.years = _.filter(vm.yearsCopy, function (y) {
                 return y.id >= 2020;
             });
         }
+
 
         if (vm.isTakeHomeRationReportSelected()) {
             vm.years = _.filter(vm.yearsCopy, function (y) {
@@ -362,7 +364,18 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             vm.selectedQuarter = vm.selectedQuarter >= 2 ? vm.selectedQuarter : 2;
             vm.setPPRYears();
 
-        } else if (year.id === latest.getFullYear()) {
+        } else if (year.id === 2020 && vm.isMTRSelected()) {
+            var currentMonth = latest.getMonth() + 1;
+            var currentYear = latest.getFullYear();
+            vm.months = _.filter(vm.monthsCopy, function (month) {
+                if (currentYear === 2020) {
+                    return month.id >= 9 && month.id <= currentMonth;
+                } else {
+                    return month.id >= 9;
+                }
+            });
+            vm.selectedMonth = vm.selectedMonth >= 9 ? vm.selectedMonth : 9;
+        }else if (year.id === latest.getFullYear()) {
             var maxQuarter = Math.floor(latest.getMonth() / 3);
             vm.months = _.filter(vm.monthsCopy, function (month) {
                 return month.id <= latest.getMonth() + 1;
@@ -441,10 +454,9 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
                 var currentYear  = new Date().getFullYear();
                 vm.selectedYear = vm.selectedYear >= 2019 ? vm.selectedYear : currentYear;
                 locationsService.resetLevelsBelow(3, vm);
-            } else if (vm.isSDRSelected()) {
-                if (vm.selectedYear < 2020) {
-                    vm.selectedYear = new Date().getFullYear();
-                }
+            } else if (vm.isSDRSelected() || vm.isMTRSelected()) {
+                var currentYear  = new Date().getFullYear();
+                vm.selectedYear = vm.selectedYear >= 2020 ? vm.selectedYear : currentYear;
             } else if (vm.isPPRSelected()) {
                 vm.groupByLevels = vm.groupByLevelValuesPPR();
                 var currentYear  = new Date().getFullYear();
@@ -552,6 +564,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
         var viewByErrors = vm.showViewBy() && (vm.selectedLevel <= 0 || vm.selectedLevel > 5);
         var beneficiaryListErrors = vm.isChildBeneficiaryListSelected() && (vm.selectedFilterOptions().length === 0 || !vm.isDistrictOrBelowSelected());
         var growthListErrors = vm.isChildGrowthTrackerSelected() && !vm.isDistrictOrBelowSelected();
+        var mtrListErrors = vm.isMTRSelected() && !vm.isDistrictOrBelowSelected();
         var incentiveReportErrors = vm.isIncentiveReportSelected() && !vm.isStateSelected();
         var PPRErrors = vm.isPPRSelected() && (vm.isDistrictOrBelowSelected() || vm.selectedLevel === 0);
         var ladySupervisorReportErrors = false;
@@ -559,7 +572,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             ladySupervisorReportErrors = vm.isLadySupervisorSelected() && !vm.isStateSelected();
         }
         var awwActvityReportErrors = vm.isAwwActivityReportSelected() && (vm.selectedLevel === 5 || vm.selectedLevel === 0);
-        return beneficiaryListErrors || incentiveReportErrors || ladySupervisorReportErrors || growthListErrors || awwActvityReportErrors || PPRErrors || viewByErrors;
+        return beneficiaryListErrors || incentiveReportErrors || ladySupervisorReportErrors || growthListErrors || awwActvityReportErrors || PPRErrors || viewByErrors || mtrListErrors;
     };
 
     vm.isCombinedPDFSelected = function () {
@@ -639,6 +652,10 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
         return vm.selectedIndicator === 13;
     };
 
+    vm.isMTRSelected = function () {
+        return vm.selectedIndicator === 16;
+    };
+
     vm.isMonthlyDataPeriodSelected = function() {
         return vm.selectedDataPeriod === 'month';
     };
@@ -670,7 +687,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     vm.showViewBy = function () {
         return !(vm.isChildBeneficiaryListSelected() || vm.isIncentiveReportSelected() ||
             vm.isLadySupervisorSelected() || vm.isDashboardUsageSelected() ||
-            vm.isChildGrowthTrackerSelected() || vm.isTakeHomeRationReportSelected() || vm.isAwwActivityReportSelected());
+            vm.isChildGrowthTrackerSelected() || vm.isTakeHomeRationReportSelected() || vm.isAwwActivityReportSelected() || vm.isMTRSelected());
     };
 
     vm.showLocationFilter = function () {
@@ -739,15 +756,11 @@ DownloadController.$inject = ['$scope', '$rootScope', '$location', 'locationHier
     'userLocationId', 'haveAccessToFeatures', 'downloadService', 'isAlertActive', 'userLocationType',
     'haveAccessToAllLocations','allUserLocationId'];
 
-window.angular.module('icdsApp').directive("download", function () {
-    var url = hqImport('hqwebapp/js/initial_page_data').reverse;
-    return {
-        restrict: 'E',
-        scope: {
-        },
-        bindToController: true,
-        templateUrl: url('icds-ng-template', 'download.directive'),
-        controller: DownloadController,
-        controllerAs: "$ctrl",
-    };
+window.angular.module('icdsApp').component("download", {
+    templateUrl: function () {
+        var url = hqImport('hqwebapp/js/initial_page_data').reverse;
+        return url('icds-ng-template', 'download.directive');
+    },
+    controller: DownloadController,
+    controllerAs: "$ctrl",
 });

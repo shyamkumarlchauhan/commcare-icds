@@ -26,7 +26,7 @@ def get_test_district_locations_id(domain):
 
 
 def get_cas_data_blob_file(indicator, location, date):
-    if indicator not in ['', 'child_health_monthly', 'ccs_record_monthly', 'agg_awc']:
+    if indicator not in ['', 'child_health_monthly', 'ccs_record_monthly', 'agg_awc', 'birth_preparedness', 'delivery_child']:
         raise ValueError('Bad indicator {}'.format(indicator))
     blob_id = "{}-{}-{}".format(
         indicator,

@@ -1,5 +1,4 @@
 /* global moment */
-
 function CasExportController($window, $location, locationHierarchy, locationsService, downloadService, userLocationId, isAlertActive) {
     var vm = this;
     vm.isAlertActive = isAlertActive;
@@ -129,6 +128,24 @@ function CasExportController($window, $location, locationHierarchy, locationsSer
         return locationsService.getLocations(level, locationsCache, vm.selectedLocations, true);
     };
 
+    vm.accessToAllLocationsForLevel = function (locations) {
+        var haveAccessToAllLocationsForLevel = true;
+        window.angular.forEach(locations, function (location) {
+            if (!location.user_have_access) {
+                haveAccessToAllLocationsForLevel = false;
+            }
+        });
+        return haveAccessToAllLocationsForLevel;
+    };
+
+    vm.userLocationIdIsNull = function () {
+        return ["null", "undefined", null, undefined].indexOf(vm.userLocationId) !== -1;
+    };
+
+    vm.preventShowingAllOption = function (locations) {
+        return !vm.userLocationIdIsNull() && !vm.accessToAllLocationsForLevel(locations);
+    };
+
     vm.isLocationDisabled = function (level) {
         return locationsService.isLocationDisabled(level, vm);
     };
@@ -161,15 +178,11 @@ function CasExportController($window, $location, locationHierarchy, locationsSer
 
 CasExportController.$inject = ['$window', '$location', 'locationHierarchy', 'locationsService', 'downloadService', 'userLocationId', 'isAlertActive'];
 
-window.angular.module('icdsApp').directive("casExport", function () {
-    var url = hqImport('hqwebapp/js/initial_page_data').reverse;
-    return {
-        restrict: 'E',
-        scope: {
-        },
-        bindToController: true,
-        templateUrl: url('icds-ng-template', 'cas-export.directive'),
-        controller: CasExportController,
-        controllerAs: "$ctrl",
-    };
+window.angular.module('icdsApp').component("casExport", {
+    templateUrl: function () {
+        var url = hqImport('hqwebapp/js/initial_page_data').reverse;
+        return url('icds-ng-template', 'cas-export.directive');
+    },
+    controller: CasExportController,
+    controllerAs: "$ctrl",
 });

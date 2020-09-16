@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models.query_utils import Q
+from django.http import HttpResponseNotFound
 from django.http.response import (
     Http404,
     HttpResponse,
@@ -66,7 +67,8 @@ from custom.icds_reports.const import (
     SERVICE_DELIVERY_REPORT,
     CHILD_GROWTH_TRACKER_REPORT,
     POSHAN_PROGRESS_REPORT,
-    AWW_ACTIVITY_REPORT
+    AWW_ACTIVITY_REPORT,
+    MALNUTRITION_TRACKING_REPORT
 )
 from custom.icds_reports.dashboard_utils import get_dashboard_template_context
 from custom.icds_reports.models.aggregate import AwcLocation
@@ -105,6 +107,7 @@ from custom.icds_reports.reports.awc_reports import (
     get_awc_reports_system_usage,
     get_beneficiary_details,
     get_pregnant_details,
+    get_awc_report_thr,
 )
 from custom.icds_reports.reports.children_initiated_data import (
     get_children_initiated_data_chart,
@@ -455,6 +458,8 @@ class DownloadReleaseNotes(View):
         release_notes_file = IcdsFile.objects.filter(blob_id="dashboard_release_notes.pdf",
                                                      data_type='dashboard_release_notes')\
             .order_by('file_added').last()
+        if not release_notes_file:
+            return HttpResponseNotFound()
         request_type = request.GET.get('type')
         if request_type == 'date':
             release_date = release_notes_file.file_added
@@ -961,6 +966,13 @@ class AwcReportsView(BaseReportView):
                     reversed_order,
                     config['awc_id']
                 )
+        elif step == 'take_home_ration':
+            data = get_awc_report_thr(
+                config,
+                tuple(current_month.timetuple())[:3],
+                self.kwargs.get('domain'),
+                include_test
+            )
         return JsonResponse(data=data)
 
 
@@ -1079,7 +1091,7 @@ class ExportIndicatorView(View):
                          AWC_INFRASTRUCTURE_EXPORT, GROWTH_MONITORING_LIST_EXPORT, AWW_INCENTIVE_REPORT,
                          LS_REPORT_EXPORT, THR_REPORT_EXPORT, DASHBOARD_USAGE_EXPORT,
                          SERVICE_DELIVERY_REPORT, CHILD_GROWTH_TRACKER_REPORT, AWW_ACTIVITY_REPORT,
-                         POSHAN_PROGRESS_REPORT):
+                         POSHAN_PROGRESS_REPORT, MALNUTRITION_TRACKING_REPORT):
             task = prepare_excel_reports.delay(
                 config,
                 aggregation_level,
@@ -2436,7 +2448,7 @@ class CasDataExportAPIView(View):
 
     @property
     def valid_types(self):
-        return ('woman', 'child', 'awc')
+        return ('woman', 'child', 'awc', 'birth', 'deliverychild')
 
     @staticmethod
     def get_type_code(data_type):
@@ -2444,6 +2456,8 @@ class CasDataExportAPIView(View):
             "child": 'child_health_monthly',
             "woman": 'ccs_record_monthly',
             "awc": 'agg_awc',
+            "birth": 'birth_preparedness',
+            "deliverychild": 'delivery_child'
         }
         return type_map[data_type]
 
@@ -2835,6 +2849,7 @@ class PoshanProgressDashboardView(BaseReportView):
 
         location_filters = get_location_filter(location, domain)
         location_filters['aggregation_level'] = location_filters.get('aggregation_level', 1)
+        pre_release_features = icds_pre_release_features(self.request.couch_user)
 
         data = get_poshan_progress_dashboard_data(
             domain,
@@ -2844,6 +2859,7 @@ class PoshanProgressDashboardView(BaseReportView):
             data_period,
             step,
             location_filters,
-            include_test
+            include_test,
+            pre_release_features
         )
         return JsonResponse(data=data)

@@ -10,3 +10,4 @@ class Migration(migrations.Migration):
     dependencies = [
         ('icds_reports', '0200_update_chm_ccs_view'),
     ]
+
