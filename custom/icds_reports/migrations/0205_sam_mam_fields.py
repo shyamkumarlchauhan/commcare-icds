@@ -52,5 +52,3 @@ class Migration(migrations.Migration):
     ]
     operations.extend(get_composite_primary_key_migrations(['aggregatesammamform']))
     operations.append(migrations.RunSQL(f"SELECT create_distributed_table('icds_dashboard_sam_mam_forms', 'supervisor_id')"))
-
-    operations.extend(get_view_migrations())
