@@ -156,7 +156,12 @@ def get_prevalence_of_undernutrition_data_chart(domain, config, loc_level,
 
     config['month__range'] = (three_before, month)
     del config['month']
-    chart_data = AggChildHealthMonthly.objects.filter(**config).values(
+    if config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
+        chm_filter = get_filters_from_config_for_chart_view(config)
+        chm_queryset = ChildHealthMonthlyView.objects.filter(**chm_filter)
+    else:
+        chm_queryset = AggChildHealthMonthly.objects.filter(**config)
+    chart_data = chm_queryset.values(
         'month', '%s_name' % loc_level
     ).annotate(
         moderately_underweight=Sum('nutrition_status_moderately_underweight'),
