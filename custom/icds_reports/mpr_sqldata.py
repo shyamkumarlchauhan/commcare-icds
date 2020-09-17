@@ -10,6 +10,10 @@ from custom.icds_reports.sqldata.base_operationalization import BaseOperationali
     BaseOperationalizationBeta
 from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
+from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport
+from custom.icds_reports.utils import get_location_filter
+from django.db.models.aggregates import Sum
+from django.db.models import Case, When, Value
 
 from custom.icds_reports.models.views import ServiceDeliveryReportView
 from custom.icds_reports.models.aggregate import AggChildHealth, AggMPRAwc, AggAwc
@@ -1357,6 +1361,366 @@ class MPRPreschoolEducation(ICDSMixin, MPRData):
                 )
             }
         ]
+
+
+class MPRPreschoolEducationBeta(ICDSMixin, MPRData):
+
+    title = '7. Pre-school Education conducted for children 3-6 years'
+    slug = 'preschool'
+    has_sections = True
+
+    @property
+    def rows(self):
+        if self.config['location_id']:
+            data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
+            filters = get_location_filter(self.config['location_id'], self.config['domain'])
+            if filters.get('aggregation_level') > 1:
+                filters['aggregation_level'] -= 1
+
+            filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+            data.update(self.get_child_data(filters))
+            data.update(self.get_activity_data(filters))
+
+            sections = []
+            for section in self.row_config:
+
+                rows = []
+                for row in section['rows_config']:
+                    row_data = []
+                    for idx, cell in enumerate(row):
+                        if isinstance(cell, dict):
+                            num = 0
+                            for c in cell['columns']:
+                                num += data.get(c, 0)
+
+                            if 'second_value' in cell:
+                                denom = data.get(cell['second_value'], 1)
+                                alias_data = cell['func'](num, float(denom or 1))
+                                cell_data = "%.1f" % cell['func'](num, float(denom or 1))
+                            else:
+                                cell_data = num
+                                alias_data = num
+
+                            if 'alias' in cell:
+                                data[cell['alias']] = alias_data
+                            row_data.append(cell_data)
+                        elif isinstance(cell, tuple):
+                            cell_data = 0
+                            for c in cell:
+                                cell_data += data.get(c, 0)
+                            row_data.append(cell_data)
+                        else:
+                            row_data.append(data.get(cell, cell if cell == '--' or idx == 0 else 0))
+                    rows.append(row_data)
+                sections.append(dict(
+                    title=section['title'],
+                    slug=section['slug'],
+                    headers=section['headers'],
+                    rows=rows
+                ))
+            return sections
+
+    def get_child_data(self, filters):
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            pse_attendance_f_3_4=Sum(Case(When(gender='F',
+                                               age_tranche__in=['36', '48'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_m_3_4=Sum(Case(When(gender='M',
+                                               age_tranche__in=['36', '48'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_f_4_5=Sum(Case(When(gender='F',
+                                               age_tranche__in=['60'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_m_4_5=Sum(Case(When(gender='F',
+                                               age_tranche__in=['60'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_f_5_6=Sum(Case(When(gender='F',
+                                               age_tranche__in=['72'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_m_5_6=Sum(Case(When(gender='F',
+                                               age_tranche__in=['72'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_eligible_f=Sum(Case(When(gender='F',
+                                         then='pse_eligible',
+                                         ), default=Value(0))),
+            pse_eligible_m=Sum(Case(When(gender='F',
+                                         then='pse_eligible',
+                                         ), default=Value(0))),
+            pse_attended_0_days_f=Sum(Case(When(gender='F',
+                                                then='pse_attended_0_days',
+                                                ), default=Value(0))),
+            pse_attended_0_days_m=Sum(Case(When(gender='F',
+                                                then='pse_attended_0_days',
+                                                ), default=Value(0))),
+            pse_attended_1_days_f=Sum(Case(When(gender='F',
+                                                then='pse_attended_1_days',
+                                                ), default=Value(0))),
+            pse_attended_1_days_m=Sum(Case(When(gender='M',
+                                                then='pse_attended_1_days',
+                                                ), default=Value(0))),
+            total_pse_days_attended_f=Sum(Case(When(gender='F',
+                                                    then='total_pse_days_attended',
+                                                    ), default=Value(0))),
+            total_pse_days_attended_m=Sum(Case(When(gender='M',
+                                                    then='total_pse_days_attended',
+                                                    ), default=Value(0))),
+        ).order_by('month').first()
+
+        if not child_data:
+            return {}
+        attendance_total_data_map = {
+            'total_pse_attendance_3_4': ['pse_attendance_f_3_4', 'pse_attendance_m_3_4'],
+            'total_pse_attendance_4_5': ['pse_attendance_f_4_5', 'pse_attendance_m_4_5'],
+            'total_pse_attendance_5_6': ['pse_attendance_f_5_6', 'pse_attendance_m_5_6'],
+            'total_pse_f': ['pse_attendance_f_3_4', 'pse_attendance_f_4_5', 'pse_attendance_f_5_6'],
+            'total_pse_m': ['pse_attendance_m_3_4', 'pse_attendance_m_4_5', 'pse_attendance_m_5_6'],
+            'total_pse_attendance': ['pse_attendance_f_3_4', 'pse_attendance_m_3_4',
+                                     'pse_attendance_f_4_5', 'pse_attendance_m_4_5',
+                                     'pse_attendance_f_5_6', 'pse_attendance_m_5_6'],
+        }
+
+        for total_attendance_key, total_attendance_summation_cols in attendance_total_data_map.items():
+            child_data[total_attendance_key] = sum([child_data[key] for key in total_attendance_summation_cols])
+        return child_data
+
+    def get_activity_data(self, filters):
+        data = AggAwc.objects.filter(**filters).values(
+            'num_launched_awcs',
+            'num_days_4_pse_activities',
+            'num_days_1_pse_activities',
+            'awc_days_open'
+        ).order_by('month').first()
+
+        if not data:
+            return {}
+
+        pse_4 = 0
+        pse_1 = 0
+        if data['num_launched_awcs']:
+            pse_4 = data['num_days_4_pse_activities'] / data['num_launched_awcs']
+            pse_1 = data['num_days_1_pse_activities'] / data['num_launched_awcs']
+
+        return {
+            'open_four_acts_count': pse_4,
+            'open_one_acts_count': pse_1,
+            'open_pse_count': data['awc_days_open']
+        }
+
+    @property
+    def row_config(self):
+        return [
+            {
+                'title': 'a. Average attendance of children for 16 or more days '
+                         'in the reporting month by different categories',
+                'slug': 'preschool_1',
+                'headers': DataTablesHeader(
+                    DataTablesColumn('Category'),
+                    DataTablesColumn('Girls'),
+                    DataTablesColumn('Boys'),
+                    DataTablesColumn('Total')
+                ),
+                'rows_config': (
+                    (
+                        _('ST'),
+                        'pse_21_days_female_st',
+                        'pse_21_days_male_st',
+                        {
+                            'columns': ('pse_21_days_female_st', 'pse_21_days_male_st'),
+                            'alias': '21_days_st'
+                        }
+                    ),
+                    (
+                        _('SC'),
+                        'pse_21_days_female_sc',
+                        'pse_21_days_male_sc',
+                        {
+                            'columns': ('pse_21_days_female_sc', 'pse_21_days_male_sc'),
+                            'alias': '21_days_sc'
+                        }
+                    ),
+                    (
+                        _('Other'),
+                        'pse_21_days_female_others',
+                        'pse_21_days_male_others',
+                        {
+                            'columns': ('pse_21_days_female_others', 'pse_21_days_male_others'),
+                            'alias': '21_days_others'
+                        }
+                    ),
+                    (
+                        _('All Categories (Total)'),
+                        ('pse_21_days_female_st', 'pse_21_days_female_sc', 'pse_21_days_female_others'),
+                        ('pse_21_days_male_st', 'pse_21_days_male_sc', 'pse_21_days_male_others'),
+                        ('21_days_st', '21_days_sc', '21_days_others')
+                    ),
+                    (
+                        _('Disabled'),
+                        'pse_21_days_female_disabled',
+                        'pse_21_days_male_disabled',
+                        ('pse_21_days_female_disabled', 'pse_21_days_male_disabled')
+                    ),
+                    (
+                        _('Minority'),
+                        'pse_21_days_female_minority',
+                        'pse_21_days_male_minority',
+                        ('pse_21_days_female_minority', 'pse_21_days_male_minority')
+                    )
+                )
+
+            },
+            {
+                'title': 'b. Total Daily Attendance of Children by age category',
+                'slug': 'preschool_2',
+                'headers': DataTablesHeader(
+                    DataTablesColumn('Age Category'),
+                    DataTablesColumn('Girls'),
+                    DataTablesColumn('Boys'),
+                    DataTablesColumn('Total')
+                ),
+                'rows_config': (
+                    (
+                        _('3-4 years'),
+                        'pse_attendance_f_3_4',
+                        'pse_attendance_m_3_4',
+                        'total_pse_attendance_3_4'
+                    ),
+                    (
+                        _('4-5 years'),
+                        'pse_attendance_f_4_5',
+                        'pse_attendance_f_4_5',
+                        'total_pse_attendance_4_5'
+                    ),
+                    (
+                        _('5-6 years'),
+                        'pse_attendance_f_5_6',
+                        'pse_attendance_f_5_6',
+                        'total_pse_attendance_5_6'
+                    ),
+                    (
+                        _('All Children'),
+                        'total_pse_f',
+                        'total_pse_m',
+                        'total_pse_attendance'
+                    )
+                )
+            },
+            {
+                'title': 'c. PSE Attendance Efficiency',
+                'slug': 'preschool_3',
+                'headers': DataTablesHeader(
+                    DataTablesColumn(''),
+                    DataTablesColumn('Girls'),
+                    DataTablesColumn('Boys'),
+                    DataTablesColumn('Total')
+                ),
+                'rows_config': (
+                    (
+                        _('I. Annual Population Totals (3-6 years)'),
+                        'pse_eligible_f',
+                        'pse_eligible_m',
+                        {
+                            'columns': ('pse_eligible_f', 'pse_eligible_m'),
+                            'alias': 'child_count'
+                        }
+                    ),
+                    (
+                        _('II. Usual Absentees during the month'),
+                        'pse_attended_0_days_f',
+                        'pse_attended_0_days_m',
+                        {
+                            'columns': ('pse_attended_0_days_f', 'pse_attended_0_days_m'),
+                            'alias': 'absent'
+                        }
+                    ),
+                    (
+                        _('III. Total present for at least one day in month'),
+                        'pse_attended_1_days_f',
+                        'pse_attended_1_days_m',
+                        {
+                            'columns': ('pse_attended_1_days_f', 'pse_attended_1_days_m'),
+                            'alias': 'partial'
+                        }
+                    ),
+                    (
+                        _('IV. Expected Total Daily Attendance'),
+                        {
+                            'columns': ('pse_attended_1_days_f',),
+                            'func': mul,
+                            'second_value': 'open_pse_count',
+                            'alias': 'expected_attendance_female'
+                        },
+                        {
+                            'columns': ('pse_attended_1_days_m',),
+                            'func': mul,
+                            'second_value': 'open_pse_count',
+                            'alias': 'expected_attendance_male'
+                        },
+                        {
+                            'columns': ('partial',),
+                            'func': mul,
+                            'second_value': 'open_pse_count',
+                            'alias': 'expected_attendance'
+                        }
+                    ),
+                    (
+                        _('V. Actual Total Daily Attendance'),
+                            'total_pse_days_attended_f',
+                            'total_pse_days_attended_m',
+                        {
+                            'columns': (
+                                'total_pse_days_attended_f',
+                                'total_pse_days_attended_m',
+                            ),
+                            'alias': 'attendance'
+                        }
+                    ),
+                    (
+                        _('VI. PSE Attendance Efficiency'),
+                        {
+                            'columns': ('total_pse_days_attended_f',),
+                            'func': truediv,
+                            'second_value': 'expected_attendance_female',
+                            'format': 'percent',
+                        },
+                        {
+                            'columns': 'total_pse_days_attended_m',
+                            'func': truediv,
+                            'second_value': 'expected_attendance_male',
+                            'format': 'percent',
+                        },
+                        {
+                            'columns': 'attendance',
+                            'func': truediv,
+                            'second_value': 'expected_attendance',
+                            'format': 'percent',
+                        }
+                    )
+                )
+            },
+            {
+                'title': 'd. PSE Activities',
+                'slug': 'preschool_4',
+                'headers': [],
+                'rows_config': (
+                    (
+                        _('I. Average no. of days on which at least four PSE activities were conducted at AWCs'),
+                        'open_four_acts_count'
+                    ),
+                    (
+                        _('II. Average no. of days on which any PSE activity was conducted at AWCs'),
+                        'open_one_acts_count'
+                    )
+                )
+            }
+        ]
+
 
 
 class MPRGrowthMonitoring(ICDSMixin, MPRData):
