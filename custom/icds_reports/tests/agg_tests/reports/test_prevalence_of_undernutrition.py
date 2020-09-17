@@ -15,6 +15,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -220,7 +221,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -230,7 +232,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -240,15 +243,14 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertListEqual(
             data['bottom_five'],
             [
-                {'loc_name': 'st5', 'percent': 0.0},
-                {'loc_name': 'st6', 'percent': 0.0},
                 {'loc_name': 'st7', 'percent': 0.0},
                 {'loc_name': 'st2', 'percent': 20.37037037037037},
                 {'loc_name': 'st1', 'percent': 22.71293375394322}
@@ -259,18 +261,17 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertListEqual(
             data['top_five'],
             [
-                {'loc_name': 'st3', 'percent': 0.0},
-                {'loc_name': 'st4', 'percent': 0.0},
-                {'loc_name': 'st5', 'percent': 0.0},
-                {'loc_name': 'st6', 'percent': 0.0},
-                {'loc_name': 'st7', 'percent': 0.0}
+                {'loc_name': 'st7', 'percent': 0.0},
+                {'loc_name': 'st2', 'percent': 20.37037037037037},
+                {'loc_name': 'st1', 'percent': 22.71293375394322}
             ]
         )
 
@@ -278,7 +279,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -288,7 +290,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -314,14 +317,14 @@ class TestPrevalenceOfUndernutrition(TestCase):
                     {
                         "y": 0.7478260869565218,
                         "x": 1491004800000,
-                        "weighed": 3450,
-                        "unweighed": 1655
+                        "weighed": 690,
+                        "unweighed": 331
                     },
                     {
                         "y": 0.7856115107913669,
                         "x": 1493596800000,
-                        "weighed": 3475,
-                        "unweighed": 1480
+                        "weighed": 695,
+                        "unweighed": 294
                     }
                 ],
                 "key": "% Normal"
@@ -332,7 +335,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -358,14 +362,14 @@ class TestPrevalenceOfUndernutrition(TestCase):
                     {
                         "y": 0.23043478260869565,
                         "x": 1491004800000,
-                        "weighed": 3450,
-                        "unweighed": 1655
+                        "weighed": 690,
+                        "unweighed": 331
                     },
                     {
                         "y": 0.1856115107913669,
                         "x": 1493596800000,
-                        "weighed": 3475,
-                        "unweighed": 1480
+                        "weighed": 695,
+                        "unweighed": 294
                     }
                 ],
                 "key": "% Moderately Underweight (-2 SD)"
@@ -376,7 +380,8 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -402,14 +407,14 @@ class TestPrevalenceOfUndernutrition(TestCase):
                     {
                         "y": 0.021739130434782608,
                         "x": 1491004800000,
-                        "weighed": 3450,
-                        "unweighed": 1655
+                        "weighed": 690,
+                        "unweighed": 331
                     },
                     {
                         "y": 0.02877697841726619,
                         "x": 1493596800000,
-                        "weighed": 3475,
-                        "unweighed": 1480
+                        "weighed": 695,
+                        "unweighed": 294
                     }
                 ],
                 "key": "% Severely Underweight (-3 SD) "
@@ -420,17 +425,14 @@ class TestPrevalenceOfUndernutrition(TestCase):
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
-                'month': (2017, 5, 1)
+                'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertListEqual(
             data['all_locations'],
             [
-                {'loc_name': 'st3', 'percent': 0.0},
-                {'loc_name': 'st4', 'percent': 0.0},
-                {'loc_name': 'st5', 'percent': 0.0},
-                {'loc_name': 'st6', 'percent': 0.0},
                 {'loc_name': 'st7', 'percent': 0.0},
                 {'loc_name': 'st2', 'percent': 20.37037037037037},
                 {'loc_name': 'st1', 'percent': 22.71293375394322}
