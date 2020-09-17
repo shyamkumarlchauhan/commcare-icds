@@ -19,14 +19,12 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
         delete_extra_record_query = self.delete_extra_record_query()
         missing_location_query = self.missing_location_query()
         aggregation_query, agg_params = self.aggregate_query()
-        update_days_query = self.update_days_query()
-        update_awc_location_details = self.update_awc_location_details()
+        update_days_location_query = self.update_days_location_query()
 
         cursor.execute(delete_extra_record_query)
         cursor.execute(missing_location_query)
         cursor.execute(aggregation_query, agg_params)
-        cursor.execute(update_days_query)
-        cursor.execute(update_awc_location_details)
+        cursor.execute(update_days_location_query)
 
     def delete_extra_record_query(self):
         return """
@@ -114,25 +112,17 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
             now=datetime.date.today()
         ), params
 
-    def update_days_query(self):
-        return """
-            UPDATE "{table_name}" SET
-                no_of_days_since_start = CASE
-                    WHEN first_submission IS DISTINCT FROM NULL
-                    THEN '{now}'::DATE - first_submission::DATE
-                    ELSE NULL END,
-                no_of_days_inactive = CASE
-                    WHEN last_submission IS DISTINCT FROM NULL
-                    THEN '{now}'::DATE - last_submission::DATE
-                    ELSE NULL END
-        """.format(
-            table_name=self.aggregate_parent_table,
-            now=datetime.date.today()
-        )
-
-    def update_awc_location_details(self):
+    def update_days_location_query(self):
         return """
             UPDATE "{table_name}" awc SET
+                no_of_days_since_start = CASE
+                    WHEN awc.first_submission IS DISTINCT FROM NULL
+                    THEN '{now}'::DATE - awc.first_submission::DATE
+                    ELSE NULL END,
+                no_of_days_inactive = CASE
+                    WHEN awc.last_submission IS DISTINCT FROM NULL
+                    THEN '{now}'::DATE - awc.last_submission::DATE
+                    ELSE NULL END,
                 awc_id = loc.doc_id,
                 awc_name = loc.awc_name,
                 awc_site_code = loc.awc_site_code,
@@ -143,7 +133,7 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
                 district_id = loc.district_id,
                 district_name = loc.district_name,
                 state_id = loc.state_id,
-                state_name = loc.state_name as state_name
+                state_name = loc.state_name
             FROM "{awc_location_table_name}" loc
             loc.doc_id = aww.awc_id AND
             loc.doc_id != 'All'
