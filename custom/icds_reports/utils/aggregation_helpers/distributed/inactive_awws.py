@@ -135,7 +135,7 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
                 state_id = loc.state_id,
                 state_name = loc.state_name
             FROM "{awc_location_table_name}" loc
-            loc.doc_id = aww.awc_id AND
+            WHERE loc.doc_id = awc.awc_id AND
             loc.doc_id != 'All'
         """.format(
             awc_location_table_name='awc_location_local',
