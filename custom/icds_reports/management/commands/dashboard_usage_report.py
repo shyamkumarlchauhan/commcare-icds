@@ -71,7 +71,7 @@ class Command(BaseCommand):
         """
         print(f'Compiling tabular usage counts for users')
         tabular_user_counts = defaultdict(int)
-        tabular_user_indicators = defaultdict(lambda: [0] * 10)
+        tabular_user_indicators = defaultdict(lambda: [0] * 15)
 
         records = list(ICDSAuditEntryRecord.objects.filter(url=f'/a/{domain}/icds_export_indicator',
                                                            time_of_use__gte=start_date,
@@ -116,7 +116,9 @@ class Command(BaseCommand):
 
         extra_headers = ['Total', 'Child', 'Pregnant Women', 'Demographics', 'System Usage',
                          'AWC infrastructure', 'Child Growth Monitoring List', 'ICDS - CAS Monthly Register',
-                         'AWW Performance Report', 'LS Performance Report', 'Take Home Ration']
+                         'AWW Performance Report', 'LS Performance Report', 'Take Home Ration',
+                         'Dashboard Activity Report', 'Service Delivery Report', 'Child Growth Tracking Report',
+                         'AWW Activity Report', 'Poshan Progress Report']
         print(f'Compiling request data for {len(usage_data)} users')
         headers = usage_data[0][:7]
         headers.extend(extra_headers)

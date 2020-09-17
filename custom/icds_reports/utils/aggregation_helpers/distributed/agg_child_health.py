@@ -70,6 +70,8 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
              "COUNT(*) FILTER (WHERE COALESCE(chm.disabled, 'no')='yes' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 25)"),
             ('pse_attended_25_days_minority',
              "COUNT(*) FILTER (WHERE COALESCE(chm.minority, 'no')='yes' and chm.pse_eligible = 1 AND chm.pse_days_attended >= 25)"),
+            ('pse_attended_21_days',
+             "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended >= 21)"),
             ('pse_attended_0_days',
              "COUNT(*) FILTER (WHERE chm.pse_eligible = 1 AND chm.pse_days_attended = 0)"),
             ('pse_attended_1_days',
@@ -98,6 +100,14 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('fully_immunized_eligible', "SUM(chm.fully_immunized_eligible)"),
             ('fully_immunized_on_time', "SUM(chm.fully_immunized_on_time)"),
             ('fully_immunized_late', "SUM(chm.fully_immunized_late)"),
+            ('fully_immunized_eligible_in_month',"SUM(CASE WHEN "
+                                                 "date_trunc('MONTH',dob + INTERVAL '12 months')=%(start_date)s "
+                                                 "AND valid_in_month=1 THEN 1 ELSE 0 END )"),
+            ('fully_immun_before_month_end', "SUM(CASE WHEN "
+                                             "date_trunc('MONTH',dob + INTERVAL '12 months')=%(start_date)s "
+                                             "AND valid_in_month=1"
+                                             "AND fully_immun_before_month_end=1"
+                                             "THEN 1 ELSE 0 END)"),
             ('has_aadhar_id', "SUM(chm.has_aadhar_id)"),
             ('aggregation_level', '5'),
             ('pnc_eligible', 'SUM(chm.pnc_eligible)'),
@@ -303,6 +313,8 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('fully_immunized_eligible', ),
             ('fully_immunized_on_time', ),
             ('fully_immunized_late', ),
+            ('fully_immunized_eligible_in_month',),
+            ('fully_immun_before_month_end',),
             ('has_aadhar_id', ),
             ('aggregation_level', str(aggregation_level)),
             ('pnc_eligible', ),
