@@ -1707,7 +1707,6 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
     vm.data = {};
     vm.label = "AWC Report";
     vm.haveAccessToAllLocations = haveAccessToAllLocations;
-    vm.haveAccessToFeatures = haveAccessToFeatures;
     vm.tooltipPlacement = "right";
     vm.step = $routeParams.step;
     vm.filters = ['data_period', 'gender', 'age'];
@@ -1799,6 +1798,12 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
                 'heading': 'Mother Phone Number',
                 'class': 'medium-col',
                 'value': renderMotherPhoneNumber
+            },
+            {
+                'mData': 'beneficiary_status',
+                'heading': 'Status',
+                'class': 'medium-col',
+                'value': renderBeneficairyStatus
             }
         ],
         'pregnant': [
@@ -1926,16 +1931,6 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             }
         ],
     };
-
-    if (vm.haveAccessToFeatures) {
-        vm.awcReportTableData['beneficiary'].push(
-        {
-            'mData': 'beneficiary_status',
-            'heading': 'Status',
-            'class': 'medium-col',
-            'value': renderBeneficairyStatus
-        })
-    }
 
     vm.dtColumns = [];
     if (vm.awcReportTableData[vm.step] && !isMobile) {
