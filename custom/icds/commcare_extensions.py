@@ -30,6 +30,7 @@ from custom.icds_core.const import (
 
 SUPPORTED_DOMAINS = [
     'icds-cas',
+    'cas-lab',
 ]
 
 
