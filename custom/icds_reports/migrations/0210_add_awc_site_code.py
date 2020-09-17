@@ -9,7 +9,7 @@ from custom.icds_reports.utils.migrations import get_view_migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0208_add_immu_col_to_chm'),
+        ('icds_reports', '0209_add_new_column_agg_child'),
     ]
 
     operations = [
