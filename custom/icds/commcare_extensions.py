@@ -28,7 +28,13 @@ from custom.icds_core.const import (
 )
 
 
-@uitab_dropdown_items.extend(domains=["icds-cas"])
+SUPPORTED_DOMAINS = [
+    'icds-cas',
+    'cas-lab',
+]
+
+
+@uitab_dropdown_items.extend(domains=SUPPORTED_DOMAINS)
 def icds_uitab_dropdown_items(tab_name, tab, domain, request):
     if tab_name == 'ApplicationsTab' and icds_toggles.MANAGE_CCZ_HOSTING.enabled_for_request(request):
         return [{
@@ -37,7 +43,7 @@ def icds_uitab_dropdown_items(tab_name, tab, domain, request):
         }]
 
 
-@uitab_sidebar_items.extend(domains=["icds-cas"])
+@uitab_sidebar_items.extend(domains=SUPPORTED_DOMAINS)
 def icds_uitab_sidebar_items(tab_name, tab, domain, request):
 
     if tab_name == "ProjectReportsTab" and icds_toggles.PERFORM_LOCATION_REASSIGNMENT.enabled_for_request(request):
@@ -161,7 +167,7 @@ def icds_tabs():
     ]
 
 
-@user_query_mutators.extend(domains=["icds-cas"])
+@user_query_mutators.extend(domains=SUPPORTED_DOMAINS)
 def icds_emwf_options_user_query_mutators(domain):
     from custom.icds.report_filters import filter_users_in_test_locations
     return [
