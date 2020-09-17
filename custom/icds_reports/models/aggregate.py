@@ -576,6 +576,9 @@ class AggAwc(models.Model, AggregateMixin):
     cases_ccs_lactating_reg_in_month = models.IntegerField(blank=True, null=True)
     cases_ccs_pregnant_all_reg_in_month = models.IntegerField(blank=True, null=True)
     cases_ccs_lactating_all_reg_in_month = models.IntegerField(blank=True, null=True)
+    awc_open_with_attended_children = models.IntegerField(blank=True, null=True)
+    num_days_4_pse_activities = models.IntegerField(blank=True, null=True)
+    num_days_1_pse_activities = models.IntegerField(blank=True, null=True)
     use_salt = models.IntegerField(null=True)
 
     class Meta:
@@ -807,6 +810,9 @@ class AggChildHealth(models.Model, AggregateMixin):
     zscore_grading_hfa_recorded_in_month = models.IntegerField(blank=True, null=True)
     zscore_grading_wfh_recorded_in_month = models.IntegerField(blank=True, null=True)
     lunch_count_21_days = models.IntegerField(blank=True, null=True)
+    total_pse_days_attended = models.IntegerField(blank=True, null=True)
+    pse_attended_0_days = models.IntegerField(null=True)
+    pse_attended_1_days = models.IntegerField(null=True)
     fully_immunized_eligible_in_month = models.IntegerField(blank=True, null=True)
     fully_immun_before_month_end = models.IntegerField(blank=True, null=True)
 
@@ -882,6 +888,8 @@ class DailyAttendance(models.Model, AggregateMixin):
     days_thr_provided_count = models.IntegerField(null=True)
     open_pse_count = models.IntegerField(null=True)
     state_id = models.TextField(null=True)
+    open_4_acts_count = models.SmallIntegerField(null=True)
+    open_1_acts_count = models.SmallIntegerField(null=True)
 
     class Meta:
         managed = False
