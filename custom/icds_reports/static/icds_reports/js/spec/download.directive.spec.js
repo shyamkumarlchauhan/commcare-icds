@@ -6,7 +6,7 @@ var pageData = hqImport('hqwebapp/js/initial_page_data');
 
 describe('Download Directive', function () {
 
-    var numberOfReports = 15;
+    var numberOfReports = 16;
     describe('Download Directive main functionalities', function() {
         var $scope, $httpBackend, controller;
 

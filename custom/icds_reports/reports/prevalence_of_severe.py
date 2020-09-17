@@ -173,7 +173,7 @@ def get_prevalence_of_severe_data_chart(domain, config, loc_level, show_test=Fal
     config['month__range'] = (three_before, month)
     del config['month']
     # using child health monthly while querying for sector level due to performance issues
-    if icds_feature_flag and config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
+    if config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
         chm_filter = get_filters_from_config_for_chart_view(config)
         chm_queryset = ChildHealthMonthlyView.objects.filter(**chm_filter)
     else:

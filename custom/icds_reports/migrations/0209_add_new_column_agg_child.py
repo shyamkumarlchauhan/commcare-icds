@@ -13,7 +13,7 @@ from custom.icds_reports.utils.migrations import get_view_migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0201_auto_20200817_1631'),
+        ('icds_reports', '0208_add_immu_col_to_chm'),
     ]
 
     operations = [
