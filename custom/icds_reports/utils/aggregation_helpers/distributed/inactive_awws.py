@@ -20,11 +20,13 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
         missing_location_query = self.missing_location_query()
         aggregation_query, agg_params = self.aggregate_query()
         update_days_query = self.update_days_query()
+        update_awc_location_details = self.update_awc_location_details()
 
         cursor.execute(delete_extra_record_query)
         cursor.execute(missing_location_query)
         cursor.execute(aggregation_query, agg_params)
         cursor.execute(update_days_query)
+        cursor.execute(update_awc_location_details)
 
     def delete_extra_record_query(self):
         return """
@@ -124,6 +126,29 @@ class InactiveAwwsAggregationDistributedHelper(BaseICDSAggregationDistributedHel
                     THEN '{now}'::DATE - last_submission::DATE
                     ELSE NULL END
         """.format(
+            table_name=self.aggregate_parent_table,
+            now=datetime.date.today()
+        )
+
+    def update_awc_location_details(self):
+        return """
+            UPDATE "{table_name}" awc SET
+                awc_id = loc.doc_id,
+                awc_name = loc.awc_name,
+                awc_site_code = loc.awc_site_code,
+                supervisor_id = loc.supervisor_id,
+                supervisor_name = loc.supervisor_name,
+                block_id = loc.block_id,
+                block_name = loc.block_name,
+                district_id = loc.district_id,
+                district_name = loc.district_name,
+                state_id = loc.state_id,
+                state_name = loc.state_name as state_name
+            FROM "{awc_location_table_name}" loc
+            loc.doc_id = aww.awc_id AND
+            loc.doc_id != 'All'
+        """.format(
+            awc_location_table_name='awc_location_local',
             table_name=self.aggregate_parent_table,
             now=datetime.date.today()
         )
