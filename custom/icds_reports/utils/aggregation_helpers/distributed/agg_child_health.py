@@ -282,7 +282,7 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
             ('thr_eligible', ),
             ('rations_21_plus_distributed', ),
             ('pse_eligible', ),
-            ('pse_attended_25_days', ),
+            ('pse_attended_16_days',),
             ('pse_attended_25_days_sc',),
             ('pse_attended_25_days_st',),
             ('pse_attended_25_days_other',),
