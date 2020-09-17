@@ -25,4 +25,9 @@ class Migration(migrations.Migration):
         migrations.RunSQL("ALTER TABLE agg_awc ADD COLUMN num_days_1_pse_activities integer"),
         migrations.RunSQL("ALTER TABLE daily_attendance ADD COLUMN open_4_acts_count smallint"),
         migrations.RunSQL("ALTER TABLE daily_attendance ADD COLUMN open_1_acts_count smallint"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_25_days_sc integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_25_days_st integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_25_days_other integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_25_days_disabled integer"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_25_days_minority integer"),
     ]
