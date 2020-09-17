@@ -59,14 +59,28 @@
         
 {"last_sync": "2019-01-05T00:00:00", "now": "2019-01-11T00:00:00", "six_months_ago": "2018-07-11T00:00:00"}
 
-            UPDATE "icds_reports_aggregateinactiveaww" SET
+            UPDATE "icds_reports_aggregateinactiveaww" awc SET
                 no_of_days_since_start = CASE
-                    WHEN first_submission IS DISTINCT FROM NULL
-                    THEN '2019-01-11'::DATE - first_submission::DATE
+                    WHEN awc.first_submission IS DISTINCT FROM NULL
+                    THEN '2019-01-11'::DATE - awc.first_submission::DATE
                     ELSE NULL END,
                 no_of_days_inactive = CASE
-                    WHEN last_submission IS DISTINCT FROM NULL
-                    THEN '2019-01-11'::DATE - last_submission::DATE
-                    ELSE NULL END
+                    WHEN awc.last_submission IS DISTINCT FROM NULL
+                    THEN '2019-01-11'::DATE - awc.last_submission::DATE
+                    ELSE NULL END,
+                awc_id = loc.doc_id,
+                awc_name = loc.awc_name,
+                awc_site_code = loc.awc_site_code,
+                supervisor_id = loc.supervisor_id,
+                supervisor_name = loc.supervisor_name,
+                block_id = loc.block_id,
+                block_name = loc.block_name,
+                district_id = loc.district_id,
+                district_name = loc.district_name,
+                state_id = loc.state_id,
+                state_name = loc.state_name
+            FROM "awc_location_local" loc
+            WHERE loc.doc_id = awc.awc_id AND
+            loc.doc_id != 'All'
         
 {}
