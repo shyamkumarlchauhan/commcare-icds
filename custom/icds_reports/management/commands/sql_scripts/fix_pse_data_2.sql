@@ -16,6 +16,7 @@ INSERT INTO "temp_chm" (
     WHERE
       chm.month = '{start_date}' AND state_id='{state_id}'
     GROUP BY
+      chm.state_id,
       chm.awc_id,
       chm.supervisor_id,
       chm.month,

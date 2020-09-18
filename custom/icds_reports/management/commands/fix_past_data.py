@@ -6,6 +6,7 @@ from custom.icds_reports.utils.connections import get_icds_ucr_citus_db_alias
 from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand
 from django.db import connections, transaction
+from corehq.util.argparse_types import date_type
 
 
 @transaction.atomic
@@ -20,9 +21,16 @@ def _run_custom_sql_script(command):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('start_month')
-        parser.add_argument('end_month')
-
+        parser.add_argument(
+            'start_month',
+            type=date_type,
+            help='The start date (inclusive). format YYYY-MM-DD'
+        )
+        parser.add_argument(
+            'end_month',
+            type=date_type,
+            help='The end date (inclusive). format YYYY-MM-DD'
+        )
     def state_wise_query(self, state_ids, start_month, next_month, script_name):
         for state_id in state_ids:
             self.sql_to_execute(start_month, next_month, script_name, state_id)
@@ -43,8 +51,6 @@ class Command(BaseCommand):
 
     def handle(self, start_month, end_month, *args, **options):
         state_ids = AwcLocation.objects.filter(aggregation_level=1).values_list('state_id', flat=True).distinct()
-        start_month = dateutil.parser.parse(start_month).date().replace(day=1)
-        end_month = dateutil.parser.parse(end_month).date().replace(day=1)
 
         while start_month <= end_month:
             print("PROCESSING MONTH {}".format(start_month))
