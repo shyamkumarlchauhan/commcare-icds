@@ -1634,16 +1634,18 @@ class MPRPreschoolEducationBeta(MPRPreschoolEducation):
         if not data:
             return {}
 
-        pse_4 = 0
-        pse_1 = 0
+        pse_4 = data['num_days_4_pse_activities']
+        pse_1 = data['num_days_1_pse_activities']
+        awc_days_open = data['awc_days_open']
         if data['num_launched_awcs']:
-            pse_4 = data['num_days_4_pse_activities'] / data['num_launched_awcs']
-            pse_1 = data['num_days_1_pse_activities'] / data['num_launched_awcs']
+            pse_4 = pse_4 / data['num_launched_awcs']
+            pse_1 = pse_1 / data['num_launched_awcs']
+            awc_days_open = awc_days_open / data['num_launched_awcs']
 
         return {
             'open_four_acts_count': pse_4,
             'open_one_acts_count': pse_1,
-            'open_pse_count': data['awc_days_open']
+            'open_pse_count': awc_days_open
         }
 
     @property
