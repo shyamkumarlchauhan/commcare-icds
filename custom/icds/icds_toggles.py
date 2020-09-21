@@ -155,3 +155,11 @@ ICDS_CUSTOM_SMS_REPORT = StaticToggle(
     TAG_CUSTOM,
     [NAMESPACE_DOMAIN],
 )
+
+
+ENABLE_ICDS_DASHBOARD_MANUAL_UPDATE = StaticToggle(
+    'enable_icds_dashboard_manual_update',
+    'Enable updating ICDS dashboard manual for specific users',
+    TAG_CUSTOM,
+    [NAMESPACE_USER]
+)

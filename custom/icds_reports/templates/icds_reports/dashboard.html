@@ -130,7 +130,7 @@ related to angular not being defined. But if we split it here it works fine.
                                           </li>
                                           <li class="nav-menu-icon">
                                               <span class="pointer">
-                                                  <a href="{% static 'media/Dashboard_Training_Manual.pdf' %}" download>
+                                                  <a href="{% url 'download_manual'  domain %}" download>
                                                       <i class="fa fa-question-circle nav-main-icon fa-2x light-grey"
                                                           uib-popover-html="'Download user manual'"
                                                           popover-placement="left"
