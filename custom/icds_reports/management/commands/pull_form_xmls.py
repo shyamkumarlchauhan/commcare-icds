@@ -42,7 +42,8 @@ class Command(BaseCommand):
         for form in fa.get_forms([fo.get('_id') for fo in forms]):
             form_xml = str(form.get_xml())
             form_date = form.recieved_on
-            form_xmls.append((form_date, form_xml))
+            form_id = form.form_id
+            form_xmls.append((form_date, form_id, form_xml))
             if count % 100 == 0:
                 print("DONE {}/{}".format(count, len(forms)))
             count += 1
@@ -52,21 +53,20 @@ class Command(BaseCommand):
         regex = re.compile(r'<[A-Za-z0-9]*[:]*aadhar_number>') # regex to find all aadhar_number tags
         cleaned_form_xmls = list()
         counter = 0
-        for form_date, xml in form_xmls:
-            aadhar_tags = regex.findall(xml)
+        for form_date, form_id, xml in form_xmls:
             xform = parseString(xml)
-
+            aadhar_tags = regex.findall(xml.decode())
             for aadhar_tag in aadhar_tags:
                 tag_name = aadhar_tag[1:-1]
                 for node in xform.getElementsByTagName(tag_name):
                     node.childNodes = []  # clear the Aadhar number tag
 
             form_name = xform.getElementsByTagName('data')[0].attributes.get('name').value
-            file_name = f"{form_name}_{form_date}.xml"
+            file_name = f"{form_name}_{form_date}_{form_id}.xml"
             form = (file_name, str(xform.toprettyxml()))
             cleaned_form_xmls.append(form)
             if count % 100 == 0:
-                print("DONE {}/{}".format(count, len(forms)))
+                print("DONE {}/{}".format(count, len(form_xmls)))
             count += 1
 
         return cleaned_form_xmls
