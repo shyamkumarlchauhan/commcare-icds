@@ -42,6 +42,7 @@ class DataManagementRequest(models.Model):
         self._set_in_progress()
         if self.slug not in DATA_MANAGEMENT_TASKS:
             self._note_error("Unexpected slug %s" % self.slug)
+            self.save()
             return None, None, {}
         else:
             try:

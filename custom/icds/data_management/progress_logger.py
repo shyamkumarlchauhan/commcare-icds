@@ -8,7 +8,7 @@ class DataManagementProgressLogger(ProcessorProgressLogger):
         super().__init__()
         self.success_logger = logging.getLogger(iteration_key + 'success')
         self.success_logger.setLevel(logging.INFO)
-        success_log = f"success-{iteration_key}.log"
+        success_log = f"success-{iteration_key}.txt"
         self.success_logger.addHandler(logging.FileHandler(success_log))
         self.logs = {success_log: self.success_logger.handlers[0].baseFilename}
 
@@ -18,7 +18,7 @@ class SQLBasedProgressLogger(DataManagementProgressLogger):
         super().__init__(iteration_key)
         self.failure_logger = logging.getLogger(iteration_key + 'failure')
         self.failure_logger.setLevel(logging.INFO)
-        failure_log = f"failure-{iteration_key}.log"
+        failure_log = f"failure-{iteration_key}.txt"
         self.failure_logger.addHandler(logging.FileHandler(failure_log))
         self.logs[failure_log] = self.failure_logger.handlers[0].baseFilename
 
