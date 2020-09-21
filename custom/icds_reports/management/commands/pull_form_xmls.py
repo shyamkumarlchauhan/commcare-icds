@@ -38,10 +38,10 @@ class Command(BaseCommand):
         fa = FormAccessors(domain)
         form_xmls = []
 
-        counter = 0
+        count = 0
         for form in fa.get_forms([fo.get('_id') for fo in forms]):
-            form_xml = str(form.get_xml())
-            form_date = form.recieved_on
+            form_xml = form.get_xml()
+            form_date = form.recieved_on.date()
             form_id = form.form_id
             form_xmls.append((form_date, form_id, form_xml))
             if count % 100 == 0:
@@ -52,7 +52,7 @@ class Command(BaseCommand):
     def get_cleaned_xmls(self, form_xmls):
         regex = re.compile(r'<[A-Za-z0-9]*[:]*aadhar_number>') # regex to find all aadhar_number tags
         cleaned_form_xmls = list()
-        counter = 0
+        count = 0
         for form_date, form_id, xml in form_xmls:
             xform = parseString(xml)
             aadhar_tags = regex.findall(xml.decode())
@@ -63,6 +63,7 @@ class Command(BaseCommand):
 
             form_name = xform.getElementsByTagName('data')[0].attributes.get('name').value
             file_name = f"{form_name}_{form_date}_{form_id}.xml"
+            file_name = file_name.replace(' ','_').replace('/','-')
             form = (file_name, str(xform.toprettyxml()))
             cleaned_form_xmls.append(form)
             if count % 100 == 0:
@@ -90,7 +91,7 @@ class Command(BaseCommand):
 
         for file_name, form_xml in cleaned_form_xmls:
             file_path = f'{directory_name}/{file_name}'
-            with(file_path, 'w') as fout:
+            with open(file_path, 'w') as fout:
                 fout.write(form_xml)
 
 
