@@ -730,6 +730,16 @@ class AggCcsRecord(models.Model, AggregateMixin):
     valid_visits = models.IntegerField(null=True)
     expected_visits = models.IntegerField(null=True)
 
+    thr_0_days_resident = models.IntegerField(null=True)
+    thr_1_days_resident = models.IntegerField(null=True)
+    thr_25_days_sc_resident = models.IntegerField(null=True)
+    thr_25_days_st_resident = models.IntegerField(null=True)
+    thr_25_days_other_resident = models.IntegerField(null=True)
+    thr_25_days_disabled_resident = models.IntegerField(null=True)
+    thr_25_days_minority_resident = models.IntegerField(null=True)
+    total_thr_resident = models.IntegerField(null=True)
+    thr_1_days_migrant = models.IntegerField(null=True)
+
     class Meta:
         managed = False
         db_table = 'agg_ccs_record'
@@ -813,6 +823,28 @@ class AggChildHealth(models.Model, AggregateMixin):
     total_pse_days_attended = models.IntegerField(blank=True, null=True)
     pse_attended_0_days = models.IntegerField(null=True)
     pse_attended_1_days = models.IntegerField(null=True)
+
+    thr_0_days_resident = models.IntegerField(null=True)
+    thr_1_days_resident = models.IntegerField(null=True)
+    thr_25_days_sc_resident = models.IntegerField(null=True)
+    thr_25_days_st_resident = models.IntegerField(null=True)
+    thr_25_days_other_resident = models.IntegerField(null=True)
+    thr_25_days_disabled_resident = models.IntegerField(null=True)
+    thr_25_days_minority_resident = models.IntegerField(null=True)
+    total_thr_resident = models.IntegerField(null=True)
+
+    lunch_0_days_resident = models.IntegerField(null=True)
+    lunch_1_days_resident = models.IntegerField(null=True)
+    lunch_25_days_sc_resident = models.IntegerField(null=True)
+    lunch_25_days_st_resident = models.IntegerField(null=True)
+    lunch_25_days_other_resident = models.IntegerField(null=True)
+    lunch_25_days_disabled_resident = models.IntegerField(null=True)
+    lunch_25_days_minority_resident = models.IntegerField(null=True)
+    total_lunch_resident = models.IntegerField(null=True)
+
+    thr_1_days_migrant = models.IntegerField(null=True)
+    lunch_1_days_migrant = models.IntegerField(null=True)
+
     pse_attended_25_days_sc = models.IntegerField(null=True)
     pse_attended_25_days_st = models.IntegerField(null=True)
     pse_attended_25_days_other = models.IntegerField(null=True)

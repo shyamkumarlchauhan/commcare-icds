@@ -11,7 +11,8 @@ from custom.icds_reports.mpr_sqldata import MPRIdentification, MPRSectors, MPRPo
     MPRAWCDetails, MPRSupplementaryNutrition, MPRUsingSalt, MPRProgrammeCoverage, MPRPreschoolEducation, \
     MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, \
     MPROperationalizationBeta, MPRPopulationBeta, MPRGrowthMonitoringBeta, MPRSupplementaryNutritionBeta, \
-    MPRMonitoringBeta, MPRVhndBeta, MPRUsingSaltBeta, MPRImmunizationCoverageBeta, MPRPreschoolEducationBeta
+    MPRMonitoringBeta, MPRVhndBeta, MPRUsingSaltBeta, MPRImmunizationCoverageBeta, MPRPreschoolEducationBeta, \
+    MPRProgrammeCoverageBeta
 from custom.icds_reports.mpr_sqldata import MPROperationalization
 from custom.icds_reports.reports import IcdsBaseReport
 
@@ -36,7 +37,7 @@ class MPRReport(IcdsBaseReport):
             MPRAWCDetails,
             MPRSupplementaryNutrition if not self.icds_pre_release_features() else MPRSupplementaryNutritionBeta,
             MPRUsingSalt if not self.icds_pre_release_features() else MPRUsingSaltBeta,
-            MPRProgrammeCoverage,
+            MPRProgrammeCoverage if not self.icds_pre_release_features() else MPRProgrammeCoverageBeta,
             MPRPreschoolEducation if not self.icds_pre_release_features() else MPRPreschoolEducationBeta,
             MPRGrowthMonitoring if not self.icds_pre_release_features() else MPRGrowthMonitoringBeta,
             MPRImmunizationCoverage if not self.icds_pre_release_features() else MPRImmunizationCoverageBeta,
