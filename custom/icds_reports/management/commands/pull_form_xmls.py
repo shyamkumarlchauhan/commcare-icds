@@ -31,7 +31,7 @@ class Command(BaseCommand):
         location_ids = SQLLocation.objects.get_locations_and_children_ids([location_id])
         user_query = UserES().domain(domain).mobile_users()
         user_query = user_query.location(location_ids)
-        user_ids = [user.get('_id') for user in user_query.run().hits]
+        user_ids = {user.get('_id') for user in user_query.run().hits}
         return user_ids
 
     def get_xmls_by_forms(self, domain, forms):
@@ -39,9 +39,9 @@ class Command(BaseCommand):
         form_xmls = []
 
         counter = 0
-        for form in forms:
-            form_xml = str(fa.get_form(form.get('_id')).get_xml())
-            form_date = parser.parse(form.get('received_on')).date()
+        for form in fa.get_forms([fo.get('_id') for fo in forms]):
+            form_xml = str(form.get_xml())
+            form_date = form.recieved_on
             form_xmls.append((form_date, form_xml))
             if count % 100 == 0:
                 print("DONE {}/{}".format(count, len(forms)))
@@ -80,10 +80,10 @@ class Command(BaseCommand):
         print("Pulled forms")
         form_xmls = self.get_xmls_by_forms(domain, forms)
         print("pulled form xmls")
-        cleaned_form_xmls = get_cleaned_xmls(form_xmls)
+        cleaned_form_xmls = self.get_cleaned_xmls(form_xmls)
         print("pulled cleaned xmls, now writing to disk")
 
-        directory_name = "all_xml_forms_{start_date}_to_{end_date}"
+        directory_name = f"all_xml_forms_{start_date}_to_{end_date}"
 
         if not os.path.isdir(directory_name):
             os.mkdir(directory_name)
