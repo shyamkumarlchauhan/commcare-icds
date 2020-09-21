@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS temp_agg_awc_challa;
 CREATE UNLOGGED TABLE temp_agg_awc_challa AS (select awc_id, supervisor_id, open_count as cases_household, count(*) as all_cases_household
-from "ucr_icds-cas_static-household_cases_eadc276d" where 1=0 group by awc_id, supervisor_id, open_count);
+from "ucr_icds-cas_static-household_cases_eadc276d" where 1=0 group by awc_id, supervisor_id, open_count);;
 
 SELECT create_distributed_table('temp_agg_awc_challa', 'supervisor_id');
 
@@ -34,7 +34,7 @@ UPDATE agg_awc SET
            num_launched_supervisors = CASE WHEN ut.all_cases_household>0 THEN 1 ELSE 0 END,
            num_launched_awcs = CASE WHEN ut.all_cases_household>0 THEN 1 ELSE 0 END
         FROM  temp_agg_awc  ut
-        WHERE ut.awc_id = agg_awc.awc_id and ut.supervisor_id=agg_awc.supervisor_id and agg_awc.aggregation_level=5;
+        WHERE ut.awc_id = agg_awc.awc_id and ut.supervisor_id=agg_awc.supervisor_id and agg_awc.aggregation_level=5;;
 
 
 -- updating aggregation level 4 (supervisor)
@@ -58,7 +58,7 @@ UPDATE agg_awc SET
             FROM agg_awc
             WHERE month = '{month}' and aggregation_level = 5
             GROUP BY month, supervisor_id) ut
-        WHERE ut.supervisor_id=agg_awc.supervisor_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=4;
+        WHERE ut.supervisor_id=agg_awc.supervisor_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=4;;
 
 -- updating aggregation level 3 (block)
 UPDATE agg_awc SET
@@ -81,7 +81,7 @@ UPDATE agg_awc SET
             FROM agg_awc
             WHERE month = '{month}' and aggregation_level = 4
             GROUP BY month, block_id) ut
-        WHERE ut.block_id=agg_awc.block_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=3;
+        WHERE ut.block_id=agg_awc.block_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=3;;
 
 -- updating aggregation level 2 (district)
 UPDATE agg_awc SET
@@ -104,7 +104,7 @@ UPDATE agg_awc SET
             FROM agg_awc
             WHERE month = '{month}' and aggregation_level = 3
             GROUP BY month, district_id) ut
-        WHERE ut.district_id=agg_awc.district_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=2;
+        WHERE ut.district_id=agg_awc.district_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=2;;
 
 
 -- updating aggregation level 1 (state)
@@ -128,9 +128,9 @@ UPDATE agg_awc SET
             FROM agg_awc
             WHERE month = '{month}' and aggregation_level = 2
             GROUP BY month, state_id) ut
-        WHERE ut.state_id=agg_awc.state_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=1;
+        WHERE ut.state_id=agg_awc.state_id and ut.month=agg_awc.month and agg_awc.month='{month}' and agg_awc.aggregation_level=1;;
 
 -- Deleting temo tables
-DROP TABLE IF EXISTS temp_agg_awc_challa;
+DROP TABLE IF EXISTS temp_agg_awc_challa;;
 
 DROP TABLE IF EXISTS temp_agg_awc;

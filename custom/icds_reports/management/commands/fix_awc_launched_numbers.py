@@ -31,6 +31,8 @@ class Command(BaseCommand):
         end_month = start_month + relativedelta(months=1, seconds=-1)
         with open(path, "r", encoding='utf-8') as sql_file:
             sql_to_execute = sql_file.read()
+            split_sqls = sql_to_execute.split(";;")
             print("PROCESSING MONTH {}".format(month))
-            query = sql_to_execute.format(month=start_month, month_end=end_month)
-            _run_custom_sql_script(query)
+            for split_sql in split_sqls:
+                query = split_sql.format(month=start_month, month_end=end_month)
+                _run_custom_sql_script(query)
