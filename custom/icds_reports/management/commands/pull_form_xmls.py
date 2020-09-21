@@ -49,7 +49,7 @@ class Command(BaseCommand):
         return form_xmls
 
     def get_cleaned_xmls(self, form_xmls):
-        regex = re.compile(r'<[A-Za-z0-9]*[:]*aadhar_number>')
+        regex = re.compile(r'<[A-Za-z0-9]*[:]*aadhar_number>') # regex to find all aadhar_number tags
         cleaned_form_xmls = list()
         counter = 0
         for form_date, xml in form_xmls:
