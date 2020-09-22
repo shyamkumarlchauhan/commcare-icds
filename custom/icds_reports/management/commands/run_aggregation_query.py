@@ -59,6 +59,7 @@ from custom.icds_reports.tasks import (
     _aggregate_child_health_sam_mam_form,
     _daily_thr_ccs_record,
     _daily_thr_child_health,
+    _agg_app_version_table
 )
 
 
@@ -109,7 +110,8 @@ NORMAL_TASKS = {
     'update_service_delivery_report': (None, update_service_delivery_report, None),
     'update_bihar_api_table': (None, update_bihar_api_table, None),
     'update_child_vaccine_table': (None, update_child_vaccine_table, None),
-    '_aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None)
+    '_aggregate_inactive_aww_agg': (None, _aggregate_inactive_aww_agg, None),
+    'aggregate_app_version_table': (None, _agg_app_version_table, None)
 }
 
 

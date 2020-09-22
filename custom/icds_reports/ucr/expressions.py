@@ -5,7 +5,8 @@ from quickcache.django_quickcache import get_django_quickcache
 
 from casexml.apps.case.const import UNOWNED_EXTENSION_OWNER_ID
 from casexml.apps.case.xform import extract_case_blocks
-from corehq.apps.receiverwrapper.util import get_version_from_appversion_text
+from corehq.apps.receiverwrapper.util import get_version_from_appversion_text,\
+    get_commcare_version_from_appversion_text
 from corehq.apps.userreports.const import XFORM_CACHE_KEY_PREFIX
 from corehq.apps.userreports.expressions.factory import ExpressionFactory
 from corehq.apps.userreports.mixins import NoPropertyTypeCoercionMixIn
@@ -304,6 +305,25 @@ class GetAppVersion(JsonObject):
 
     def __str__(self):
         return "Application Version"
+
+
+class GetCommcareVersion(JsonObject):
+    type = TypeProperty('icds_get_commcare_version')
+    commcare_version_string = DefaultProperty(required=True)
+
+    def configure(self, commcare_version_string):
+        self._commcare_version_string = commcare_version_string
+
+    def get_version_from_appversion_string(self, item, context):
+        commcare_version_string = self._commcare_version_string(item, context)
+        return get_commcare_version_from_appversion_text(commcare_version_string)
+
+    def __call__(self, item, context=None):
+        commcare_version = self.get_version_from_appversion_string(item, context)
+        return commcare_version
+
+    def __str__(self):
+        return "Commcare Version"
 
 
 class DateTimeNow(JsonObject):
@@ -838,6 +858,14 @@ def get_app_version(spec, context):
     wrapped = GetAppVersion.wrap(spec)
     wrapped.configure(
         app_version_string=ExpressionFactory.from_spec(wrapped.app_version_string, context)
+    )
+    return wrapped
+
+
+def get_commcare_version(spec, context):
+    wrapped = GetCommcareVersion.wrap(spec)
+    wrapped.configure(
+        commcare_version_string=ExpressionFactory.from_spec(wrapped.commcare_version_string, context)
     )
     return wrapped
 

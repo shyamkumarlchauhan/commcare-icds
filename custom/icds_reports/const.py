@@ -130,6 +130,7 @@ AGG_GOV_DASHBOARD_TABLE = 'agg_gov_dashboard'
 AGG_MPR_AWC_TABLE = 'agg_mpr_awc'
 AGG_MIGRATION_TABLE = 'icds_dashboard_migration_forms'
 AGG_AVAILING_SERVICES_TABLE = 'icds_dashboard_availing_service_forms'
+AGG_APP_VERSION_TABLE = 'icds_dashboard_app_version'
 
 AWC_LOCATION_TABLE_ID = 'static-awc_location'
 USAGE_TABLE_ID = 'static-usage_forms'

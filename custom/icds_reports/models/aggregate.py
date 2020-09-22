@@ -31,7 +31,8 @@ from custom.icds_reports.const import (
     AGG_MPR_AWC_TABLE,
     AGG_SAM_MAM_TABLE,
     AGG_DAILY_CCS_RECORD_THR_TABLE,
-    AGG_DAILY_CHILD_HEALTH_THR_TABLE
+    AGG_DAILY_CHILD_HEALTH_THR_TABLE,
+    AGG_APP_VERSION_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers.distributed import (
     AggAwcDailyAggregationDistributedHelper,
@@ -71,7 +72,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     AggMprAwcHelper,
     SamMamFormAggregationDistributedHelper,
     DailyTHRCCSRecordHelper,
-    DailyTHRChildHealthHelper
+    DailyTHRChildHealthHelper,
+    AppVersionAggregationDistributedHelper
 )
 
 
@@ -580,6 +582,8 @@ class AggAwc(models.Model, AggregateMixin):
     num_days_4_pse_activities = models.IntegerField(blank=True, null=True)
     num_days_1_pse_activities = models.IntegerField(blank=True, null=True)
     use_salt = models.IntegerField(null=True)
+    app_version = models.IntegerField(blank=True, null=True)
+    commcare_version = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -668,6 +672,21 @@ class AggregateTHRForm(models.Model, AggregateMixin):
         db_table = AGG_THR_V2_TABLE
 
     _agg_helper_cls = THRFormV2AggDistributedHelper
+    _agg_atomic = False
+
+
+class AggregateAppVersion(models.Model, AggregateMixin):
+    supervisor_id = models.TextField()
+    awc_id = models.TextField(primary_key=True)
+    month = models.DateField()
+    app_version = models.IntegerField(blank=True, null=True)
+    commcare_version = models.TextField(blank=True, null=True)
+
+    class Meta(object):
+        db_table = AGG_APP_VERSION_TABLE
+        unique_together = ('month', 'supervisor_id', 'awc_id')
+
+    _agg_helper_cls = AppVersionAggregationDistributedHelper
     _agg_atomic = False
 
 

@@ -37,6 +37,10 @@ def is_current_month(month):
     return month == transform_day_to_month(date.today())
 
 
+def get_app_version_temp_tablename():
+    return 'tmp_app_version'
+
+
 class AggregationHelper(object):
     """Base class used to tag aggregation helpers
 

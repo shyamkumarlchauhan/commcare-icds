@@ -37,6 +37,7 @@ from .availing_service_forms import AvailingServiceFormsAggregationDistributedHe
 from .child_vaccine_helper import ChildVaccineHelper
 from .agg_mpr_awc import AggMprAwcHelper
 from .sam_mam_form import SamMamFormAggregationDistributedHelper
+from .app_commcare_version import AppVersionAggregationDistributedHelper
 
 __all__ = (
     'AggAwcDistributedHelper',
@@ -81,5 +82,6 @@ __all__ = (
     'AggMprAwcHelper',
     'SamMamFormAggregationDistributedHelper',
     'DailyTHRCCSRecordHelper',
-    'DailyTHRChildHealthHelper'
+    'DailyTHRChildHealthHelper',
+    'AppVersionAggregationDistributedHelper'
 )

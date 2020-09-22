@@ -118,7 +118,8 @@ from custom.icds_reports.models.aggregate import (
     ChildVaccines,
     AggMPRAwc,
     AggregateDailyChildHealthTHRForms,
-    AggregateDailyCcsRecordTHRForms
+    AggregateDailyCcsRecordTHRForms,
+    AggregateAppVersion
 )
 from custom.icds_reports.models.helper import IcdsFile
 from custom.icds_reports.models.util import UcrReconciliationStatus
@@ -386,6 +387,9 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
 
             res_inactive_aww.get(disable_sync_subtasks=False)
 
+            res_app_version_agg = chain(icds_aggregation_task.si(date=calculation_date, func_name='_agg_app_version_table'),).apply_async()
+            res_app_version_agg.get(disable_sync_subtasks=False)
+
             daily_thr_ccs_tasks = list()
             daily_thr_ccs_tasks.extend([icds_state_aggregation_task.si(state_id=state_id, date=calculation_date,
                                                                        func_name='_daily_thr_ccs_record')
@@ -485,6 +489,7 @@ def icds_aggregation_task(self, date, func_name):
         '_ccs_record_monthly_table': _ccs_record_monthly_table,
         '_agg_ccs_record_table': _agg_ccs_record_table,
         '_agg_awc_table': _agg_awc_table,
+        '_agg_app_version_table': _agg_app_version_table,
         'aggregate_awc_daily': aggregate_awc_daily,
         'update_service_delivery_report': update_service_delivery_report,
         '_aggregate_inactive_aww_agg': _aggregate_inactive_aww_agg,
@@ -797,6 +802,13 @@ def _agg_ls_table(day):
 def _agg_thr_table(state_id, day):
     with transaction.atomic(using=router.db_for_write(AggregateTHRForm)):
         AggregateTHRForm.aggregate(state_id, force_to_date(day))
+
+
+@track_time
+def _agg_app_version_table(day):
+    with transaction.atomic(using=router.db_for_write(AggregateAppVersion)):
+        AggregateAppVersion.aggregate(force_to_date(day))
+
 
 @track_time
 def _agg_adolescent_girls_registration_table(state_id, day):
