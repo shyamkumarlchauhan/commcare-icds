@@ -19,11 +19,13 @@ def execute_data_management(request_id):
     file_attachments = []
     for filename, filepath in logs.items():
         with open(filepath) as logfile:
-            file_attachments.append({
-                'title': filename,
-                'file_obj': io.StringIO(logfile.read()),
-                'mimetype': 'text/html',
-            })
+            content = logfile.read()
+            if content:
+                file_attachments.append({
+                    'title': filename,
+                    'file_obj': io.StringIO(content),
+                    'mimetype': 'text/html',
+                })
     subject = f"Data Management Task Result {serialized['name']} on {request.domain}"
 
     context = {

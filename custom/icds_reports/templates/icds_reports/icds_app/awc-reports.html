@@ -85,7 +85,7 @@
                     <h4>Beneficiary Information:</h4>
                     <div><button class="btn btn-info btn-sm right" ng-click="$ctrl.goToBeneficiaryTable()">Back</button></div>
                     <div class="form-horizontal">
-                        <div ng-if="$ctrl.haveAccessToFeatures" class="form-group">
+                        <div class="form-group">
                             <label class="control-label col-sm-2" for="name">Status: </label>
                             <div class="col-sm-9">
                                 <span class="icds-control">{$ $ctrl.beneficiary.beneficiary_status $}</span>
@@ -367,10 +367,39 @@
                     </table>
                 </div>
             </div>
+            <div class="row black" ng-if="$ctrl.step === 'take_home_ration'">
+              <div class="row">
+                <p class="col-xs-9 col-md-6 title">Total number of beneficiaries eligible for THR:</p>
+                <p class="col-xs-3 col-md-6" ng-bind="$ctrl.thr_eligible_beneficiaries"></p>
+              </div>
+              <div class="row">
+                <p class="col-xs-9 col-md-6 title">Total number of beneficiaries received THR in the month (25+ days):</p>
+                <p class="col-xs-3 col-md-6" ng-bind="$ctrl.thr_25_days"></p>
+              </div>
+              <div class="row">
+                <p class="col-xs-9 col-md-6 title">Total number of pictures taken:</p>
+                <p class="col-xs-3 col-md-6" ng-bind="$ctrl.thr_pictures_count"></p>
+              </div>
+              <h4 class="text-center title">Take Home Ration (THR) Photo Submissions</h4>
+              <div class="d-flex justify-content-center">
+                <div class="alert alert-info text-center col-xs-12 col-md-8 title" ng-show="$ctrl.isOlderThan90Days()">
+                  PSE photos older than 90 days are not available on the ICDS CAS Dashboard
+                </div>
+              </div>
+              <div ng-repeat="images in $ctrl.thr_images" class="mb-3">
+                <div class="d-flex">
+                  <div class="thr-image" ng-repeat="image in images">
+                    <img ng-src="{$ image['image'] $}" style="height: 150px">
+                    <p class="text-center mb-2" ng-bind="image['person_name']"></p>
+                    <p class="text-center mb-2" ng-bind="image['date']"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
     </div>
     <div class="row fixed-dots">
-        <div class="dot-menu">
+        <div class="dot-menu" id="awc-dot-links">
             <div class="dot-menu-item pointer" ng-repeat="step in $ctrl.steps">
                 <dot-link label="{$ step.label $}" route="{$ step.route $}"></dot-link>
             </div>

@@ -3,9 +3,14 @@ from corehq.apps.userreports.models import StaticDataSourceConfiguration, get_da
 from corehq.apps.userreports.util import get_table_name
 from custom.icds_reports.const import DASHBOARD_DOMAIN
 from custom.icds_reports.utils.aggregation_helpers import AggregationHelper
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 class MBTDistributedHelper(AggregationHelper):
+
+
+    base_class = None
 
     def __init__(self, state_id, month):
         self.state_id = state_id
@@ -32,6 +37,13 @@ class MBTDistributedHelper(AggregationHelper):
     @property
     def location_columns(self):
         return ('awc.state_name', 'awc.district_name', 'awc.block_name', 'awc.awc_name', 'awc.awc_site_code')
+
+    @property
+    def get_month_range(self):
+        start_datetime = datetime.strptime(self.month, '%Y-%m-%d')\
+            if isinstance(self.month, str) else self.month
+        end_datetime = start_datetime + relativedelta(months=1)
+        return [str(start_datetime.date()), str(end_datetime.date())]
 
     def query(self):
         return """
@@ -152,7 +164,9 @@ class CcsMbtDistributedHelper(MBTDistributedHelper):
                 'migration_status',
                 'where_born',
                 'num_children_del',
-                'still_live_birth'
+                'still_live_birth',
+                'bpl_apl',
+                'religion',
                 )
 
 
@@ -422,4 +436,58 @@ class AwcMbtDistributedHelper(MBTDistributedHelper):
             table=self.base_tablename,
             state_id=self.state_id,
             month=self.month
+        )
+
+
+class BirthPreparednessMbtDistributedHelper(MBTDistributedHelper):
+    helper_key = 'birth-preparedness-mbt'
+
+    @property
+    def base_tablename(self):
+        return 'birth_preparedness'
+
+    @property
+    def birth_preparedness_ucr_tablename(self):
+        return get_table_name(self.domain, 'static-dashboard_birth_preparedness_forms')
+
+    def query(self):
+        requested_month, next_month = self.get_month_range
+        return """
+        COPY(
+            SELECT * FROM "{birth_preparedness_ucr}" t
+            WHERE t.state_id='{state_id}' and t.received_on >= '{requested_month}'
+            and t.received_on < '{next_month_start}' 
+        ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
+        """.format(
+            birth_preparedness_ucr=self.birth_preparedness_ucr_tablename,
+            state_id=self.state_id,
+            requested_month=requested_month,
+            next_month_start=next_month
+        )
+
+
+class DeliveryChildMbtDistributedHelper(MBTDistributedHelper):
+    helper_key = 'delivery-child-mbt'
+
+    @property
+    def child_delivery_ucr_tablename(self):
+        return get_table_name(self.domain, 'static-child_delivery_forms')
+
+    @property
+    def base_tablename(self):
+        return 'delivery_child'
+
+    def query(self):
+        requested_month, next_month = self.get_month_range
+        return """
+        COPY(
+            SELECT * FROM "{child_delivery_ucr}" t
+            WHERE t.state_id='{state_id}' and t.received_on >= '{requested_month}'
+            and t.received_on < '{next_month_start}'
+        ) TO STDOUT WITH CSV HEADER ENCODING 'UTF-8';
+        """.format(
+            child_delivery_ucr=self.child_delivery_ucr_tablename,
+            state_id=self.state_id,
+            requested_month=requested_month,
+            next_month_start=next_month
         )
