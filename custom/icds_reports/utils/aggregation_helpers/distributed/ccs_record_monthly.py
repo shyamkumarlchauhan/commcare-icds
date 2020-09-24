@@ -209,7 +209,7 @@ class CcsRecordMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribute
             ('caste', 'case_list.caste'),
             ('disabled', 'case_list.disabled'),
             ('minority', 'case_list.minority'),
-            ('resident', "CASE WHEN person_cases.resident=1 THEN 'yes' ELSE 'no' END"),
+            ('resident', 'case_list.resident'),
             ('valid_in_month', "CASE WHEN {} THEN 1 ELSE 0 END".format(valid_in_month)),
             ('institutional_delivery', 'case_list.institutional_delivery'),
             ('anc_in_month',
