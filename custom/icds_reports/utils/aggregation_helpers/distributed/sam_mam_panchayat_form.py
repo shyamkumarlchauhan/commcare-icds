@@ -1,16 +1,16 @@
 from dateutil.relativedelta import relativedelta
 
-from custom.icds_reports.const import AGG_SAM_MAM_TABLE
+from custom.icds_reports.const import AGG_SAM_MAM_PANCHAYAT_TABLE
 from custom.icds_reports.utils.aggregation_helpers import month_formatter
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import (
     StateBasedAggregationDistributedHelper,
 )
 
 
-class SamMamFormAggregationDistributedHelper(StateBasedAggregationDistributedHelper):
+class SamMamFormAggregationPanchayatDistributedHelper(StateBasedAggregationDistributedHelper):
     helper_key = 'sam-mam-form'
     ucr_data_source_id = 'static-sam_mam_visit'
-    aggregate_parent_table = AGG_SAM_MAM_TABLE
+    aggregate_parent_table = AGG_SAM_MAM_PANCHAYAT_TABLE
     months_required = 3
 
     def data_from_ucr_query(self):
@@ -25,23 +25,21 @@ class SamMamFormAggregationDistributedHelper(StateBasedAggregationDistributedHel
         return """
             SELECT
                 supervisor_id,
-                child_health_case_id,
-                last_visit_date,
+                awc_id,
                 poshan_panchayat_date,
                 rank() OVER (
-                    PARTITION BY supervisor_id, child_health_case_id
-                    ORDER BY last_visit_date, timeend
+                    PARTITION BY supervisor_id, awc_id
+                    ORDER BY poshan_panchayat_date, timeend
                     ) as rank
-            FROM "{ucr_tablename}"
-            WHERE
-                state_id = '{state_id}' AND 
-                last_visit_date>=%(current_month_start)s AND
-                last_visit_date<%(next_month_start)s
+            FROM "{ucr_tablename}" 
+            WHERE 
+                state_id = '{state_id}' AND
+                poshan_panchayat_date >= %(current_month_start)s AND
+                poshan_panchayat_date < %(next_month_start)s;
         """.format(ucr_tablename=self.ucr_tablename, state_id=self.state_id), {
             "current_month_start": current_month_start,
             "next_month_start": next_month_start
         }
-
 
     def aggregation_query(self):
         month = self.month.replace(day=1)
@@ -55,33 +53,33 @@ class SamMamFormAggregationDistributedHelper(StateBasedAggregationDistributedHel
         }
         query_params.update(ucr_query_params)
 
+
         return """
         INSERT INTO "{tablename}" (
             state_id,
             supervisor_id,
             month,
-            child_health_case_id,
-            sam_mam_visit_date_1,
-            sam_mam_visit_date_2,
-            sam_mam_visit_date_3,
-            sam_mam_visit_date_4
+            awc_id,
+            poshan_panchayat_date_1,
+            poshan_panchayat_date_2,
+            poshan_panchayat_date_3,
+            poshan_panchayat_date_4
         ) (
           SELECT
             %(state_id)s AS state_id,
             supervisor_id,
             %(month)s::date AS month,
-            child_health_case_id,
-            MIN(CASE WHEN rank=1 THEN last_visit_date ELSE NULL END
-                ) AS sam_mam_visit_date_1,
-            MIN(CASE WHEN rank=2 THEN last_visit_date ELSE NULL END
-                ) AS sam_mam_visit_date_2,
-            MIN(CASE WHEN rank=3 THEN last_visit_date ELSE NULL END
-                ) AS sam_mam_visit_date_3,
-            MIN(CASE WHEN rank=4 THEN last_visit_date ELSE NULL END
-                ) AS sam_mam_visit_date_4
-
+            awc_id,
+            MIN(CASE WHEN rank=1 THEN poshan_panchayat_date ELSE NULL END
+                ) AS poshan_panchayat_date_1,
+            MIN(CASE WHEN rank=2 THEN poshan_panchayat_date ELSE NULL END
+                ) AS poshan_panchayat_date_2,
+            MIN(CASE WHEN rank=3 THEN poshan_panchayat_date ELSE NULL END
+                ) AS poshan_panchayat_date_3,
+            MIN(CASE WHEN rank=4 THEN poshan_panchayat_date ELSE NULL END
+                ) AS poshan_panchayat_date_4
           FROM ({ucr_table_query}) ucr
-          group by state_id, supervisor_id, month, child_health_case_id
+          group by state_id, supervisor_id, month, awc_id
         )
         """.format(
             ucr_table_query=ucr_query,
