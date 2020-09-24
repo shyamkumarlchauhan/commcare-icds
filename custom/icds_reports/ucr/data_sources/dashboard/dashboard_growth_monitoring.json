@@ -16,7 +16,8 @@
     "reach-dashboard-qa",
     "reach-test",
     "icds-cas",
-    "cas-lab"
+    "cas-lab",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",
