@@ -200,9 +200,9 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
                                               "chm.birth_status_in_month='live' THEN 1 ELSE 0 END)"),
             ('live_birth_temp_resident', "SUM(CASE WHEN chm.mother_resident_status IS DISTINCT FROM 'yes' "
                                          "AND chm.birth_status_in_month='live' THEN 1 ELSE 0 END)"),
-            ('permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.live_birth=0 THEN 1 ELSE 0 END)"),
-            ('temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes' AND"
-                              " chm.live_birth=0 THEN 1 ELSE 0 END)")
+            ('permanent_resident', "SUM(CASE WHEN chm.resident='yes' THEN 1 ELSE 0 END)"),
+            ('temp_resident', "SUM(CASE WHEN chm.resident IS DISTINCT FROM 'yes'"
+                              "  THEN 1 ELSE 0 END)")
         )
         query_cols = []
         for c in columns:
