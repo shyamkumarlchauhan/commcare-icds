@@ -35,7 +35,7 @@ class SamMamFormAggregationPanchayatDistributedHelper(StateBasedAggregationDistr
             WHERE 
                 state_id = '{state_id}' AND
                 poshan_panchayat_date >= %(current_month_start)s AND
-                poshan_panchayat_date < %(next_month_start)s;
+                poshan_panchayat_date < %(next_month_start)s
         """.format(ucr_tablename=self.ucr_tablename, state_id=self.state_id), {
             "current_month_start": current_month_start,
             "next_month_start": next_month_start
