@@ -398,7 +398,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("poshan_panchayat_date_1", "sam_panch_form.poshan_panchayat_date_1"),
             ("poshan_panchayat_date_2", "sam_panch_form.poshan_panchayat_date_2"),
             ("poshan_panchayat_date_3", "sam_panch_form.poshan_panchayat_date_3"),
-            ("poshan_panchayat_date_4", "sam_panch_form.poshan_panchayat_date_4"),
+            ("poshan_panchayat_date_4", "sam_panch_form.poshan_panchayat_date_4")
         )
         yield """
         INSERT INTO "{child_tablename}" (
