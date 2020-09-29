@@ -22,11 +22,35 @@ class Migration(migrations.Migration):
             field=models.DateField(null=True)
         ),
         migrations.RunSQL(
-            "ALTER table icds_dashboard_ccs_record_bp_forms ADD COLUMN new_ifa_tablets_total SMALLINT"),
+            "ALTER table icds_dashboard_ccs_record_bp_forms ADD COLUMN new_ifa_tablets_total SMALLINT",
+            state_operations=[
+                migrations.AddField(
+                    model_name='aggregatebirthpreparednesforms',
+                    name='new_ifa_tablets_total',
+                    field=models.SmallIntegerField(help_text='New ifa tablets', null=True)
+                )
+            ]
+        ),
         migrations.RunSQL(
-            "ALTER table icds_dashboard_ccs_record_bp_forms ADD COLUMN reason_no_ifa TEXT"),
+            "ALTER table icds_dashboard_ccs_record_bp_forms ADD COLUMN reason_no_ifa TEXT",
+            state_operations=[
+                migrations.AddField(
+                    model_name='aggregatebirthpreparednesforms',
+                    name='reason_no_ifa',
+                    field=models.TextField(null=True)
+                )
+            ]
+        ),
         migrations.RunSQL(
-            "ALTER table icds_dashboard_ccs_record_postnatal_forms ADD COLUMN new_ifa_tablets_total SMALLINT"),
+            "ALTER table icds_dashboard_ccs_record_postnatal_forms ADD COLUMN new_ifa_tablets_total SMALLINT",
+            state_operations=[
+                migrations.AddField(
+                    model_name='aggregateccsrecordpostnatalcareforms',
+                    name='new_ifa_tablets_total',
+                    field=models.SmallIntegerField(help_text='New ifa tablets', null=True)
+                )
+            ]
+        ),
         migrations.RunSQL("ALTER TABLE ccs_record_monthly ADD COLUMN complication_type TEXT"),
         migrations.RunSQL("ALTER TABLE ccs_record_monthly ADD COLUMN reason_no_ifa TEXT"),
         migrations.RunSQL("ALTER TABLE ccs_record_monthly ADD COLUMN new_ifa_tablets_total_bp INTEGER"),

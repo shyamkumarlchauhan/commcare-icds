@@ -475,29 +475,4 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='AggThrMonthly',
         ),
-        migrations.AddField(
-            model_name='aggregatebirthpreparednesforms',
-            name='new_ifa_tablets_total',
-            field=models.SmallIntegerField(help_text='New ifa tablets', null=True),
-        ),
-        migrations.AddField(
-            model_name='aggregatebirthpreparednesforms',
-            name='reason_no_ifa',
-            field=models.TextField(null=True),
-        ),
-        migrations.AddField(
-            model_name='aggregateccsrecorddeliveryforms',
-            name='num_children_del',
-            field=models.PositiveSmallIntegerField(help_text='Number of children born', null=True),
-        ),
-        migrations.AddField(
-            model_name='aggregateccsrecorddeliveryforms',
-            name='still_live_birth',
-            field=models.PositiveSmallIntegerField(help_text='Number of children alive', null=True),
-        ),
-        migrations.AddField(
-            model_name='aggregateccsrecordpostnatalcareforms',
-            name='new_ifa_tablets_total',
-            field=models.SmallIntegerField(help_text='New ifa tablets', null=True),
-        ),
     ]
