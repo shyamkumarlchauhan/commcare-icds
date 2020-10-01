@@ -19,7 +19,8 @@
     "icds-sql",
     "icds-cas",
     "cas-lab",
-    "icds-cas-sandbox"
+    "icds-cas-sandbox",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",
@@ -141,22 +142,22 @@
           "type": "number_format"
         }, 
         "display": {
-          "mar": "मुलाचे जन्म वजन आहे",
-          "tel": "బిడ్డ యొక్క బరువు",
-          "hin": "जन्म के समय बच्चे का वज़न",
-          "en": "Birth Weight",
-          "tam": "பிறப்பு எடை",
-          "lus": "Pianhlima rihzawng",
-          "pan": "ਜਨਮ ਸਮੇ ਭਾਰ",
-          "grt": "Jrime atchia",
-          "kha": "Jingkhia ha ka por ba kha",
-          "asm": "জন্মৰ ওজন",
-          "ben": "জন্ম ওজন",
-          "guj": "જન્મ સમયનું વજન",
-          "mni": "পোকপা মতমদা অঙাংগী অরুম্বা",
-          "mal": "ജനനഭാരം",
-          "kan": "ಜನನದ ತೂಕ",
-          "urd": "پیدائش کا وزن"
+          "mar": "मुलाचे जन्म वजन आहे(kg)",
+          "tel": "బిడ్డ యొక్క బరువు(kg)",
+          "hin": "जन्म के समय बच्चे का वज़न(kg)",
+          "en": "Birth Weight(kg)",
+          "tam": "பிறப்பு எடை(kg)",
+          "lus": "Pianhlima rihzawng(kg)",
+          "pan": "ਜਨਮ ਸਮੇ ਭਾਰ(kg)",
+          "grt": "Jrime atchia(kg)",
+          "kha": "Jingkhia ha ka por ba kha(kg)",
+          "asm": "জন্মৰ ওজন(kg)",
+          "ben": "জন্ম ওজন(kg)",
+          "guj": "જન્મ સમયનું વજન(kg)",
+          "mni": "পোকপা মতমদা অঙাংগী অরুম্বা(kg)",
+          "mal": "ജനനഭാരം(kg)",
+          "kan": "ಜನನದ ತೂಕ(kg)",
+          "urd": "پیدائش کا وزن (kg)"
         }
       },
       {

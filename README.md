@@ -22,7 +22,6 @@ This does not include populating any data.
     ```python
     LOCAL_APPS = (
         "custom.icds",
-        "custom.icds.data_management",
         "custom.icds_reports",
     )
     

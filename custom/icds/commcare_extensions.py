@@ -83,7 +83,6 @@ def urls_domain_specific():
     return [
         'custom.icds_reports.urls',
         'custom.icds.urls',
-        'custom.icds.data_management.urls',
     ]
 
 
