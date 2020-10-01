@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
 from corehq.apps.userreports.util import get_table_name
-from custom.icds_reports.const import AGG_MPR_AWC_TABLE
+from custom.icds_reports.const import AGG_MPR_AWC_TABLE, AGG_PERSON_CASE_TABLE
 from custom.icds_reports.utils.aggregation_helpers import  month_formatter, get_child_health_temp_tablename
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import AggregationPartitionedHelper
 
@@ -38,10 +38,6 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
     @property
     def visitorbook_ucr_table(self):
         return get_table_name(self.domain, 'static-visitorbook_forms')
-
-    @property
-    def person_case_ucr_table(self):
-        return get_table_name(self.domain, 'static-person_cases_v3')
 
     @property
     def awc_vhnd_ucr_table(self):
@@ -222,68 +218,10 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             num_other_referral_awcs = CASE WHEN ut.total_other_referrals>0 THEN 1 ELSE 0 END,
             total_other_referrals = ut.total_other_referrals,
             total_other_reached_facility = ut.total_other_reached_facility
-        FROM (
-            SELECT
-                state_id,
-                awc_id,
-                SUM(CASE WHEN referral_health_problem='premature' THEN 1 ELSE 0 END) as total_premature_referrals,
-                SUM(CASE WHEN referral_health_problem='premature' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_premature_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='sepsis' THEN 1 ELSE 0 END) as total_sepsis_referrals,
-                SUM(CASE WHEN referral_health_problem='sepsis' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_sepsis_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='diarrhoea' THEN 1 ELSE 0 END) as total_diarrhoea_referrals,
-                SUM(CASE WHEN referral_health_problem='diarrhoea' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_diarrhoea_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='pneumonia' THEN 1 ELSE 0 END) as total_pneumonia_referrals,
-                SUM(CASE WHEN referral_health_problem='pneumonia' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_pneumonia_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='fever_child' THEN 1 ELSE 0 END) as total_fever_referrals,
-                SUM(CASE WHEN referral_health_problem='fever_child' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_fever_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='severely_underweight' THEN 1 ELSE 0 END) as total_severely_underweight_referrals,
-                SUM(CASE WHEN referral_health_problem='severely_underweight' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_severely_underweight_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='other_child' THEN 1 ELSE 0 END) as total_other_child_referrals,
-                SUM(CASE WHEN referral_health_problem='other_child' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_child_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='bleeding' THEN 1 ELSE 0 END) as total_bleeding_referrals,
-                SUM(CASE WHEN referral_health_problem='bleeding' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_bleeding_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='convulsions' THEN 1 ELSE 0 END) as total_convulsions_referrals,
-                SUM(CASE WHEN referral_health_problem='convulsions' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_convulsions_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='prolonged_labor' THEN 1 ELSE 0 END) as total_prolonged_labor_referrals,
-                SUM(CASE WHEN referral_health_problem='prolonged_labor' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_prolonged_labor_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem='abortion_complications' THEN 1 ELSE 0 END) as total_abortion_complications_referrals,
-                SUM(CASE WHEN referral_health_problem='abortion_complications' AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_abortion_complications_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem in ('fever', 'offensive_discharge') THEN 1 ELSE 0 END) as total_fever_discharge_referrals,
-                SUM(CASE WHEN referral_health_problem in ('fever', 'offensive_discharge') AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_fever_discharge_reached_facility,
-
-                SUM(CASE WHEN referral_health_problem in ('swelling', 'blurred_vision', 'other') THEN 1 ELSE 0 END) as total_other_referrals,
-                SUM(CASE WHEN referral_health_problem in ('swelling', 'blurred_vision', 'other') AND
-                    referral_reached_facility=1 THEN 1 ELSE 0 END) as total_other_reached_facility
-            FROM "{self.person_case_ucr_table}" ucr
-            WHERE last_referral_date>=%(start_date)s and last_referral_date<%(next_month_start_date)s
-            GROUP BY state_id, awc_id
-        ) ut
-        
-        WHERE agg_mpr.month=%(start_date)s AND
+        FROM "{AGG_PERSON_CASE_TABLE}" ut
+        WHERE agg_mpr.month=%(start_date)s AND ut.month=%(start_date)s AND
             agg_mpr.awc_id=ut.awc_id AND
+            agg_mpr.supervisor_id=ut.supervisor_id AND
             agg_mpr.state_id=ut.state_id AND
             agg_mpr.aggregation_level=5
         """, {
