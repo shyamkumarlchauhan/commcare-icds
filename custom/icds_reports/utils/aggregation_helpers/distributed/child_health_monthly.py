@@ -170,7 +170,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("caste", "child_health.caste"),
             ("disabled", "child_health.disabled"),
             ("minority", "child_health.minority"),
-            ("resident", "CASE WHEN person_cases.resident=1 THEN 'yes' ELSE 'no' END"),
+            ("resident", "child_health.resident"),
             ("dob", "person_cases.dob"),
             ("age_in_months", 'trunc({})'.format(age_in_months_end)),
             ("open_in_month", "CASE WHEN {} THEN 1 ELSE 0 END".format(open_in_month)),
