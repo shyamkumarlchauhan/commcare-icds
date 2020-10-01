@@ -19,7 +19,8 @@
     "icds-sql",
     "icds-cas",
     "cas-lab",
-    "icds-cas-sandbox"
+    "icds-cas-sandbox",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",
@@ -186,7 +187,7 @@
               "kha": "Ka jingkha khyllung",
               "asm": "প্ৰসৱ",
               "ben": "প্রসব",
-              "guj": "પ્રસવ",
+              "guj": "પ્રસુતિ",
               "mni": "অঙাং উন্নবা",
               "mal": "പ്രസവം",
               "kan": "ಹೆರಿಗೆ",
@@ -197,7 +198,7 @@
               "tel": "కాన్పు తరువాత సంరక్షణ ",
               "hin": "प्रसव के बाद देख-रेख",
               "en": "PNC",
-              "tam": "பிரவேசத்திற்கு பின் பராமரிப்பு",
+              "tam": "பிரசவத்திற்கு பிந்தைய கவனிப்பு",
               "lus": "Nau neih hnu a in enkawl dan",
               "pan": "ਜਣੇਪੇ ਤੋਂ ਬਾਅਦ ਜਾਂਚ",
               "grt": "PNC",
@@ -239,7 +240,7 @@
           "hin": "प्रकार",
           "en": "Type",
           "tam": "வகை",
-          "lus": "Thih chhan",
+          "lus": "Type",
           "pan": "ਕਿਸਮ",
           "grt": "Rokom",
           "kha": "Ka rukom",

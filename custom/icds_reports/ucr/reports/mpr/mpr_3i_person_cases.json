@@ -19,7 +19,8 @@
     "icds-sql",
     "icds-cas",
     "cas-lab",
-    "icds-cas-sandbox"
+    "icds-cas-sandbox",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",

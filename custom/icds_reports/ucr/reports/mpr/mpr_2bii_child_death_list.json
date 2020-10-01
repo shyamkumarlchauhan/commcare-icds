@@ -19,7 +19,8 @@
     "icds-sql",
     "icds-cas",
     "cas-lab",
-    "icds-cas-sandbox"
+    "icds-cas-sandbox",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",
@@ -226,7 +227,7 @@
           "hin": "लिंग",
           "en": "Sex",
           "tam": "பாலினம்",
-          "lus": "Sex",
+          "lus": "Mipa nge hmeichhia",
           "pan": "ਲਿੰਗ",
           "grt": "Me·a ba Me·chik",
           "kha": "Jinglong shynrang ne kynthei",
@@ -331,7 +332,7 @@
           "kha": "Nutrition status i khynnah",
           "asm": "পৰিপুষ্টিৰ স্থিতি",
           "ben": "পুষ্টির মান",
-          "guj": "પોષણ સ્તર",
+          "guj": "પોષણ સ્થિતિ",
           "mni": "ন্য়ুট্রিসন স্টেটস/অঙাংগী মশা মউ ফবগী থাক",
           "mal": "പോഷണനിലവാരം",
           "kan": "ಪೋಷಣೆಯ ಸ್ಥಿತಿ",

@@ -35,6 +35,17 @@ class TestDeliveryForms(BaseFormsTest):
                         "next_visit": datetime.date(2017, 10, 30),
                         "num_children_del": 1,
                         "still_live_birth": report_value,
+                        "delivery_nature": '',
+                        "edd": datetime.date(2018, 1, 6),
+                        "how_many_children": 1,
+                        "mother_alive": "yes",
+                        "mother_dob": datetime.date(1989, 10, 30),
+                        "owner_id": "d821504464134d4cb43f190bca90f800",
+                        "person_case_id": "ae00145a-c8f9-41bc-8bff-83994ec26d50",
+                        "safe": "yes",
+                        "timestart": datetime.datetime(2018, 1, 7, 7, 10, 40, 613000),
+                        "total_children_died": 0,
+                        "username": "awc-2",
                     }
                 ],
                 {

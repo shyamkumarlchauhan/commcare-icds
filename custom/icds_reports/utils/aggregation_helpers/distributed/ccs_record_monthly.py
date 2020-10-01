@@ -71,7 +71,7 @@ class CcsRecordMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribute
             " OR (case_list.closed_on::date - {})::integer > 0)"
         ).format(end_month_string, start_month_string)
 
-        alive_in_month = "(case_list.date_death is null OR case_list.date_death-{}>0)".format(start_month_string)
+        alive_in_month = "(person_cases.date_death is null OR person_cases.date_death-{}>=0)".format(start_month_string)
         not_migrated = (
             "(agg_migration.is_migrated IS DISTINCT FROM 1 "
             "OR agg_migration.migration_date::date >= {start_month_string})"
@@ -277,6 +277,8 @@ class CcsRecordMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribute
             ('new_ifa_tablets_total_bp', 'agg_bp.new_ifa_tablets_total'),  # backfilled for only Bihar
             ('new_ifa_tablets_total_pnc', 'agg_pnc.new_ifa_tablets_total'),  # backfilled for only Bihar
             ('ifa_last_seven_days', 'agg_bp.ifa_last_seven_days'),  # backfilled for only Bihar
+            ('bpl_apl','case_list.bpl_apl'),
+            ('religion','case_list.religion'),
         )
         return """
         INSERT INTO "{tablename}" (

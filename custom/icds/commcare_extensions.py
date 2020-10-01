@@ -3,6 +3,7 @@ import os
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
+from corehq.apps.reports.extension_points import user_query_mutators
 from custom.icds import icds_toggles
 from corehq.apps.domain.extension_points import custom_domain_module
 from corehq.apps.userreports.extension_points import (
@@ -27,7 +28,13 @@ from custom.icds_core.const import (
 )
 
 
-@uitab_dropdown_items.extend(domains=["icds-cas"])
+SUPPORTED_DOMAINS = [
+    'icds-cas',
+    'cas-lab',
+]
+
+
+@uitab_dropdown_items.extend(domains=SUPPORTED_DOMAINS)
 def icds_uitab_dropdown_items(tab_name, tab, domain, request):
     if tab_name == 'ApplicationsTab' and icds_toggles.MANAGE_CCZ_HOSTING.enabled_for_request(request):
         return [{
@@ -36,7 +43,7 @@ def icds_uitab_dropdown_items(tab_name, tab, domain, request):
         }]
 
 
-@uitab_sidebar_items.extend(domains=["icds-cas"])
+@uitab_sidebar_items.extend(domains=SUPPORTED_DOMAINS)
 def icds_uitab_sidebar_items(tab_name, tab, domain, request):
 
     if tab_name == "ProjectReportsTab" and icds_toggles.PERFORM_LOCATION_REASSIGNMENT.enabled_for_request(request):
@@ -76,7 +83,6 @@ def urls_domain_specific():
     return [
         'custom.icds_reports.urls',
         'custom.icds.urls',
-        'custom.icds.data_management.urls',
     ]
 
 
@@ -91,7 +97,7 @@ def icds_ucr_data_sources():
 @static_ucr_report_paths.extend()
 def icds_ucr_reports():
     return [os.path.join(ICDS_APPS_ROOT, path) for path in [
-        "icds_reports/ucr/reports/dashboard/*.j,son",
+        "icds_reports/ucr/reports/dashboard/*.json",
         "icds_reports/ucr/reports/asr/*.json",
         "icds_reports/ucr/reports/asr/ucr_v2/*.json",
         "icds_reports/ucr/reports/mpr/*.json",
@@ -157,4 +163,12 @@ def icds_tabs():
     from custom.icds.uitab import HostedCCZTab
     return [
         HostedCCZTab,
+    ]
+
+
+@user_query_mutators.extend(domains=SUPPORTED_DOMAINS)
+def icds_emwf_options_user_query_mutators(domain):
+    from custom.icds.report_filters import filter_users_in_test_locations
+    return [
+        filter_users_in_test_locations,
     ]

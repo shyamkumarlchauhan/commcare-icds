@@ -165,7 +165,7 @@ def get_institutional_deliveries_data_chart(domain, config, loc_level, show_test
     del config['month']
 
     # using child health monthly while querying for sector level due to performance issues
-    if icds_features_flag and config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
+    if config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
         ccs_filter = get_filters_from_config_for_chart_view(config)
         ccs_queryset = CcsRecordMonthlyView.objects.filter(**ccs_filter)
     else:
