@@ -400,6 +400,8 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("poshan_panchayat_date_2", "sam_form.poshan_panchayat_date_2"),
             ("poshan_panchayat_date_3", "sam_form.poshan_panchayat_date_3"),
             ("poshan_panchayat_date_4", "sam_form.poshan_panchayat_date_4"),
+            ("weighed_within_3_days", "CASE WHEN {} THEN del_form.birth_weight_kg ELSE NULL END".format(born_in_month)),
+            ("mother_resident_status", "del_form.mother_resident_status")
         )
         yield """
         INSERT INTO "{child_tablename}" (

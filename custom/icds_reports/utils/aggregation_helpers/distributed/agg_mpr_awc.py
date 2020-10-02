@@ -217,7 +217,15 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
 
             num_other_referral_awcs = CASE WHEN ut.total_other_referrals>0 THEN 1 ELSE 0 END,
             total_other_referrals = ut.total_other_referrals,
-            total_other_reached_facility = ut.total_other_reached_facility
+            total_other_reached_facility = ut.total_other_reached_facility,
+            mother_death_permanent_resident = ut.mother_death_permanent_resident,
+            mother_death_temp_resident = ut.mother_death_temp_resident,
+            pregnancy_death_permanent_resident = ut.pregnancy_death_permanent_resident,
+            pregnancy_death_temp_resident = ut.pregnancy_death_temp_resident,
+            delivery_death_permanent_resident = ut.delivery_death_permanent_resident,
+            delivery_death_temp_resident = ut.delivery_death_temp_resident,
+            pnc_death_permanent_resident = ut.pnc_death_permanent_resident,
+            pnc_death_temp_resident = ut.pnc_death_temp_resident
         FROM "{AGG_PERSON_CASE_TABLE}" ut
         WHERE agg_mpr.month=%(start_date)s AND ut.month=%(start_date)s AND
             agg_mpr.awc_id=ut.awc_id AND
@@ -325,6 +333,14 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             ('num_other_referral_awcs',),
             ('total_other_referrals',),
             ('total_other_reached_facility',),
+            ('mother_death_permanent_resident',),
+            ('mother_death_temp_resident',),
+            ('pregnancy_death_permanent_resident',),
+            ('pregnancy_death_temp_resident',),
+            ('delivery_death_permanent_resident',),
+            ('delivery_death_temp_resident',),
+            ('pnc_death_permanent_resident',),
+            ('pnc_death_temp_resident',),
             ('state_is_test', 'MAX(state_is_test)'),
             ('district_is_test', column_value_as_per_agg_level(aggregation_level, 1,'MAX(district_is_test)', "0")),
             ('block_is_test', column_value_as_per_agg_level(aggregation_level, 2,'MAX(block_is_test)', "0")),

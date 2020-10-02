@@ -86,6 +86,28 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
             ]
         return columns
 
+    @property
+    def death_columns(self):
+        death_in_month = (f"date_death is not null AND date_death>='{self.month_start}' AND "
+                          f"date_death<'{self.next_month_start}'")
+        return  [
+            ('mother_death_permanent_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident=1 AND "
+                                                f" {death_in_month} AND ucr.age_at_death_yrs >= 11)"),
+            ('mother_death_temp_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident is distinct from 1 AND "
+                                           f" {death_in_month} AND ucr.age_at_death_yrs >= 11)"),
+            ('pregnancy_death_permanent_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident=1 AND "
+                                                   f" {death_in_month} AND ucr.female_death_type='pregnant')"),
+            ('pregnancy_death_temp_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident IS DISTINCT FROM 1 AND "
+                                                f" {death_in_month} AND ucr.female_death_type='pregnant')"),
+            ('delivery_death_permanent_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident=1 AND "
+                                                f" {death_in_month} AND ucr.female_death_type='delivery')"),
+            ('delivery_death_temp_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident IS DISTINCT FROM 1 AND "
+                                             f" {death_in_month} AND ucr.female_death_type='delivery')"),
+            ('pnc_death_permanent_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident=1 AND "
+                                             f" {death_in_month} AND ucr.female_death_type='pnc')"),
+            ('pnc_death_temp_resident', "COUNT(*) filter(WHERE ucr.sex='F' AND ucr.resident IS DISTINCT FROM 1 AND "
+                                        f" {death_in_month} AND ucr.female_death_type='pnc')")
+        ]
 
     def aggregation_query(self):
         month_start_string = month_formatter(self.month_start)
@@ -126,7 +148,7 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         	]
 
         columns += self.referral_columns
-
+        columns += self.death_columns
         column_names = ", ".join([col[0] for col in columns])
         calculations = ", ".join([col[1] for col in columns])
 
@@ -154,7 +176,6 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         			GROUP BY ucr.state_id,ucr.supervisor_id, ucr.awc_id
               	)
                 """
-
 
     def add_partition_table__query(self):
         return f"""
