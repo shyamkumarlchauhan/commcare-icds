@@ -568,6 +568,7 @@ class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
                 'pse_awc_9_days',
                 'num_launched_awcs').order_by('month').first()
 
+            data = data if data else {}
             self.awc_open_count = data.get('awc_days_open', 0)
             rows = []
             for row in self.row_config:
@@ -705,7 +706,7 @@ class MPRUsingSaltBeta(ICDSMixin, MPRData):
             awc_data = AggAwc.objects.filter(**filters).values(
                 'use_salt',
                 'num_launched_awcs').order_by('month').first()
-
+            awc_data = awc_data if awc_data else {}
             use_salt = awc_data.get('use_salt', 0)
             percent = "%.2f" % ((use_salt or 0) * 100 / float(awc_data.get('num_launched_awcs', 0) or 1))
             return [
@@ -3569,10 +3570,7 @@ class MPRReferralServicesBeta(MPRReferralServices):
         if agg_awc_data:
             data.update(agg_awc_data)
 
-        print(data)
         return {key: value if value else 0 for key, value in data.items()}
-
-
 
 
 class MPRMonitoring(ICDSMixin, MPRData):

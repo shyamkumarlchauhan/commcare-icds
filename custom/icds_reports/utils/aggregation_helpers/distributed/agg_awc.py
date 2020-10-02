@@ -232,11 +232,11 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
            cases_person_referred = ut.cases_person_referred,
            cases_person_adolescent_girls_11_14_all_v2 = ut.cases_person_adolescent_girls_11_14_all_v2,
            cases_person_adolescent_girls_11_14_out_of_school=0
-        FROM "{agg_person_cases}" agg_person_cases
-        WHERE agg_person_cases.awc_id = agg_awc.awc_id AND 
-            agg_person_cases.supervisor_id=agg_awc.supervisor_id AND
-            agg_person_cases.month=%(start_date)s AND
-            agg_person_cases.month=agg_awc.month
+        FROM "{agg_person_cases}" ut
+        WHERE ut.awc_id = agg_awc.awc_id AND 
+            ut.supervisor_id=agg_awc.supervisor_id AND
+            ut.month=%(start_date)s AND
+            ut.month=agg_awc.month
         """.format(
             tablename=self.temporary_tablename,
             ucr_tablename=self.get_table('static-person_cases_v3'),
