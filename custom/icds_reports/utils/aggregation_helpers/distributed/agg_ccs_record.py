@@ -132,6 +132,9 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
              'WHEN crm.month - crm.add < 182 THEN 1 '
              'ELSE 0.39 END'
              ')'),
+            ('pregnant_permanent_resident', "sum(CASE WHEN crm.resident='yes' THEN crm.pregnant_all ELSE 0 END)"),
+            ('pregnant_temp_resident', "sum(CASE WHEN crm.resident IS DISTINCT FROM 'yes' THEN "
+                                       "crm.pregnant_all ELSE 0 END)"),
         )
         query_cols = []
         for c in columns:
@@ -265,6 +268,8 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
             ('pregnant_all_registered_in_month',),
             ('valid_visits', ),
             ('expected_visits', ),
+            ('pregnant_permanent_resident',),
+            ('pregnant_temp_resident',),
             ('thr_0_days_resident',),
             ('thr_1_days_resident',),
             ('thr_25_days_sc_resident',),
