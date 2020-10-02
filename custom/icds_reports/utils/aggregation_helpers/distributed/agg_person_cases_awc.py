@@ -52,41 +52,39 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
 
         return f"{self.tablename}_{month_formatter(month)}"
 
-
     @property
     def referral_columns(self):
-    	referred_in_month = f"last_referral_date>='{self.month_start}' and last_referral_date<'{self.next_month_start}'"
-    	referral_problems_col_names =[
-    		(('premature',), 'premature'),
-    		(('sepsis',), 'sepsis'),
-    		(('diarrhoea',), 'diarrhoea'),
-    		(('pneumonia',), 'pneumonia'),
-    		(('fever_child',), 'fever'),
-    		(('severely_underweight',), 'severely_underweight'),
-    		(('other_child',), 'other_child'),
-    		(('bleeding',), 'bleeding'),
-    		(('convulsions',), 'convulsions'),
-    		(('prolonged_labor',), 'prolonged_labor'),
-    		(('abortion_complications',), 'abortion_complications'),
-    		(('fever', 'offensive_discharge'), 'fever_discharge'),
-    		(('swelling', 'blurred_vision', 'other'), 'other'),
-    	]
+        referred_in_month = f"(last_referral_date>='{self.month_start}' AND last_referral_date<'{self.next_month_start}')"
+        referral_problems_col_names = [
+            (('premature',), 'premature'),
+            (('sepsis',), 'sepsis'),
+            (('diarrhoea',), 'diarrhoea'),
+            (('pneumonia',), 'pneumonia'),
+            (('fever_child',), 'fever'),
+            (('severely_underweight',), 'severely_underweight'),
+            (('other_child',), 'other_child'),
+            (('bleeding',), 'bleeding'),
+            (('convulsions',), 'convulsions'),
+            (('prolonged_labor',), 'prolonged_labor'),
+            (('abortion_complications',), 'abortion_complications'),
+            (('fever', 'offensive_discharge'), 'fever_discharge'),
+            (('swelling', 'blurred_vision', 'other'), 'other'),
+        ]
 
-    	columns = []
-    	for ref_problems, col_name in referral_problems_col_names:
-    		referral_col_name = f"total_{col_name}_referrals"
-    		referral_calculation = [ "referral_health_problem like '%{prob}%'" for prob in ref_problems]
-    		referral_calculation = " OR ".join(referral_calculation)
-    		
-    		reached_facility_col_name = f"total_{col_name}_reached_facility"
-    		reached_facility_calculation = f"({referral_calculation}) AND referral_reached_facility=1"
-
-    		columns += [
-    			(referral_col_name, f"SUM(CASE WHEN {referral_calculation} AND {referred_in_month} THEN 1 ELSE 0 END)"),
-    			(reached_facility_col_name, f"SUM(CASE WHEN {reached_facility_calculation} AND {referred_in_month} THEN 1 ELSE 0 END)"),
-    			]
-
-    	return columns
+        columns = []
+        for ref_problems, col_name in referral_problems_col_names:
+            referral_col_name = f"total_{col_name}_referrals"
+            referral_calculation = ["referral_health_problem like '%{prob}%'" for prob in ref_problems]
+            referral_calculation = " OR ".join(referral_calculation)
+            referral_calculation = f"({referral_calculation})"
+            reached_facility_col_name = f"total_{col_name}_reached_facility"
+            reached_facility_calculation = f"({referral_calculation} AND referral_reached_facility=1)"
+            columns += [
+                (referral_col_name, f"SUM(CASE WHEN {referral_calculation} AND {referred_in_month} THEN 1 ELSE 0 END)"),
+                (reached_facility_col_name,
+                 f"SUM(CASE WHEN {reached_facility_calculation} AND {referred_in_month} THEN 1 ELSE 0 END)"),
+            ]
+        return columns
 
 
     def aggregation_query(self):
