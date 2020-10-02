@@ -20,4 +20,5 @@ SELECT
         ("agg_child_health"."aggregation_level" = 1)
     )
     WHERE "agg_awc".aggregation_level=1 AND "agg_awc".month>='2020-01-01' AND "agg_awc".month<'2020-09-01'
+    AND "agg_awc".state_is_test <> 1
     GROUP BY "agg_awc".month
