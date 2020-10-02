@@ -12,9 +12,6 @@ from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePop
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
 
 from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport, AggCcsRecord
-from custom.icds_reports.utils import get_location_filter
-from django.db.models.aggregates import Sum
-from django.db.models import Case, When, Value
 
 from custom.icds_reports.models.views import ServiceDeliveryReportView
 from custom.icds_reports.models.aggregate import AggChildHealth, AggMPRAwc, AggAwc
@@ -235,6 +232,229 @@ class MPRBirthsAndDeaths(ICDSMixin, MPRData):
                 '--',
             ),
         )
+
+
+class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters['aggregation_level']>1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        mother_death_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            dead_F_resident_adult_count=F('mother_death_permanent_resident'),
+            dead_F_migrant_adult_count=F('mother_death_temp_resident'),
+            dead_preg_resident_count=F('pregnancy_death_permanent_resident'),
+            dead_preg_migrant_count=F('pregnancy_death_temp_resident'),
+            dead_del_resident_count=F('delivery_death_permanent_resident'),
+            dead_del_migrant_count=F('delivery_death_temp_resident'),
+            dead_pnc_resident_count=F('pnc_death_permanent_resident'),
+            dead_pnc_migrant_count=F('pnc_death_temp_resident'),
+        ).order_by('month').first()
+
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            live_F_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            live_M_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            live_F_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            live_M_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_F_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_M_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_F_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_M_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_F_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='weighed_in_3_days_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_M_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='weighed_in_3_days_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_F_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='weighed_in_3_days_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_M_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='weighed_in_3_days_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_resident_neo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_resident_neo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_migrant_neo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_migrant_neo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_resident_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='post_neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_resident_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='post_neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_migrant_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='post_neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_migrant_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='post_neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_resident_child_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='total_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_resident_child_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='total_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_migrant_child_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='total_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_migrant_child_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='total_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            )
+        ).order_by('month').first()
+
+        if child_data:
+            data.update(child_data)
+        if mother_death_data:
+            data.update(mother_death_data)
+        data = {key: value if value else 0 for key, value in data.items()}
+        return data
 
 
 class MPRAWCDetails(ICDSMixin, MPRData):
