@@ -11,7 +11,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0211_add_thr_snp_columns'),
+        ('icds_reports', '0212_auto_20200929_0811'),
     ]
 
     operations = [
