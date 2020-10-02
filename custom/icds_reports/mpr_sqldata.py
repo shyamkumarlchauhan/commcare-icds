@@ -10,6 +10,7 @@ from custom.icds_reports.sqldata.base_operationalization import BaseOperationali
     BaseOperationalizationBeta
 from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
+
 from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport, AggCcsRecord
 from custom.icds_reports.utils import get_location_filter
 from django.db.models.aggregates import Sum
@@ -301,6 +302,92 @@ class MPRAWCDetails(ICDSMixin, MPRData):
                 'M_migrant_count_1'
             ),
         )
+
+
+class MPRAWCDetailsBeta(MPRAWCDetails):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(self.config['location_id'], self.config['domain'])
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        if filters['aggregation_level'] > 1:
+            filters['aggregation_level'] -= 1
+        data = dict()
+
+        ccs_data = AggCcsRecord.objects.filter(**filters).values('month').annotate(
+            pregnant_resident_count=Sum('pregnant_permanent_resident'),
+            pregnant_migrant_count=Sum('pregnant_temp_resident')
+        ).order_by('month').first()
+
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            live_F_resident_birth_count=Sum(
+                Case(
+                    When(gender='F', then='live_birth_permanent_resident'), default=Value(0)
+                )
+            ),
+            live_M_resident_birth_count=Sum(
+                Case(
+                    When(gender='M', then='live_birth_permanent_resident'), default=Value(0)
+                )
+            ),
+            live_F_migrant_birth_count=Sum(
+                Case(
+                    When(gender='F', then='live_birth_temp_resident'), default=Value(0)
+                )
+            ),
+            live_M_migrant_birth_count=Sum(
+                Case(
+                    When(gender='M', then='live_birth_temp_resident'), default=Value(0)
+                )
+            ),
+            F_resident_count=Sum(
+                Case(
+                    When(gender='F', age_tranche__lte=36, then='permanent_resident'), default=Value(0)
+                )
+            ),
+            M_resident_count=Sum(
+                Case(
+                    When(gender='F', then='permanent_resident'), default=Value(0)
+                )
+            ),
+            F_migrant_count=Sum(
+                Case(
+                    When(gender='F', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+            M_migrant_count=Sum(
+                Case(
+                    When(gender='M', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+            F_resident_count_1=Sum(
+                Case(
+                    When(gender='F', age_tranche__gt=36,  then='permanent_resident'), default=Value(0)
+                )
+            ),
+            M_resident_count_1=Sum(
+                Case(
+                    When(gender='M', age_tranche__gt=36, then='permanent_resident'), default=Value(0)
+                )
+            ),
+            F_migrant_count_1=Sum(
+                Case(
+                    When(gender='F', age_tranche__gt=36,  then='temp_resident'), default=Value(0)
+                )
+            ),
+            M_migrant_count_1=Sum(
+                Case(
+                    When(gender='M', age_tranche__gt=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+        ).order_by('month').first()
+
+        if child_data:
+            data.update(child_data)
+
+        if ccs_data:
+            data.update(ccs_data)
+
+        return {key: value if value else 0 for key, value in data.items()}
 
 
 class MPRSupplementaryNutrition(ICDSMixin, MPRData):
