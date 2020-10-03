@@ -1,4 +1,3 @@
-
 from custom.icds_reports.const import AGG_PERSON_CASE_TABLE, AGG_MIGRATION_TABLE, AGG_AVAILING_SERVICES_TABLE
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import BaseICDSAggregationDistributedHelper
 from corehq.apps.userreports.util import get_table_name
@@ -86,7 +85,6 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
             ]
         return columns
 
-
     def aggregation_query(self):
         month_start_string = month_formatter(self.month_start)
         month_end_11yr = self.month_end - relativedelta(years=11)
@@ -95,35 +93,44 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         month_end_15yr = self.month_end - relativedelta(years=15)
         month_start_18yr = self.month_start - relativedelta(years=18)
         unmigrated = ("(agg_migration.is_migrated IS DISTINCT FROM 1 OR "
-            		  f"agg_migration.migration_date::date >= '{self.month_start}')")
+                      f"agg_migration.migration_date::date >= '{self.month_start}')")
         seeking_services = (
-        	"((agg_availing.is_registered IS DISTINCT FROM 0 OR "
+            "((agg_availing.is_registered IS DISTINCT FROM 0 OR "
             f"agg_availing.registration_date::date >= '{self.month_start}') AND {unmigrated})"
-            )
-        girls_11_14 = (
-        	f"'{month_end_11yr}' > dob AND "
-        	f"'{month_start_14yr}'<= dob AND sex = 'F'"
-        	)
-        girls_15_18 = (
-        	f"'{month_end_15yr}' > dob AND "
-        	f"'{month_start_18yr}'<= dob AND sex = 'F'"
-        	)
+        )
 
+        girls_11_14 = (
+            f"'{month_end_11yr}' > dob AND "
+            f"'{month_start_15yr}'<= dob AND sex = 'F'"
+        )
+        girls_11_14_v2 = (
+            f"'{month_end_11yr}' > dob AND "
+            f"'{month_start_14yr}'<= dob AND sex = 'F'"
+        )
+        girls_15_18 = (
+            f"'{month_end_15yr}' > dob AND "
+            f"'{month_start_18yr}'<= dob AND sex = 'F'"
+        )
 
         columns = [
-        	('state_id', 'ucr.state_id'),
-        	('supervisor_id', 'ucr.supervisor_id'),
-        	('awc_id', 'ucr.awc_id'),
-        	('month', f"'{self.month_start}'"),
-        	('cases_person', f"SUM(CASE WHEN {seeking_services} THEN 1 else 0 END)"),
-        	('cases_person_all', 'count(*)'),
-        	('cases_person_adolescent_girls_11_14', f"SUM(CASE WHEN {girls_11_14} and {seeking_services} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_11_14_all', f"SUM(CASE WHEN {girls_11_14} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_11_14_all_v2', f"SUM(CASE WHEN {girls_11_14} AND {unmigrated} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_15_18', f"SUM(CASE WHEN {girls_15_18} AND {seeking_services} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_15_18_all', f"SUM(CASE WHEN {girls_15_18} AND {unmigrated}THEN 1 ELSE 0 END)"),
-        	('cases_person_referred', f"SUM(CASE WHEN last_referral_date>='{self.month_start}' AND last_referral_date<'{self.next_month_start}' THEN 1 ELSE 0 END)"),
-        	]
+            ('state_id', 'ucr.state_id'),
+            ('supervisor_id', 'ucr.supervisor_id'),
+            ('awc_id', 'ucr.awc_id'),
+            ('month', f"'{self.month_start}'"),
+            ('cases_person', f"SUM(CASE WHEN {seeking_services} THEN 1 else 0 END)"),
+            ('cases_person_all', 'count(*)'),
+            ('cases_person_adolescent_girls_11_14',
+             f"SUM(CASE WHEN {girls_11_14} and {seeking_services} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_11_14_all', f"SUM(CASE WHEN {girls_11_14} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_11_14_all_v2',
+             f"SUM(CASE WHEN {girls_11_14_v2} AND {unmigrated} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_15_18',
+             f"SUM(CASE WHEN {girls_15_18} AND {seeking_services} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_15_18_all',
+             f"SUM(CASE WHEN {girls_15_18} AND {unmigrated}THEN 1 ELSE 0 END)"),
+            ('cases_person_referred',
+             f"SUM(CASE WHEN last_referral_date>='{self.month_start}' AND last_referral_date<'{self.next_month_start}' THEN 1 ELSE 0 END)"),
+        ]
 
         columns += self.referral_columns
 
@@ -142,19 +149,17 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
 	                "{AGG_MIGRATION_TABLE}" agg_migration ON (
                 		ucr.doc_id = agg_migration.person_case_id AND
                 		agg_migration.month = '{self.month_start}' AND
-                		ucr.supervisor_id = agg_migration.supervisor_id) LEFT JOIN 
+                		ucr.supervisor_id = agg_migration.supervisor_id
+                	) LEFT JOIN
                 	"{AGG_AVAILING_SERVICES_TABLE}" agg_availing ON (
                 		ucr.doc_id = agg_availing.person_case_id AND
                 		agg_availing.month = '{self.month_start}' AND
-                		ucr.supervisor_id = agg_availing.supervisor_id)
-        			WHERE (
-        				opened_on <'{self.next_month_start}' AND
-              			(closed_on IS NULL OR closed_on >= '{self.month_start}')
-              			)
+                		ucr.supervisor_id = agg_availing.supervisor_id
+                	)
+                	WHERE opened_on <='{self.next_month_start}' AND (closed_on IS NULL OR closed_on >= '{self.month_start}')
         			GROUP BY ucr.state_id,ucr.supervisor_id, ucr.awc_id
               	)
                 """
-
 
     def add_partition_table__query(self):
         return f"""
