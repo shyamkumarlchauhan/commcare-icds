@@ -156,7 +156,7 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
                 		agg_availing.month = '{self.month_start}' AND
                 		ucr.supervisor_id = agg_availing.supervisor_id
                 	)
-                	WHERE opened_on <='{self.next_month_start}' AND (closed_on IS NULL OR closed_on >= '{self.month_start}')
+                	WHERE opened_on <='{self.month_end}' AND (closed_on IS NULL OR closed_on >= '{self.month_start}')
         			GROUP BY ucr.state_id,ucr.supervisor_id, ucr.awc_id
               	)
                 """
