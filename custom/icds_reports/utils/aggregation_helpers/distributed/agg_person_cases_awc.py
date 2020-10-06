@@ -1,10 +1,9 @@
-
 from custom.icds_reports.const import AGG_PERSON_CASE_TABLE, AGG_MIGRATION_TABLE, AGG_AVAILING_SERVICES_TABLE
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import BaseICDSAggregationDistributedHelper
 from corehq.apps.userreports.util import get_table_name
 from dateutil.relativedelta import relativedelta
-from custom.icds_reports.utils.aggregation_helpers import transform_day_to_month, month_formatter
-from corehq.apps.locations.models import SQLLocation
+from custom.icds_reports.utils.aggregation_helpers import transform_day_to_month, month_formatter, get_prev_agg_tablename, is_current_month
+from custom.icds.icds_toggles import ICDS_LOCATION_REASSIGNMENT_AGG
 
 
 class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelper):
@@ -15,7 +14,7 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         self.month_start = transform_day_to_month(month)
         self.month_end = self.month_start + relativedelta(months=1, seconds=-1)
         self.next_month_start = month + relativedelta(months=1)
-        self.person_case_ucr = get_table_name(self.domain, 'static-person_cases_v3')
+        self.person_case_ucr = self.get_table('static-person_cases_v3')
 
         self.current_month_table = self.monthly_tablename()
 
@@ -30,6 +29,11 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         cursor.execute(agg_query)
 
         cursor.execute(add_partition_query)
+
+    def get_table(self, table_id):
+        if not is_current_month(self.month_start) and ICDS_LOCATION_REASSIGNMENT_AGG.enabled(self.domain):
+            return get_prev_agg_tablename(table_id)
+        return get_table_name(self.domain, table_id)
 
     def drop_old_tables_query(self):
         previous_month = self.month_start - relativedelta(months=1)
@@ -117,35 +121,43 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         month_end_15yr = self.month_end - relativedelta(years=15)
         month_start_18yr = self.month_start - relativedelta(years=18)
         unmigrated = ("(agg_migration.is_migrated IS DISTINCT FROM 1 OR "
-            		  f"agg_migration.migration_date::date >= '{self.month_start}')")
+                      f"agg_migration.migration_date::date >= '{self.month_start}')")
         seeking_services = (
-        	"((agg_availing.is_registered IS DISTINCT FROM 0 OR "
+            "((agg_availing.is_registered IS DISTINCT FROM 0 OR "
             f"agg_availing.registration_date::date >= '{self.month_start}') AND {unmigrated})"
-            )
-        girls_11_14 = (
-        	f"'{month_end_11yr}' > dob AND "
-        	f"'{month_start_14yr}'<= dob AND sex = 'F'"
-        	)
-        girls_15_18 = (
-        	f"'{month_end_15yr}' > dob AND "
-        	f"'{month_start_18yr}'<= dob AND sex = 'F'"
-        	)
+        )
 
+        girls_11_14 = (
+            f"'{month_end_11yr}' > dob AND "
+            f"'{month_start_15yr}'<= dob AND sex = 'F'"
+        )
+        girls_11_14_v2 = (
+            f"'{month_end_11yr}' > dob AND "
+            f"'{month_start_14yr}'<= dob AND sex = 'F'"
+        )
+        girls_15_18 = (
+            f"'{month_end_15yr}' > dob AND "
+            f"'{month_start_18yr}'<= dob AND sex = 'F'"
+        )
 
         columns = [
-        	('state_id', 'ucr.state_id'),
-        	('supervisor_id', 'ucr.supervisor_id'),
-        	('awc_id', 'ucr.awc_id'),
-        	('month', f"'{self.month_start}'"),
-        	('cases_person', f"SUM(CASE WHEN {seeking_services} THEN 1 else 0 END)"),
-        	('cases_person_all', 'count(*)'),
-        	('cases_person_adolescent_girls_11_14', f"SUM(CASE WHEN {girls_11_14} and {seeking_services} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_11_14_all', f"SUM(CASE WHEN {girls_11_14} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_11_14_all_v2', f"SUM(CASE WHEN {girls_11_14} AND {unmigrated} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_15_18', f"SUM(CASE WHEN {girls_15_18} AND {seeking_services} THEN 1 ELSE 0 END)"),
-        	('cases_person_adolescent_girls_15_18_all', f"SUM(CASE WHEN {girls_15_18} AND {unmigrated}THEN 1 ELSE 0 END)"),
-        	('cases_person_referred', f"SUM(CASE WHEN last_referral_date>='{self.month_start}' AND last_referral_date<'{self.next_month_start}' THEN 1 ELSE 0 END)"),
-        	]
+            ('supervisor_id', 'ucr.supervisor_id'),
+            ('awc_id', 'ucr.awc_id'),
+            ('month', f"'{self.month_start}'"),
+            ('cases_person', f"SUM(CASE WHEN {seeking_services} THEN 1 else 0 END)"),
+            ('cases_person_all', 'count(*)'),
+            ('cases_person_adolescent_girls_11_14',
+             f"SUM(CASE WHEN {girls_11_14} and {seeking_services} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_11_14_all', f"SUM(CASE WHEN {girls_11_14} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_11_14_all_v2',
+             f"SUM(CASE WHEN {girls_11_14_v2} AND {unmigrated} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_15_18',
+             f"SUM(CASE WHEN {girls_15_18} AND {seeking_services} THEN 1 ELSE 0 END)"),
+            ('cases_person_adolescent_girls_15_18_all',
+             f"SUM(CASE WHEN {girls_15_18} AND {unmigrated}THEN 1 ELSE 0 END)"),
+            ('cases_person_referred',
+             f"SUM(CASE WHEN last_referral_date>='{self.month_start}' AND last_referral_date<'{self.next_month_start}' THEN 1 ELSE 0 END)"),
+        ]
 
         columns += self.referral_columns
         columns += self.death_columns
@@ -164,16 +176,15 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
 	                "{AGG_MIGRATION_TABLE}" agg_migration ON (
                 		ucr.doc_id = agg_migration.person_case_id AND
                 		agg_migration.month = '{self.month_start}' AND
-                		ucr.supervisor_id = agg_migration.supervisor_id) LEFT JOIN 
+                		ucr.supervisor_id = agg_migration.supervisor_id
+                	) LEFT JOIN
                 	"{AGG_AVAILING_SERVICES_TABLE}" agg_availing ON (
                 		ucr.doc_id = agg_availing.person_case_id AND
                 		agg_availing.month = '{self.month_start}' AND
-                		ucr.supervisor_id = agg_availing.supervisor_id)
-        			WHERE (
-        				opened_on <'{self.next_month_start}' AND
-              			(closed_on IS NULL OR closed_on >= '{self.month_start}')
-              			)
-        			GROUP BY ucr.state_id,ucr.supervisor_id, ucr.awc_id
+                		ucr.supervisor_id = agg_availing.supervisor_id
+                	)
+                	WHERE opened_on <='{self.month_end}' AND (closed_on IS NULL OR closed_on >= '{self.month_start}')
+        			GROUP BY ucr.supervisor_id, ucr.awc_id
               	)
                 """
 

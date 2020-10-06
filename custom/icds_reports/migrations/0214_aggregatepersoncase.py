@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AggregatePersonCase',
             fields=[
-                ('state_id', models.TextField(null=True)),
                 ('supervisor_id', models.TextField(null=True)),
                 ('month', models.DateField(help_text='Will always be YYYY-MM-01')),
                 ('awc_id', models.TextField(primary_key=True, serialize=False)),
@@ -77,7 +76,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='aggregatepersoncase',
-            unique_together=set([('month', 'state_id','supervisor_id', 'awc_id')]),
+            unique_together=set([('month', 'supervisor_id', 'awc_id')]),
         ),
     ]
     operations.extend(get_composite_primary_key_migrations(['aggregatepersoncase']))
