@@ -231,7 +231,7 @@ class AggChildHealthAggregationDistributedHelper(AggregationPartitionedHelper):
                                            f"THEN 1 ELSE 0 END)"),
             ('lbw_permanent_resident', "SUM(CASE WHEN chm.resident='yes' and chm.birth_status_in_month='live' AND "
                                        " chm.weighed_within_3_days is not null THEN "
-                                       "chmd.low_birth_weight_born_in_month ELSE 0 END)"),
+                                       "chm.low_birth_weight_born_in_month ELSE 0 END)"),
             ('lbw_temp_resident', "SUM(CASE WHEN chm.resident is distinct from 'yes' AND "
                                   "chm.birth_status_in_month='live' AND chm.weighed_within_3_days is not null THEN "
                                   "chm.low_birth_weight_born_in_month ELSE 0 END)"),
