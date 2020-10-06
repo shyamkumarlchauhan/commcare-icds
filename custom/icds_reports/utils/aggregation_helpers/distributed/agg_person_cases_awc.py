@@ -2,8 +2,8 @@ from custom.icds_reports.const import AGG_PERSON_CASE_TABLE, AGG_MIGRATION_TABLE
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import BaseICDSAggregationDistributedHelper
 from corehq.apps.userreports.util import get_table_name
 from dateutil.relativedelta import relativedelta
-from custom.icds_reports.utils.aggregation_helpers import transform_day_to_month, month_formatter
-from corehq.apps.locations.models import SQLLocation
+from custom.icds_reports.utils.aggregation_helpers import transform_day_to_month, month_formatter, get_prev_agg_tablename, is_current_month
+from custom.icds.icds_toggles import ICDS_LOCATION_REASSIGNMENT_AGG
 
 
 class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelper):
@@ -14,7 +14,7 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         self.month_start = transform_day_to_month(month)
         self.month_end = self.month_start + relativedelta(months=1, seconds=-1)
         self.next_month_start = month + relativedelta(months=1)
-        self.person_case_ucr = get_table_name(self.domain, 'static-person_cases_v3')
+        self.person_case_ucr = self.get_table('static-person_cases_v3')
 
         self.current_month_table = self.monthly_tablename()
 
@@ -29,6 +29,11 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         cursor.execute(agg_query)
 
         cursor.execute(add_partition_query)
+
+    def get_table(self, table_id):
+        if not is_current_month(self.month_start) and ICDS_LOCATION_REASSIGNMENT_AGG.enabled(self.domain):
+            return get_prev_agg_tablename(table_id)
+        return get_table_name(self.domain, table_id)
 
     def drop_old_tables_query(self):
         previous_month = self.month_start - relativedelta(months=1)
