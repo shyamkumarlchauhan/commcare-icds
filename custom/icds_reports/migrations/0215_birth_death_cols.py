@@ -93,7 +93,6 @@ class Migration(migrations.Migration):
             field=models.IntegerField(null=True),
         ),
         migrations.RunSQL("ALTER TABLE child_health_monthly ADD COLUMN weighed_within_3_days smallint"),
-        migrations.RunSQL("ALTER TABLE child_health_monthly ADD COLUMN mother_resident_status TEXT"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN still_birth_permanent_resident INTEGER"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN still_birth_temp_resident INTEGER"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN weighed_in_3_days_permanent_resident INTEGER"),
