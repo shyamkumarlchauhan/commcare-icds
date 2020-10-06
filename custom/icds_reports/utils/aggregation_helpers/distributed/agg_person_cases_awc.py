@@ -118,7 +118,6 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
         )
 
         columns = [
-            ('state_id', 'ucr.state_id'),
             ('supervisor_id', 'ucr.supervisor_id'),
             ('awc_id', 'ucr.awc_id'),
             ('month', f"'{self.month_start}'"),
@@ -162,7 +161,7 @@ class PersonCaseAggregationDistributedHelper(BaseICDSAggregationDistributedHelpe
                 		ucr.supervisor_id = agg_availing.supervisor_id
                 	)
                 	WHERE opened_on <='{self.month_end}' AND (closed_on IS NULL OR closed_on >= '{self.month_start}')
-        			GROUP BY ucr.state_id,ucr.supervisor_id, ucr.awc_id
+        			GROUP BY ucr.supervisor_id, ucr.awc_id
               	)
                 """
 

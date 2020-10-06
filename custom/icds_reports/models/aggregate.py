@@ -2207,7 +2207,6 @@ class AggregateSamMamForm(models.Model, AggregateMixin):
 
 
 class AggregatePersonCase(models.Model, AggregateMixin):
-    state_id = models.TextField(null=True)
     supervisor_id = models.TextField(null=True)
     month = models.DateField(help_text="Will always be YYYY-MM-01")
 
@@ -2277,7 +2276,7 @@ class AggregatePersonCase(models.Model, AggregateMixin):
 
     class Meta(object):
         db_table = AGG_PERSON_CASE_TABLE
-        unique_together = ('month', 'state_id', 'supervisor_id', 'awc_id')  # pkey
+        unique_together = ('month', 'supervisor_id', 'awc_id')  # pkey
 
     _agg_helper_cls = PersonCaseAggregationDistributedHelper
     _agg_atomic = False

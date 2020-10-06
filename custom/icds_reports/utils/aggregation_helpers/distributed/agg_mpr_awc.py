@@ -222,7 +222,6 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
         WHERE agg_mpr.month=%(start_date)s AND ut.month=%(start_date)s AND
             agg_mpr.awc_id=ut.awc_id AND
             agg_mpr.supervisor_id=ut.supervisor_id AND
-            agg_mpr.state_id=ut.state_id AND
             agg_mpr.aggregation_level=5
         """, {
             'start_date': self.month,
