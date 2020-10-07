@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN pregnant_permanent_resident smallint"),
-        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN pregnant_temp_resident smallint"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN pregnant_permanent_resident integer"),
+        migrations.RunSQL("ALTER TABLE agg_ccs_record ADD COLUMN pregnant_temp_resident integer"),
         migrations.RunSQL("ALTER TABLE child_health_monthly ADD COLUMN birth_status_in_month TEXT"),
         migrations.RunSQL("ALTER TABLE child_health_monthly ADD COLUMN mother_resident_status TEXT"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN live_birth_permanent_resident integer"),
