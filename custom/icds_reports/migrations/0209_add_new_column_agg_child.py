@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN total_pse_days_attended smallint"),
+        migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN total_pse_days_attended integer"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_0_days integer"),
         migrations.RunSQL("ALTER TABLE agg_child_health ADD COLUMN pse_attended_1_days integer"),
         migrations.RunSQL("ALTER TABLE agg_awc ADD COLUMN awc_open_with_attended_children integer"),
