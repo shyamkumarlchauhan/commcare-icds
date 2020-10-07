@@ -118,7 +118,8 @@ from custom.icds_reports.models.aggregate import (
     ChildVaccines,
     AggMPRAwc,
     AggregateDailyChildHealthTHRForms,
-    AggregateDailyCcsRecordTHRForms
+    AggregateDailyCcsRecordTHRForms,
+    AggregatePersonCase
 )
 from custom.icds_reports.models.helper import IcdsFile
 from custom.icds_reports.models.util import UcrReconciliationStatus
@@ -377,13 +378,15 @@ def move_ucr_data_into_aggregation_tables(date=None, intervals=2):
             res_sdr.get(disable_sync_subtasks=False)
 
 
+            res_person_cases = chain(icds_aggregation_task.si(date=calculation_date, func_name='_aggregate_person_case_data'),
+                            ).apply_async()
+            res_person_cases.get(disable_sync_subtasks=False)
+
             res_mpr = chain(icds_aggregation_task.si(date=calculation_date, func_name='update_mpr_data'),
                             ).apply_async()
-
             res_mpr.get(disable_sync_subtasks=False)
 
             res_inactive_aww = chain(icds_aggregation_task.si(date=calculation_date, func_name='_aggregate_inactive_aww_agg'),).apply_async()
-
             res_inactive_aww.get(disable_sync_subtasks=False)
 
             daily_thr_ccs_tasks = list()
@@ -488,7 +491,8 @@ def icds_aggregation_task(self, date, func_name):
         'aggregate_awc_daily': aggregate_awc_daily,
         'update_service_delivery_report': update_service_delivery_report,
         '_aggregate_inactive_aww_agg': _aggregate_inactive_aww_agg,
-        'update_mpr_data': update_mpr_data
+        'update_mpr_data': update_mpr_data,
+        '_aggregate_person_case_data': _aggregate_person_case_data
     }[func_name]
 
     db_alias = get_icds_ucr_citus_db_alias()
@@ -2133,13 +2137,6 @@ def update_child_vaccine_table(target_date):
     current_month = force_to_date(target_date).replace(day=1)
     ChildVaccines.aggregate(current_month)
 
-
-@track_time
-def update_mpr_data(target_date):
-    current_month = force_to_date(target_date).replace(day=1)
-    AggMPRAwc.aggregate(current_month)
-
-
 @track_time
 def _aggregate_child_health_sam_mam_form(state_id, day):
     AggregateSamMamForm.aggregate(state_id, day)
@@ -2153,3 +2150,16 @@ def _daily_thr_ccs_record(state_id, day):
 @track_time
 def _daily_thr_child_health(state_id, day):
     AggregateDailyChildHealthTHRForms.aggregate(state_id, force_to_date(day))
+
+
+@track_time
+def _aggregate_person_case_data(target_date):
+    current_month = force_to_date(target_date).replace(day=1)
+    AggregatePersonCase.aggregate(current_month)
+
+
+@track_time 
+def update_mpr_data(target_date):   
+    current_month = force_to_date(target_date).replace(day=1)   
+    AggMPRAwc.aggregate(current_month)  
+
