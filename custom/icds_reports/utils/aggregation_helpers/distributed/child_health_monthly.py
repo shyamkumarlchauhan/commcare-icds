@@ -379,6 +379,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("birth_weight", "child_health.birth_weight"),
             ("child_person_case_id", "child_health.mother_id"),
             ("delivery_nature", "del_form.delivery_nature"),
+            ("birth_status_in_month", "CASE WHEN {} THEN del_form.still_live_birth ELSE NULL END".format(born_in_month)),
             ("term_days", "(del_form.add::DATE - del_form.edd::DATE) + 280"),
             ("valid_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(valid_status_daily)),
             ("migration_status_daily", "CASE WHEN {} THEN 0 ELSE 1 END".format(not_migration_status_daily)),
@@ -391,6 +392,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("last_referral_discharge_date", "person_cases.last_referral_discharge_date"),
             ("seeking_services_status_daily",
              "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily)),
+            ("mother_resident_status", "del_form.mother_resident_status"),
             ("sam_mam_visit_date_1", "sam_form.sam_mam_visit_date_1"),
             ("sam_mam_visit_date_2", "sam_form.sam_mam_visit_date_2"),
             ("sam_mam_visit_date_3", "sam_form.sam_mam_visit_date_3"),
@@ -398,7 +400,8 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("poshan_panchayat_date_1", "sam_panch_form.poshan_panchayat_date_1"),
             ("poshan_panchayat_date_2", "sam_panch_form.poshan_panchayat_date_2"),
             ("poshan_panchayat_date_3", "sam_panch_form.poshan_panchayat_date_3"),
-            ("poshan_panchayat_date_4", "sam_panch_form.poshan_panchayat_date_4")
+            ("poshan_panchayat_date_4", "sam_panch_form.poshan_panchayat_date_4"),
+            ("weighed_within_3_days", "CASE WHEN {} THEN del_form.birth_weight_kg ELSE NULL END".format(born_in_month))
         )
         yield """
         INSERT INTO "{child_tablename}" (

@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
 from corehq.apps.userreports.util import get_table_name
-from custom.icds_reports.const import AGG_MPR_AWC_TABLE
+from custom.icds_reports.const import AGG_MPR_AWC_TABLE, AGG_PERSON_CASE_TABLE
 from custom.icds_reports.utils.aggregation_helpers import  month_formatter, get_child_health_temp_tablename
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import AggregationPartitionedHelper
 
@@ -163,6 +163,79 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             'next_month_start_date': next_month_start
         }
 
+        yield f"""
+        
+        UPDATE  "{self.temporary_tablename}" agg_mpr
+        SET
+            num_premature_referral_awcs = CASE WHEN ut.total_premature_referrals>0 THEN 1 ELSE 0 END,
+            total_premature_referrals = ut.total_premature_referrals,
+            total_premature_reached_facility = ut.total_premature_reached_facility,
+
+            num_sepsis_referral_awcs = CASE WHEN ut.total_sepsis_referrals>0 THEN 1 ELSE 0 END,
+            total_sepsis_referrals = ut.total_sepsis_referrals,
+            total_sepsis_reached_facility = ut.total_sepsis_reached_facility,
+
+            num_diarrhoea_referral_awcs = CASE WHEN ut.total_diarrhoea_referrals>0 THEN 1 ELSE 0 END,
+            total_diarrhoea_referrals = ut.total_diarrhoea_referrals,
+            total_diarrhoea_reached_facility = ut.total_diarrhoea_reached_facility,
+
+            num_pneumonia_referral_awcs = CASE WHEN ut.total_pneumonia_referrals>0 THEN 1 ELSE 0 END,
+            total_pneumonia_referrals = ut.total_pneumonia_referrals,
+            total_pneumonia_reached_facility = ut.total_pneumonia_reached_facility,
+
+            num_fever_referral_awcs = CASE WHEN ut.total_fever_referrals>0 THEN 1 ELSE 0 END,
+            total_fever_referrals = ut.total_fever_referrals,
+            total_fever_reached_facility = ut.total_fever_reached_facility,
+
+            num_severely_underweight_referral_awcs = CASE WHEN ut.total_severely_underweight_referrals>0 THEN 1 ELSE 0 END,
+            total_severely_underweight_referrals = ut.total_severely_underweight_referrals,
+            total_severely_underweight_reached_facility = ut.total_severely_underweight_reached_facility,
+
+            num_other_child_referral_awcs = CASE WHEN ut.total_other_child_referrals>0 THEN 1 ELSE 0 END,
+            total_other_child_referrals = ut.total_other_child_referrals,
+            total_other_child_reached_facility = ut.total_other_child_reached_facility,
+
+            num_bleeding_referral_awcs = CASE WHEN ut.total_bleeding_referrals>0 THEN 1 ELSE 0 END,
+            total_bleeding_referrals = ut.total_bleeding_referrals,
+            total_bleeding_reached_facility = ut.total_bleeding_reached_facility,
+
+            num_convulsions_referral_awcs = CASE WHEN ut.total_convulsions_referrals>0 THEN 1 ELSE 0 END,
+            total_convulsions_referrals = ut.total_convulsions_referrals,
+            total_convulsions_reached_facility = ut.total_convulsions_reached_facility,
+
+            num_prolonged_labor_referral_awcs = CASE WHEN ut.total_prolonged_labor_referrals>0 THEN 1 ELSE 0 END,
+            total_prolonged_labor_referrals = ut.total_prolonged_labor_referrals,
+            total_prolonged_labor_reached_facility = ut.total_prolonged_labor_reached_facility,
+
+            num_abortion_complications_referral_awcs = CASE WHEN ut.total_abortion_complications_referrals>0 THEN 1 ELSE 0 END,
+            total_abortion_complications_referrals = ut.total_abortion_complications_referrals,
+            total_abortion_complications_reached_facility = ut.total_abortion_complications_reached_facility,
+
+            num_fever_discharge_referral_awcs = CASE WHEN ut.total_fever_discharge_referrals>0 THEN 1 ELSE 0 END,
+            total_fever_discharge_referrals = ut.total_fever_discharge_referrals,
+            total_fever_discharge_reached_facility = ut.total_fever_discharge_reached_facility,
+
+            num_other_referral_awcs = CASE WHEN ut.total_other_referrals>0 THEN 1 ELSE 0 END,
+            total_other_referrals = ut.total_other_referrals,
+            total_other_reached_facility = ut.total_other_reached_facility,
+            mother_death_permanent_resident = ut.mother_death_permanent_resident,
+            mother_death_temp_resident = ut.mother_death_temp_resident,
+            pregnancy_death_permanent_resident = ut.pregnancy_death_permanent_resident,
+            pregnancy_death_temp_resident = ut.pregnancy_death_temp_resident,
+            delivery_death_permanent_resident = ut.delivery_death_permanent_resident,
+            delivery_death_temp_resident = ut.delivery_death_temp_resident,
+            pnc_death_permanent_resident = ut.pnc_death_permanent_resident,
+            pnc_death_temp_resident = ut.pnc_death_temp_resident
+        FROM "{AGG_PERSON_CASE_TABLE}" ut
+        WHERE agg_mpr.month=%(start_date)s AND ut.month=%(start_date)s AND
+            agg_mpr.awc_id=ut.awc_id AND
+            agg_mpr.supervisor_id=ut.supervisor_id AND
+            agg_mpr.aggregation_level=5
+        """, {
+            'start_date': self.month,
+            'next_month_start_date': next_month_start
+        }
+
     def update_queries(self):
 
         yield f"""
@@ -220,6 +293,53 @@ class AggMprAwcHelper(AggregationPartitionedHelper):
             ('vhnd_with_due_list_prep_immunization',),
             ('vhnd_with_due_list_prep_vita_a',),
             ('vhnd_with_due_list_prep_antenatal_checkup',),
+            ('num_premature_referral_awcs',),
+            ('total_premature_referrals',),
+            ('total_premature_reached_facility',),
+            ('num_sepsis_referral_awcs',),
+            ('total_sepsis_referrals',),
+            ('total_sepsis_reached_facility',),
+            ('num_diarrhoea_referral_awcs',),
+            ('total_diarrhoea_referrals',),
+            ('total_diarrhoea_reached_facility',),
+            ('num_pneumonia_referral_awcs',),
+            ('total_pneumonia_referrals',),
+            ('total_pneumonia_reached_facility',),
+            ('num_fever_referral_awcs',),
+            ('total_fever_referrals',),
+            ('total_fever_reached_facility',),
+            ('num_severely_underweight_referral_awcs',),
+            ('total_severely_underweight_referrals',),
+            ('total_severely_underweight_reached_facility',),
+            ('num_other_child_referral_awcs',),
+            ('total_other_child_referrals',),
+            ('total_other_child_reached_facility',),
+            ('num_bleeding_referral_awcs',),
+            ('total_bleeding_referrals',),
+            ('total_bleeding_reached_facility',),
+            ('num_convulsions_referral_awcs',),
+            ('total_convulsions_referrals',),
+            ('total_convulsions_reached_facility',),
+            ('num_prolonged_labor_referral_awcs',),
+            ('total_prolonged_labor_referrals',),
+            ('total_prolonged_labor_reached_facility',),
+            ('num_abortion_complications_referral_awcs',),
+            ('total_abortion_complications_referrals',),
+            ('total_abortion_complications_reached_facility',),
+            ('num_fever_discharge_referral_awcs',),
+            ('total_fever_discharge_referrals',),
+            ('total_fever_discharge_reached_facility',),
+            ('num_other_referral_awcs',),
+            ('total_other_referrals',),
+            ('total_other_reached_facility',),
+            ('mother_death_permanent_resident',),
+            ('mother_death_temp_resident',),
+            ('pregnancy_death_permanent_resident',),
+            ('pregnancy_death_temp_resident',),
+            ('delivery_death_permanent_resident',),
+            ('delivery_death_temp_resident',),
+            ('pnc_death_permanent_resident',),
+            ('pnc_death_temp_resident',),
             ('state_is_test', 'MAX(state_is_test)'),
             ('district_is_test', column_value_as_per_agg_level(aggregation_level, 1,'MAX(district_is_test)', "0")),
             ('block_is_test', column_value_as_per_agg_level(aggregation_level, 2,'MAX(block_is_test)', "0")),

@@ -9,12 +9,10 @@
   {% endcompress %}
   <link type="text/css" rel="stylesheet" media="all" href="{% static 'font-awesome/css/font-awesome.css' %}"/>
   {% compress js %}
-  <script src="{% static 'nic_compliance/js/encoder.js' %}"></script>
   <script src="{% static 'hqwebapp/js/captcha.js' %}"></script>
   {% endcompress %}
 {% endblock head %}
 {% block body %}
-{% initial_page_data 'implement_password_obfuscation' implement_password_obfuscation %}
 <div class="app-bg min-vh-100">
   <div class="top-section-bg top-section-rounded-corner vh-45">
     <div class="top-section-circle float-right"></div>

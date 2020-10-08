@@ -12,7 +12,8 @@ from custom.icds_reports.mpr_sqldata import MPRIdentification, MPRSectors, MPRPo
     MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, \
     MPROperationalizationBeta, MPRPopulationBeta, MPRGrowthMonitoringBeta, MPRSupplementaryNutritionBeta, \
     MPRMonitoringBeta, MPRVhndBeta, MPRUsingSaltBeta, MPRImmunizationCoverageBeta, MPRPreschoolEducationBeta, \
-    MPRProgrammeCoverageBeta
+    MPRProgrammeCoverageBeta, MPRAWCDetailsBeta, MPRReferralServicesBeta, MPRBirthsAndDeathsBeta
+
 from custom.icds_reports.mpr_sqldata import MPROperationalization
 from custom.icds_reports.reports import IcdsBaseReport
 
@@ -33,8 +34,8 @@ class MPRReport(IcdsBaseReport):
             MPROperationalization if not self.icds_pre_release_features() else MPROperationalizationBeta,
             MPRSectors,
             MPRPopulation if not self.icds_pre_release_features() else MPRPopulationBeta,
-            MPRBirthsAndDeaths,
-            MPRAWCDetails,
+            MPRBirthsAndDeaths if not self.icds_pre_release_features() else MPRBirthsAndDeathsBeta,
+            MPRAWCDetails if not self.icds_pre_release_features() else MPRAWCDetailsBeta,
             MPRSupplementaryNutrition if not self.icds_pre_release_features() else MPRSupplementaryNutritionBeta,
             MPRUsingSalt if not self.icds_pre_release_features() else MPRUsingSaltBeta,
             MPRProgrammeCoverage if not self.icds_pre_release_features() else MPRProgrammeCoverageBeta,
@@ -42,7 +43,7 @@ class MPRReport(IcdsBaseReport):
             MPRGrowthMonitoring if not self.icds_pre_release_features() else MPRGrowthMonitoringBeta,
             MPRImmunizationCoverage if not self.icds_pre_release_features() else MPRImmunizationCoverageBeta,
             MPRVhnd if not self.icds_pre_release_features() else MPRVhndBeta,
-            MPRReferralServices,
+            MPRReferralServices if not self.icds_pre_release_features() else MPRReferralServicesBeta,
             MPRMonitoring if not self.icds_pre_release_features() else MPRMonitoringBeta
         ]
 

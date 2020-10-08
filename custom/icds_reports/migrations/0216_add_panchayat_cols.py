@@ -8,7 +8,7 @@ from custom.icds_reports.utils.migrations import get_composite_primary_key_migra
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0211_add_thr_snp_columns'),
+        ('icds_reports', '0215_birth_death_cols'),
     ]
 
     operations = [

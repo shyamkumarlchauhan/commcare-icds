@@ -38,7 +38,7 @@ from .child_vaccine_helper import ChildVaccineHelper
 from .agg_mpr_awc import AggMprAwcHelper
 from .sam_mam_form import SamMamFormAggregationDistributedHelper
 from .sam_mam_panchayat_form import SamMamFormAggregationPanchayatDistributedHelper
-
+from .agg_person_cases_awc import PersonCaseAggregationDistributedHelper
 
 __all__ = (
     'AggAwcDistributedHelper',
@@ -84,5 +84,6 @@ __all__ = (
     'SamMamFormAggregationDistributedHelper',
     'DailyTHRCCSRecordHelper',
     'DailyTHRChildHealthHelper',
-    'SamMamFormAggregationPanchayatDistributedHelper'
+    'SamMamFormAggregationPanchayatDistributedHelper',
+    'PersonCaseAggregationDistributedHelper'
 )
