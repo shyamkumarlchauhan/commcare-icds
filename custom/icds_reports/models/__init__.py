@@ -21,7 +21,8 @@ from custom.icds_reports.models.aggregate import (
     AggregateAwcInfrastructureForms,
     AggregateCcsRecordComplementaryFeedingForms,
     AWWIncentiveReport,
-    AggregateSamMamForm
+    AggregateSamMamForm,
+    AggregateSamMamPanchayatForm
 )
 from custom.icds_reports.models.views import (
     AggAwcDailyView,

@@ -13,7 +13,8 @@ from custom.icds_reports.const import (
     AGG_MIGRATION_TABLE,
     AGG_AVAILING_SERVICES_TABLE,
     CHILD_DELIVERY_FORM_ID,
-    AGG_SAM_MAM_TABLE
+    AGG_SAM_MAM_TABLE,
+    AGG_SAM_MAM_PANCHAYAT_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers import (
     get_child_health_tablename,
@@ -396,10 +397,10 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("sam_mam_visit_date_2", "sam_form.sam_mam_visit_date_2"),
             ("sam_mam_visit_date_3", "sam_form.sam_mam_visit_date_3"),
             ("sam_mam_visit_date_4", "sam_form.sam_mam_visit_date_4"),
-            ("poshan_panchayat_date_1", "sam_form.poshan_panchayat_date_1"),
-            ("poshan_panchayat_date_2", "sam_form.poshan_panchayat_date_2"),
-            ("poshan_panchayat_date_3", "sam_form.poshan_panchayat_date_3"),
-            ("poshan_panchayat_date_4", "sam_form.poshan_panchayat_date_4"),
+            ("poshan_panchayat_date_1", "sam_panch_form.poshan_panchayat_date_1"),
+            ("poshan_panchayat_date_2", "sam_panch_form.poshan_panchayat_date_2"),
+            ("poshan_panchayat_date_3", "sam_panch_form.poshan_panchayat_date_3"),
+            ("poshan_panchayat_date_4", "sam_panch_form.poshan_panchayat_date_4"),
             ("weighed_within_3_days", "CASE WHEN {} THEN del_form.birth_weight_kg ELSE NULL END".format(born_in_month))
         )
         yield """
@@ -451,6 +452,10 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
               AND child_health.supervisor_id = sam_form.supervisor_id
               AND child_health.state_id = sam_form.state_id
               AND sam_form.month = %(start_date)s
+            LEFT OUTER JOIN "{sam_mam_panchayat_table}" sam_panch_form ON child_health.awc_id = sam_panch_form.awc_id
+              AND child_health.supervisor_id = sam_panch_form.supervisor_id
+              AND child_health.state_id = sam_panch_form.state_id
+              AND sam_panch_form.month = %(start_date)s
             WHERE child_health.doc_id IS NOT NULL
               AND child_health.state_id = %(state_id)s
               AND {open_in_month}
@@ -473,7 +478,8 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             person_cases_ucr=self.person_case_ucr_tablename,
             open_in_month=open_in_month,
             delivery_form=get_table_name(self.domain, CHILD_DELIVERY_FORM_ID),
-            sam_mam_table=AGG_SAM_MAM_TABLE
+            sam_mam_table=AGG_SAM_MAM_TABLE,
+            sam_mam_panchayat_table=AGG_SAM_MAM_PANCHAYAT_TABLE
         ), {
             "start_date": self.month,
             "next_month": month_formatter(self.month + relativedelta(months=1)),

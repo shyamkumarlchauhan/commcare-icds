@@ -30,6 +30,7 @@ from custom.icds_reports.const import (
     CHILD_VACCINE_TABLE,
     AGG_MPR_AWC_TABLE,
     AGG_SAM_MAM_TABLE,
+    AGG_SAM_MAM_PANCHAYAT_TABLE,
     AGG_DAILY_CCS_RECORD_THR_TABLE,
     AGG_DAILY_CHILD_HEALTH_THR_TABLE,
     AGG_PERSON_CASE_TABLE
@@ -73,6 +74,7 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     SamMamFormAggregationDistributedHelper,
     DailyTHRCCSRecordHelper,
     DailyTHRChildHealthHelper,
+    SamMamFormAggregationPanchayatDistributedHelper,
     PersonCaseAggregationDistributedHelper
 )
 
@@ -2219,16 +2221,32 @@ class AggregateSamMamForm(models.Model, AggregateMixin):
     sam_mam_visit_date_3 = models.DateField(blank=True, null=True)
     sam_mam_visit_date_4 = models.DateField(blank=True, null=True)
 
+    class Meta(object):
+        db_table = AGG_SAM_MAM_TABLE
+        unique_together = ('month', 'state_id', 'supervisor_id', 'child_health_case_id')  # pkey
+
+    _agg_helper_cls = SamMamFormAggregationDistributedHelper
+    _agg_atomic = False
+
+
+class AggregateSamMamPanchayatForm(models.Model, AggregateMixin):
+    state_id = models.TextField(null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    awc_id = models.TextField(primary_key=True)
+
     poshan_panchayat_date_1 = models.DateField(blank=True, null=True)
     poshan_panchayat_date_2 = models.DateField(blank=True, null=True)
     poshan_panchayat_date_3 = models.DateField(blank=True, null=True)
     poshan_panchayat_date_4 = models.DateField(blank=True, null=True)
 
     class Meta(object):
-        db_table = AGG_SAM_MAM_TABLE
-        unique_together = ('month', 'state_id', 'supervisor_id', 'child_health_case_id')  # pkey
+        db_table = AGG_SAM_MAM_PANCHAYAT_TABLE
+        unique_together = ('month', 'state_id', 'supervisor_id', 'awc_id')  # pkey
 
-    _agg_helper_cls = SamMamFormAggregationDistributedHelper
+    _agg_helper_cls = SamMamFormAggregationPanchayatDistributedHelper
     _agg_atomic = False
 
 
