@@ -60,7 +60,8 @@ from custom.icds_reports.tasks import (
     _daily_thr_ccs_record,
     _daily_thr_child_health,
     _aggregate_person_case_data,
-    update_mpr_data
+    update_mpr_data,
+    _aggregate_awc_sam_mam_panchayat_form
 
 )
 
@@ -89,6 +90,7 @@ STATE_TASKS = {
     '_aggregate_child_health_sam_mam_form': (None, _aggregate_child_health_sam_mam_form, None),
     '_daily_thr_ccs_record': (None, _daily_thr_ccs_record, None),
     '_daily_thr_child_health': (None, _daily_thr_child_health, None),
+    '_aggregate_awc_sam_mam_panchayat_form': (None, _aggregate_awc_sam_mam_panchayat_form, None)
 }
 
 ALL_STATES_TASKS = {
