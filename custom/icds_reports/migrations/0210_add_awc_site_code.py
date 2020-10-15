@@ -19,5 +19,3 @@ class Migration(migrations.Migration):
             field=models.TextField(blank=True, null=True),
         ),
     ]
-
-    operations.extend(get_view_migrations())
