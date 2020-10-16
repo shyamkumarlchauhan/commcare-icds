@@ -1,5 +1,7 @@
-hqDefine("icds_reports/js/update_manual", function() {
-    $(function() {
-        hqImport("reports/js/filters/main").init();
+hqDefine("icds_reports/js/update_manual", [
+    'jquery',
+    'reports/js/filters/main',
+], function () {
+    $(function () {
     });
 });
