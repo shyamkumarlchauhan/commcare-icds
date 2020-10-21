@@ -1,1 +1,1 @@
-from .validators import check_dashboard, check_mobile, check_inventory
+from .validators import validate_dashboard_users_upload, validate_mobile_users_upload, validate_inventory_upload
