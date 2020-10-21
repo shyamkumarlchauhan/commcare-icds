@@ -1,6 +1,5 @@
 from decimal import Decimal, InvalidOperation
 
-from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 
 from corehq.apps.app_manager.const import USERCASE_TYPE
@@ -22,8 +21,8 @@ from custom.icds.exceptions import CaseRelationshipError
 from custom.icds.messaging.custom_recipients import (
     skip_notifying_missing_ccs_record_parent,
 )
+from custom.icds.messaging.decorators import return_if_no_language_code
 from custom.icds.messaging.indicators import (
-    DEFAULT_LANGUAGE,
     AWWAggregatePerformanceIndicator,
     AWWAggregatePerformanceIndicatorV2,
     AWWIndicator,
@@ -83,14 +82,11 @@ def get_last_growth_monitoring_form(domain, case_id):
 
 
 def render_message(language_code, template, context):
-    try:
-        message = render_to_string('icds/messaging/indicators/%s/%s' % (language_code, template), context)
-    except TemplateDoesNotExist:
-        message = render_to_string('icds/messaging/indicators/%s/%s' % (DEFAULT_LANGUAGE, template), context)
-
+    message = render_to_string('icds/messaging/indicators/%s/%s' % (language_code, template), context)
     return message.strip()
 
 
+@return_if_no_language_code('recipient')
 def static_negative_growth_indicator(recipient, schedule_instance):
     if schedule_instance.case.get_case_property('zscore_grading_wfa') == 'red':
         # If the child currently has a red score, do not send this message.
@@ -128,7 +124,7 @@ def static_negative_growth_indicator(recipient, schedule_instance):
         # weight_child < weight_prev
         template = 'beneficiary_negative_growth.txt'
 
-    language_code = recipient.get_language_code() or DEFAULT_LANGUAGE
+    language_code = recipient.get_language_code()
     context = {'child_name': child_person_case.name}
     return [render_message(language_code, template, context)]
 
@@ -146,11 +142,8 @@ def get_user_from_usercase(usercase):
 
 def render_content_for_user(user, template, context):
     if user.memoized_usercase:
-        language_code = user.memoized_usercase.get_language_code() or DEFAULT_LANGUAGE
-    else:
-        language_code = DEFAULT_LANGUAGE
-
-    return render_message(language_code, template, context)
+        language_code = user.memoized_usercase.get_language_code()
+        return render_message(language_code, template, context)
 
 
 def person_case_is_migrated(case):
@@ -196,18 +189,22 @@ def render_missed_visit_message(recipient, case_schedule_instance, template):
     return [render_content_for_user(recipient, template, context)]
 
 
+@return_if_no_language_code('usercase')
 def missed_cf_visit_to_aww(recipient, case_schedule_instance):
     return render_missed_visit_message(recipient, case_schedule_instance, 'missed_cf_visit_to_aww.txt')
 
 
+@return_if_no_language_code('usercase')
 def missed_cf_visit_to_ls(recipient, case_schedule_instance):
     return render_missed_visit_message(recipient, case_schedule_instance, 'missed_cf_visit_to_ls.txt')
 
 
+@return_if_no_language_code('usercase')
 def missed_pnc_visit_to_ls(recipient, case_schedule_instance):
     return render_missed_visit_message(recipient, case_schedule_instance, 'missed_pnc_visit_to_ls.txt')
 
 
+@return_if_no_language_code('usercase')
 def child_illness_reported(recipient, case_schedule_instance):
     if not isinstance(recipient, CommCareUser) or not case_schedule_instance.case:
         return []
@@ -222,6 +219,7 @@ def child_illness_reported(recipient, case_schedule_instance):
     return [render_content_for_user(recipient, 'child_illness_reported.txt', context)]
 
 
+@return_if_no_language_code('usercase')
 def cf_visits_complete(recipient, case_schedule_instance):
     if not isinstance(recipient, CommCareUser) or not case_schedule_instance.case:
         return []
@@ -248,7 +246,7 @@ def validate_user_location_and_indicator(user, indicator_class):
         raise TypeError("Expected AWWIndicator or LSIndicator")
 
 
-def run_indicator_for_user(user, indicator_class, language_code=None):
+def run_indicator_for_user(user, indicator_class, language_code):
     validate_user_location_and_indicator(user, indicator_class)
     indicator = indicator_class(user.domain, user)
     return indicator.get_messages(language_code=language_code)
@@ -263,10 +261,12 @@ def run_indicator_for_usercase(usercase, indicator_class, user=None):
     return []
 
 
+@return_if_no_language_code()
 def aww_1(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, AWWSubmissionPerformanceIndicator)
 
 
+@return_if_no_language_code()
 def aww_2(recipient, case_schedule_instance):
     indicator_class = AWWAggregatePerformanceIndicator
     aww_user = get_user_from_usercase(case_schedule_instance.case)
@@ -282,10 +282,12 @@ def _use_v2_indicators(supervisor_user):
                                                               app_version_in_use)
 
 
+@return_if_no_language_code()
 def phase2_aww_1(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, AWWVHNDSurveyIndicator)
 
 
+@return_if_no_language_code()
 def ls_1(recipient, case_schedule_instance):
     indicator_class = LSAggregatePerformanceIndicator
     supervisor_user = get_user_from_usercase(case_schedule_instance.case)
@@ -294,9 +296,11 @@ def ls_1(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, indicator_class, user=supervisor_user)
 
 
+@return_if_no_language_code()
 def ls_2(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, LSVHNDSurveyIndicator)
 
 
+@return_if_no_language_code()
 def ls_6(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, LSSubmissionPerformanceIndicator)

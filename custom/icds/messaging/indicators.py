@@ -4,7 +4,6 @@ from datetime import date, datetime, timedelta
 from django.conf import settings
 from django.db import connections
 from django.db.models import Max
-from django.template import TemplateDoesNotExist
 from django.template.loader import get_template, render_to_string
 
 import pytz
@@ -48,8 +47,6 @@ from custom.icds.messaging.utils import (
 from custom.icds_reports.cache import icds_quickcache
 from custom.icds_reports.models.aggregate import AggregateInactiveAWW
 from dimagi.utils.couch import CriticalSection
-
-DEFAULT_LANGUAGE = 'hin'
 
 REPORT_IDS = [
     HOME_VISIT_REPORT_ID,
@@ -178,20 +175,14 @@ class SMSIndicator(object):
     def now(self):
         return datetime.now(tz=self.timezone)
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         """
         Should return a list of messages that should be sent.
         """
         raise NotImplementedError()
 
-    def render_template(self, context, language_code=None):
-        if not language_code:
-            return self._render_template(context, DEFAULT_LANGUAGE)
-
-        try:
-            return self._render_template(context, language_code)
-        except TemplateDoesNotExist:
-            return self._render_template(context, DEFAULT_LANGUAGE)
+    def render_template(self, context, language_code):
+        return self._render_template(context, language_code)
 
     def _render_template(self, context, language_code):
         template_path = self._template_path(language_code)
@@ -221,7 +212,7 @@ class LSIndicator(SMSIndicator):
 
 
 class BaseAWWAggregatePerformanceIndicator(AWWIndicator):
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         raise NotImplementedError()
 
 
@@ -245,7 +236,7 @@ class AWWAggregatePerformanceIndicator(BaseAWWAggregatePerformanceIndicator):
 
         return 0
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         if self.supervisor is None:
             return []
 
@@ -302,7 +293,7 @@ class AWWAggregatePerformanceIndicatorV2(BaseAWWAggregatePerformanceIndicator):
                 count += 1
         return count
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         get_template(self._template_path(language_code))  # fail early if template missing
         if self.supervisor is None:
             return []
@@ -351,7 +342,7 @@ class AWWSubmissionPerformanceIndicator(AWWIndicator):
         if result:
             self.last_submission_date = result['last_submission']
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         if not is_aggregate_inactive_aww_data_fresh(send_email=True):
             return []
 
@@ -385,7 +376,7 @@ class AWWVHNDSurveyIndicator(AWWIndicator):
 
         self.should_send_sms = bool(get_awcs_with_old_vhnd_date(domain, [self.user.location_id]))
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         if self.should_send_sms:
             return [self.render_template({}, language_code=language_code)]
         else:
@@ -409,7 +400,7 @@ class LSSubmissionPerformanceIndicator(LSIndicator):
 
         self.last_submission_dates = _get_last_submission_dates(awc_ids=set(self.awc_locations))
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         messages = []
         one_week_loc_ids = []
         one_month_loc_ids = []
@@ -449,7 +440,7 @@ class LSVHNDSurveyIndicator(LSIndicator):
             set(self.awc_locations)
         )
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         messages = []
 
         if self.awc_ids_not_in_timeframe:
@@ -509,7 +500,7 @@ class BaseLSAggregatePerformanceIndicator(LSIndicator):
     def restore_user(self):
         return OTARestoreCommCareUser(self.domain, self.user)
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         pass
 
 
@@ -553,7 +544,7 @@ class LSAggregatePerformanceIndicator(BaseLSAggregatePerformanceIndicator):
                 attribute, fixture, self.user.get_id
             ))
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         on_time_visits = self.get_value_from_fixture(self.visits_fixture, 'visit_on_time')
         visits = self.get_value_from_fixture(self.visits_fixture, 'count')
         thr_gte_21 = self.get_value_from_fixture(self.thr_fixture, 'open_ccs_thr_gte_21')
@@ -612,7 +603,7 @@ class LSAggregatePerformanceIndicatorV2(BaseLSAggregatePerformanceIndicator):
         rows = fixture.findall(xpath)
         return len(rows)
 
-    def get_messages(self, language_code=None):
+    def get_messages(self, language_code):
         get_template(self._template_path(language_code))  # fail early if template missing
         data = _get_data_for_v2_performance_indicator(self, self)
         num_awc_locations = len(self.awc_locations)
