@@ -2081,6 +2081,7 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
         lng: 78.22,
         zoom: 5,
     };
+    vm.defaults = {scrollWheelZoom: false}
     if (Object.keys($location.search()).length === 0) {
         $location.search(storageService.getKey('search'));
     } else {
