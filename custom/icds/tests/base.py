@@ -53,6 +53,14 @@ class BaseICDSTest(TestCase):
         return case
 
     @classmethod
+    def update_case(cls, case_id, updates):
+        caseblock = CaseBlock.deprecated_init(
+            case_id=case_id,
+            update=updates,
+        )
+        submit_case_blocks(ElementTree.tostring(caseblock.as_xml()).decode('utf-8'), cls.domain)
+
+    @classmethod
     def create_basic_related_cases(cls, owner_id=None):
         cls.mother_person_case = cls.create_case(
             'person',

@@ -5,6 +5,7 @@ from corehq.apps.locations.tests.util import make_loc, setup_location_types
 from corehq.apps.receiverwrapper.util import submit_form_locally
 from corehq.apps.users.models import CommCareUser
 from corehq.apps.users.tests.util import create_user_case
+from corehq.form_processor.interfaces.dbaccessors import CaseAccessors
 from corehq.messaging.scheduling.scheduling_partitioned.models import (
     CaseTimedScheduleInstance,
 )
@@ -24,6 +25,7 @@ from custom.icds.messaging.custom_content import (
     missed_cf_visit_to_ls,
     missed_pnc_visit_to_ls,
     person_case_is_migrated_or_opted_out,
+    phase2_aww_1,
     render_message,
     run_indicator_for_usercase,
     static_negative_growth_indicator,
@@ -245,3 +247,65 @@ class CustomContentTest(BaseICDSTest):
         self.assertFalse(person_case_is_migrated_or_opted_out(self.mother_person_case))
         self.assertTrue(person_case_is_migrated_or_opted_out(self.migrated_case))
         self.assertTrue(person_case_is_migrated_or_opted_out(self.opted_out_case))
+
+    @patch('custom.icds.messaging.indicators.get_awcs_with_old_vhnd_date', return_value=[1])
+    def test_return_if_no_language_code(self, _):
+        usercase = self.user1.get_usercase()
+        schedule_instance = CaseTimedScheduleInstance(
+            domain=self.domain,
+            case_id=usercase.case_id,
+        )
+
+        self.assertEqual(
+            phase2_aww_1(None, schedule_instance),
+            ["As per the record, VHSND could not happen at your centre in the previous "
+             "month. Please ensure this is conducted on regular basis every month."]
+        )
+
+        self.update_case(usercase.case_id, {'language_code': ''})
+        schedule_instance = CaseTimedScheduleInstance(
+            domain=self.domain,
+            case_id=usercase.case_id,
+        )
+        self.assertEqual(
+            phase2_aww_1(None, schedule_instance),
+            []
+        )
+
+    def test_return_if_no_language_code_recipient(self):
+        schedule_instance = CaseTimedScheduleInstance(
+            domain=self.domain,
+            case_id=self.child_health_case.case_id,
+        )
+
+        submit_growth_form(self.domain, self.red_child_health_case.case_id, '10.1', '9.9')
+        submit_growth_form(self.domain, self.child_health_case.case_id, '10.1', '10.1')
+        self.assertEqual(
+            static_negative_growth_indicator(self.mother_person_case, schedule_instance),
+            ["As per the latest records of your AWC, the weight of your child Joe has remained static in the last "
+             "month. Please consult your AWW for necessary advice."]
+        )
+        self.update_case(self.mother_person_case.case_id, {'language_code': ''})
+        self.mother_person_case = CaseAccessors(self.domain).get_case(self.mother_person_case.case_id)
+        self.assertEqual(
+            static_negative_growth_indicator(self.mother_person_case, schedule_instance),
+            []
+        )
+
+    def test_return_if_no_language_code_usercase(self):
+        schedule_instance = CaseTimedScheduleInstance(
+            domain=self.domain,
+            case_id=self.ccs_record_case.case_id,
+        )
+        self.assertEqual(
+            cf_visits_complete(self.user1, schedule_instance),
+            ["Congratulations! You've done all the Complementary Feeding  Visits for Sam"],
+        )
+        usercase = self.user1.get_usercase()
+        self.update_case(usercase.case_id, {'language_code': ''})
+        self.user1 = CommCareUser.get(self.user1.get_id)
+        self.assertEqual(
+            cf_visits_complete(self.user1, schedule_instance),
+            [],
+        )
+
