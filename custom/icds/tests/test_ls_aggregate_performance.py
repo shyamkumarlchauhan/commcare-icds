@@ -80,11 +80,13 @@ class TestLSAggregatePerformanceIndicator(BaseAggregatePerformanceTestCase):
 
     @patch.object(LSAggregatePerformanceIndicator, 'visits_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'thr_fixture', new_callable=PropertyMock)
+    @patch.object(LSAggregatePerformanceIndicator, 'ls_ccs_record_cases_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'weighed_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'days_open_fixture', new_callable=PropertyMock)
-    def test_report_parsing(self, days_open, weighed, thr, visits):
+    def test_report_parsing(self, days_open, weighed, ls_ccs_record_cases, thr, visits):
         days_open.return_value = etree.fromstring(self.get_xml('days_open_fixture'))
         weighed.return_value = etree.fromstring(self.get_xml('weighed_fixture'))
+        ls_ccs_record_cases.return_value = etree.fromstring(self.get_xml('ls_ccs_record_cases_fixture'))
         thr.return_value = etree.fromstring(self.get_xml('thr_fixture'))
         visits.return_value = etree.fromstring(self.get_xml('visit_fixture'))
         [message] = run_indicator_for_user(self.ls, LSAggregatePerformanceIndicator, language_code='en')
@@ -99,11 +101,13 @@ class TestAWWAggregatePerformanceIndicator(BaseAggregatePerformanceTestCase):
 
     @patch.object(LSAggregatePerformanceIndicator, 'visits_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'thr_fixture', new_callable=PropertyMock)
+    @patch.object(LSAggregatePerformanceIndicator, 'ls_ccs_record_cases_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'weighed_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'days_open_fixture', new_callable=PropertyMock)
-    def test_report_parsing(self, days_open, weighed, thr, visits):
+    def test_report_parsing(self, days_open, weighed, ls_ccs_record_cases, thr, visits):
         days_open.return_value = etree.fromstring(self.get_xml('days_open_fixture'))
         weighed.return_value = etree.fromstring(self.get_xml('weighed_fixture'))
+        ls_ccs_record_cases.return_value = etree.fromstring(self.get_xml('ls_ccs_record_cases_fixture'))
         thr.return_value = etree.fromstring(self.get_xml('thr_fixture'))
         visits.return_value = etree.fromstring(self.get_xml('visit_fixture'))
         [message] = run_indicator_for_user(self.aww, AWWAggregatePerformanceIndicator, language_code='en')
@@ -115,13 +119,15 @@ class TestAWWAggregatePerformanceIndicator(BaseAggregatePerformanceTestCase):
 
     @patch.object(LSAggregatePerformanceIndicator, 'visits_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'thr_fixture', new_callable=PropertyMock)
+    @patch.object(LSAggregatePerformanceIndicator, 'ls_ccs_record_cases_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'weighed_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'days_open_fixture', new_callable=PropertyMock)
-    def test_user_not_in_fixtures(self, days_open, weighed, thr, visits):
+    def test_user_not_in_fixtures(self, days_open, weighed, ls_ccs_record_cases, thr, visits):
         aww3 = self._make_user('aww3', self.locs['AWC3'])
         self.addCleanup(aww3.delete, deleted_by=None)
         days_open.return_value = etree.fromstring(self.get_xml('days_open_fixture'))
         weighed.return_value = etree.fromstring(self.get_xml('weighed_fixture'))
+        ls_ccs_record_cases.return_value = etree.fromstring(self.get_xml('ls_ccs_record_cases_fixture'))
         thr.return_value = etree.fromstring(self.get_xml('thr_fixture'))
         visits.return_value = etree.fromstring(self.get_xml('visit_fixture'))
         [message] = run_indicator_for_user(aww3, AWWAggregatePerformanceIndicator, language_code='en')
@@ -133,11 +139,13 @@ class TestAWWAggregatePerformanceIndicator(BaseAggregatePerformanceTestCase):
 
     @patch.object(LSAggregatePerformanceIndicator, 'visits_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'thr_fixture', new_callable=PropertyMock)
+    @patch.object(LSAggregatePerformanceIndicator, 'ls_ccs_record_cases_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'weighed_fixture', new_callable=PropertyMock)
     @patch.object(LSAggregatePerformanceIndicator, 'days_open_fixture', new_callable=PropertyMock)
-    def test_attribute_not_in_fixtures(self, days_open, weighed, thr, visits):
+    def test_attribute_not_in_fixtures(self, days_open, weighed, ls_ccs_record_cases, thr, visits):
         days_open.return_value = etree.fromstring(self.get_xml('bad_days_open_fixture'))
         weighed.return_value = etree.fromstring(self.get_xml('weighed_fixture'))
+        ls_ccs_record_cases.return_value = etree.fromstring(self.get_xml('ls_ccs_record_cases_fixture'))
         thr.return_value = etree.fromstring(self.get_xml('thr_fixture'))
         visits.return_value = etree.fromstring(self.get_xml('visit_fixture'))
         with self.assertRaises(IndicatorError) as e:

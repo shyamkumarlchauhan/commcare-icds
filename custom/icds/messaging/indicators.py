@@ -30,6 +30,7 @@ from custom.icds.const import (
     CHILDREN_WEIGHED_REPORT_ID,
     DAYS_AWC_OPEN_REPORT_ID,
     HOME_VISIT_REPORT_ID,
+    LS_CCS_RECORD_CASES_REPORT_ID,
     SUPERVISOR_APP_ID,
     THR_REPORT_ID,
     UCR_V2_AG_ALIAS,
@@ -254,7 +255,7 @@ class AWWAggregatePerformanceIndicator(BaseAWWAggregatePerformanceIndicator):
         visits = self.get_value_from_fixture(agg_perf.visits_fixture, 'count')
         on_time_visits = self.get_value_from_fixture(agg_perf.visits_fixture, 'visit_on_time')
         thr_gte_21 = self.get_value_from_fixture(agg_perf.thr_fixture, 'open_ccs_thr_gte_21')
-        thr_count = self.get_value_from_fixture(agg_perf.thr_fixture, 'open_count')
+        thr_count = self.get_value_from_fixture(agg_perf.ls_ccs_record_cases_fixture, 'open_count')
         num_weigh = self.get_value_from_fixture(agg_perf.weighed_fixture, 'open_weighed')
         num_weigh_avail = self.get_value_from_fixture(agg_perf.weighed_fixture, 'open_count')
         num_days_open = self.get_value_from_fixture(agg_perf.days_open_fixture, 'awc_opened_count')
@@ -536,6 +537,11 @@ class LSAggregatePerformanceIndicator(BaseLSAggregatePerformanceIndicator):
 
     @property
     @memoized
+    def ls_ccs_record_cases_fixture(self):
+        return self.get_report_fixture(LS_CCS_RECORD_CASES_REPORT_ID)
+
+    @property
+    @memoized
     def weighed_fixture(self):
         return self.get_report_fixture(CHILDREN_WEIGHED_REPORT_ID)
 
@@ -557,7 +563,7 @@ class LSAggregatePerformanceIndicator(BaseLSAggregatePerformanceIndicator):
         on_time_visits = self.get_value_from_fixture(self.visits_fixture, 'visit_on_time')
         visits = self.get_value_from_fixture(self.visits_fixture, 'count')
         thr_gte_21 = self.get_value_from_fixture(self.thr_fixture, 'open_ccs_thr_gte_21')
-        thr_count = self.get_value_from_fixture(self.thr_fixture, 'open_count')
+        thr_count = self.get_value_from_fixture(self.ls_ccs_record_cases_fixture, 'open_count')
         num_weigh = self.get_value_from_fixture(self.weighed_fixture, 'open_weighed')
         num_weigh_avail = self.get_value_from_fixture(self.weighed_fixture, 'open_count')
         num_days_open = int(self.get_value_from_fixture(self.days_open_fixture, 'awc_opened_count'))

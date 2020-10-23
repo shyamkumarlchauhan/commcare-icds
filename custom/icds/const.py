@@ -9,6 +9,7 @@ CHILDREN_WEIGHED_REPORT_ID = 'static-icds-cas-static-ls_children_weighed'
 DAYS_AWC_OPEN_REPORT_ID = 'static-icds-cas-static-ls_awc_days_open'
 HOME_VISIT_REPORT_ID = 'static-icds-cas-static-ls_timely_home_visits'
 THR_REPORT_ID = 'static-icds-cas-static-ls_thr_30_days'
+LS_CCS_RECORD_CASES_REPORT_ID = 'static-icds-cas-static-ls_ccs_record_cases'
 
 UCR_V2_LS_TIMELY_HOME_VISITS_ALIAS = 'ucr_v2_ls_timely_home_visits'
 UCR_V2_MPR_5_CCS_RECORD_ALIAS = 'ucr_v2_mpr_5_ccs_record'
