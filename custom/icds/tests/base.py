@@ -41,7 +41,7 @@ class BaseICDSTest(TestCase):
         if owner_id:
             kwargs['owner_id'] = owner_id
 
-        caseblock = CaseBlock.deprecated_init(
+        caseblock = CaseBlock(
             uuid.uuid4().hex,
             case_type=case_type,
             create=True,
@@ -54,7 +54,7 @@ class BaseICDSTest(TestCase):
 
     @classmethod
     def update_case(cls, case_id, updates):
-        caseblock = CaseBlock.deprecated_init(
+        caseblock = CaseBlock(
             case_id=case_id,
             update=updates,
         )
