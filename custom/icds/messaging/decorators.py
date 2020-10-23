@@ -9,7 +9,7 @@ def return_if_no_language_code(check_on=None):
                 if not recipient.get_language_code():
                     return []
             elif check_on == 'usercase':
-                if not recipient.memoized_usercase.get_language_code():
+                if not recipient.memoized_usercase or not recipient.memoized_usercase.get_language_code():
                     return []
             else:
                 if not case_schedule_instance.case.get_language_code():
