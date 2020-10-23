@@ -261,12 +261,12 @@ def run_indicator_for_usercase(usercase, indicator_class, user=None):
     return []
 
 
-@return_if_no_language_code()
+@return_if_no_language_code('case')
 def aww_1(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, AWWSubmissionPerformanceIndicator)
 
 
-@return_if_no_language_code()
+@return_if_no_language_code('case')
 def aww_2(recipient, case_schedule_instance):
     indicator_class = AWWAggregatePerformanceIndicator
     aww_user = get_user_from_usercase(case_schedule_instance.case)
@@ -282,12 +282,12 @@ def _use_v2_indicators(supervisor_user):
                                                               app_version_in_use)
 
 
-@return_if_no_language_code()
+@return_if_no_language_code('case')
 def phase2_aww_1(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, AWWVHNDSurveyIndicator)
 
 
-@return_if_no_language_code()
+@return_if_no_language_code('case')
 def ls_1(recipient, case_schedule_instance):
     indicator_class = LSAggregatePerformanceIndicator
     supervisor_user = get_user_from_usercase(case_schedule_instance.case)
@@ -296,11 +296,11 @@ def ls_1(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, indicator_class, user=supervisor_user)
 
 
-@return_if_no_language_code()
+@return_if_no_language_code('case')
 def ls_2(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, LSVHNDSurveyIndicator)
 
 
-@return_if_no_language_code()
+@return_if_no_language_code('case')
 def ls_6(recipient, case_schedule_instance):
     return run_indicator_for_usercase(case_schedule_instance.case, LSSubmissionPerformanceIndicator)
