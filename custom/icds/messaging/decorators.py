@@ -15,7 +15,7 @@ def return_if_no_language_code(check_on):
                 if not case_schedule_instance.case.get_language_code():
                     return []
             else:
-                raise Exception('Unexpected check_on passed')
+                raise ValueError(f'Unexpected check_on passed: {check_on}')
             return func(recipient, case_schedule_instance)
         return wrapped
     return decorator
