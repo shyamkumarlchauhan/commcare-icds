@@ -1950,8 +1950,6 @@ class AggServiceDeliveryReport(models.Model, AggregateMixin):
     suposhan_diwas_count = models.IntegerField(null=True)
     coming_of_age_count = models.IntegerField(null=True)
     public_health_message_count = models.IntegerField(null=True)
-    awc_days_open = models.IntegerField(null=True)
-    awc_num_open = models.IntegerField(null=True)
     breakfast_served = models.IntegerField(null=True)
     hcm_served = models.IntegerField(null=True)
     thr_served = models.IntegerField(null=True)

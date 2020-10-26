@@ -380,8 +380,6 @@ class AggServiceDeliveryReportHelper(AggregationPartitionedHelper):
             ('suposhan_diwas_count',),
             ('coming_of_age_count',),
             ('public_health_message_count',),
-            ('awc_days_open',),
-            ('awc_num_open',),
             ('breakfast_served',),
             ('hcm_served',),
             ('thr_served',),
