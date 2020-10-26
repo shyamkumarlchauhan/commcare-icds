@@ -844,7 +844,6 @@ def email_dashboad_team(aggregation_date, aggregation_start_time):
                                                                                   settings.SERVER_ENVIRONMENT),
                                     timings)
     celery_task_logger.info("Aggregation has completed")
-    icds_data_validation.delay(aggregation_date)
 
 
 @periodic_task_on_envs(
@@ -1234,92 +1233,6 @@ def prepare_issnip_monthly_register_reports(domain, awcs, pdf_format, month, yea
         'format': pdf_format,
         'link': reverse('icds_download_pdf', params=params, absolute=True, kwargs={'domain': domain})
     }
-
-
-@task(serializer='pickle', queue='background_queue')
-def icds_data_validation(day):
-    """Checks all AWCs to validate that there will be no inconsistencies in the
-    reporting dashboard.
-    """
-
-    # agg tables store the month like YYYY-MM-01
-    month = force_to_date(day)
-    month.replace(day=1)
-    return_values = ('state_name', 'district_name', 'block_name', 'supervisor_name', 'awc_name')
-
-    bad_wasting_awcs = AggChildHealthMonthly.objects.filter(
-        month=month, aggregation_level=5
-    ).exclude(
-        weighed_and_height_measured_in_month=(
-            F('wasting_moderate') + F('wasting_severe') + F('wasting_normal')
-        )
-    ).values_list(*return_values)
-
-    bad_stunting_awcs = AggChildHealthMonthly.objects.filter(month=month, aggregation_level=5).exclude(
-        height_measured_in_month=(
-            F('stunting_severe') + F('stunting_moderate') + F('stunting_normal')
-        )
-    ).values_list(*return_values)
-
-    bad_underweight_awcs = AggChildHealthMonthly.objects.filter(month=month, aggregation_level=5).exclude(
-        nutrition_status_weighed=(
-            F('nutrition_status_normal') +
-            F('nutrition_status_moderately_underweight') +
-            F('nutrition_status_severely_underweight')
-        )
-    ).values_list(*return_values)
-
-    bad_lbw_awcs = AggChildHealthMonthly.objects.filter(
-        month=month, aggregation_level=5, weighed_and_born_in_month__lt=F('low_birth_weight_in_month')
-    ).values_list(*return_values)
-
-    _send_data_validation_email(
-        return_values, month, {
-            'bad_wasting_awcs': bad_wasting_awcs,
-            'bad_stunting_awcs': bad_stunting_awcs,
-            'bad_underweight_awcs': bad_underweight_awcs,
-            'bad_lbw_awcs': bad_lbw_awcs,
-        })
-
-
-def _send_data_validation_email(csv_columns, month, bad_data):
-    # intentionally using length here because the query will need to evaluate anyway to send the CSV file
-    if all(len(v) == 0 for _, v in bad_data.items()):
-        return
-
-    bad_wasting_awcs = bad_data.get('bad_wasting_awcs', [])
-    bad_stunting_awcs = bad_data.get('bad_stunting_awcs', [])
-    bad_underweight_awcs = bad_data.get('bad_underweight_awcs', [])
-    bad_lbw_awcs = bad_data.get('bad_lbw_awcs', [])
-
-    csv_file = io.StringIO()
-    writer = csv.writer(csv_file)
-    writer.writerow(('type',) + csv_columns)
-    _icds_add_awcs_to_file(writer, 'wasting', bad_wasting_awcs)
-    _icds_add_awcs_to_file(writer, 'stunting', bad_stunting_awcs)
-    _icds_add_awcs_to_file(writer, 'underweight', bad_underweight_awcs)
-    _icds_add_awcs_to_file(writer, 'low_birth_weight', bad_lbw_awcs)
-
-    email_content = """
-    Incorrect wasting AWCs: {bad_wasting_awcs}
-    Incorrect stunting AWCs: {bad_stunting_awcs}
-    Incorrect underweight AWCs: {bad_underweight_awcs}
-    Incorrect low birth weight AWCs: {bad_lbw_awcs}
-
-    Please see attached file for more details
-    """.format(
-        bad_wasting_awcs=len(bad_wasting_awcs),
-        bad_stunting_awcs=len(bad_stunting_awcs),
-        bad_underweight_awcs=len(bad_underweight_awcs),
-        bad_lbw_awcs=len(bad_lbw_awcs),
-    )
-
-    filename = month.strftime('validation_results_%s.csv' % SERVER_DATE_FORMAT)
-    send_HTML_email(
-        '[{}] - ICDS Dashboard Validation Results'.format(settings.SERVER_ENVIRONMENT),
-        DASHBOARD_TEAM_EMAILS, email_content,
-        file_attachments=[{'file_obj': csv_file, 'title': filename, 'mimetype': 'text/csv'}],
-    )
 
 
 def _icds_add_awcs_to_file(csv_writer, error_type, rows):
