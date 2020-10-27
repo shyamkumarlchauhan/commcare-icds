@@ -1707,6 +1707,7 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
     vm.data = {};
     vm.label = "AWC Report";
     vm.haveAccessToAllLocations = haveAccessToAllLocations;
+    vm.haveAccessToFeatures = haveAccessToFeatures;
     vm.tooltipPlacement = "right";
     vm.step = $routeParams.step;
     vm.filters = ['data_period', 'gender', 'age'];
