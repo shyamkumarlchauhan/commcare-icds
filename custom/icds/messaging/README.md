@@ -9,8 +9,9 @@ Currently set SMSes for ICDS can be found [here](https://github.com/dimagi/icds-
 
 Translations
 --------------------------------
-All SMSes are to be translated and added in [folder](https://github.com/dimagi/commcare-icds/tree/master/custom/icds/templates/icds/messaging/indicators).
-SMS is only sent if the SMS is available in user's preferred language.
+All SMSes are to be translated and added in [folder](https://github.com/dimagi/commcare-icds/tree/master/custom/icds/templates/icds/messaging/indicators). <br>
+Custom SMSes don't use the language fallback settings done at the domain level and even don't make use of any fallback mechanism. Check out `corehq.messaging.scheduling.models.abstract.Content.get_translation_from_message_dict` to see how normal SMSes use fallback options.<br>
+The SMS is sent, only, if it is available in user's preferred language.
 
 
 Aggregated performances SMSes 
