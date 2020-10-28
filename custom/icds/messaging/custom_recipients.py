@@ -12,7 +12,6 @@ from dimagi.utils.logging import notify_exception
 
 
 def skip_notifying_missing_mother_person_case(e):
-    # https://manage.dimagi.com/default.asp?271995
     # It's expected that some child person cases will not have a mother person case,
     # so we don't notify when that's the lookup that fails.
 
@@ -25,7 +24,6 @@ def skip_notifying_missing_mother_person_case(e):
 
 
 def skip_notifying_missing_ccs_record_parent(e):
-    # https://manage.dimagi.com/default.asp?277600
     # This is an open issue so it probably doesn't make sense to keep notifying
     # these unless it gets resolved. Going to make these start notifying at a
     # later date so this can be revisited.
