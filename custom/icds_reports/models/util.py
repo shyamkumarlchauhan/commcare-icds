@@ -81,13 +81,17 @@ class AggregationRecord(models.Model):
         if self.interval == 0:
             return True
 
-        if self.run_date.day in (1, 2, 3):
-            return True
-        if self.run_date.day == 11:  # for performance report
-            return True
-        if self.run_date.isoweekday() == 6:  # Saturday
-            return True
-        if self.run_date.month != (self.run_date + timedelta(days=1)).month:  # last day of month
+        if self.internal == -1:  # two months aggregation
+            if self.run_date.day in (1, 2, 3):
+                return True
+            if self.run_date.day == 11:  # for performance report
+                return True
+            if self.run_date.isoweekday() == 6:  # Saturday
+                return True
+            if self.run_date.month != (self.run_date + timedelta(days=1)).month:  # last day of month
+                return True
+
+        if self.run_date.isoweekday() == 6:  # three months aggregation
             return True
 
         return False
