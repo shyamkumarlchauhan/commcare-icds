@@ -2264,55 +2264,42 @@ class AggregatePersonCase(models.Model, AggregateMixin):
     cases_person_adolescent_girls_15_18_all = models.IntegerField(null=True)
     cases_person_referred = models.IntegerField(null=True)
 
-    num_premature_referral_awcs = models.IntegerField(null=True)
     total_premature_referrals = models.IntegerField(null=True)
     total_premature_reached_facility = models.IntegerField(null=True)
 
-    num_sepsis_referral_awcs = models.IntegerField(null=True)
     total_sepsis_referrals = models.IntegerField(null=True)
     total_sepsis_reached_facility = models.IntegerField(null=True)
 
-    num_diarrhoea_referral_awcs = models.IntegerField(null=True)
     total_diarrhoea_referrals = models.IntegerField(null=True)
     total_diarrhoea_reached_facility = models.IntegerField(null=True)
 
-    num_pneumonia_referral_awcs = models.IntegerField(null=True)
     total_pneumonia_referrals = models.IntegerField(null=True)
     total_pneumonia_reached_facility = models.IntegerField(null=True)
 
-    num_fever_referral_awcs = models.IntegerField(null=True)
     total_fever_referrals = models.IntegerField(null=True)
     total_fever_reached_facility = models.IntegerField(null=True)
 
-    num_severely_underweight_referral_awcs = models.IntegerField(null=True)
     total_severely_underweight_referrals = models.IntegerField(null=True)
     total_severely_underweight_reached_facility = models.IntegerField(null=True)
 
-    num_other_child_referral_awcs = models.IntegerField(null=True)
     total_other_child_referrals = models.IntegerField(null=True)
     total_other_child_reached_facility = models.IntegerField(null=True)
 
-    num_bleeding_referral_awcs = models.IntegerField(null=True)
     total_bleeding_referrals = models.IntegerField(null=True)
     total_bleeding_reached_facility = models.IntegerField(null=True)
 
-    num_convulsions_referral_awcs = models.IntegerField(null=True)
     total_convulsions_referrals = models.IntegerField(null=True)
     total_convulsions_reached_facility = models.IntegerField(null=True)
 
-    num_prolonged_labor_referral_awcs = models.IntegerField(null=True)
     total_prolonged_labor_referrals = models.IntegerField(null=True)
     total_prolonged_labor_reached_facility = models.IntegerField(null=True)
 
-    num_abortion_complications_referral_awcs = models.IntegerField(null=True)
     total_abortion_complications_referrals = models.IntegerField(null=True)
     total_abortion_complications_reached_facility = models.IntegerField(null=True)
 
-    num_fever_discharge_referral_awcs = models.IntegerField(null=True)
     total_fever_discharge_referrals = models.IntegerField(null=True)
     total_fever_discharge_reached_facility = models.IntegerField(null=True)
 
-    num_other_referral_awcs = models.IntegerField(null=True)
     total_other_referrals = models.IntegerField(null=True)
     total_other_reached_facility = models.IntegerField(null=True)
 

@@ -13,10 +13,6 @@ from couchforms.const import DEVICE_LOG_XMLNS
 
 
 class Command(BaseCommand):
-    """https://manage.dimagi.com/default.asp?277644
-    https://trello.com/c/gLN9bxOt/389-backfill-missing-data-in-es
-    """
-
     def add_arguments(self, parser):
         parser.add_argument('domain')
         parser.add_argument(
