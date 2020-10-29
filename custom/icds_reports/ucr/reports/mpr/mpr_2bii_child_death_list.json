@@ -268,7 +268,9 @@
               "guj": "સફેદ",
               "mni": "white",
               "mal": "വെളള",
-              "kan": "ಬಿಳಿ"
+              "kan": "ಬಿಳಿ",
+              "urd": "White",
+              "ori": "White"
             },
             "green": {
               "mar": "हिरवा",
@@ -285,7 +287,9 @@
               "guj": "લીલો",
               "mni": "green",
               "mal": "പച്ച",
-              "kan": "ಹಸಿರು"
+              "kan": "ಹಸಿರು",
+              "urd": "Green",
+              "ori": "Green"
             },
             "red": {
               "mar": "लाल",
@@ -302,7 +306,9 @@
               "guj": "લાલ",
               "mni": "red",
               "mal": "ചുവപ്പ്",
-              "kan": "ಕೆಂಪು"
+              "kan": "ಕೆಂಪು",
+              "urd": "Red",
+              "ori": "Red"
             },
             "yellow": {
               "mar": "पिवळा",
@@ -319,7 +325,9 @@
               "guj": "પીળો",
               "mni": "yellow",
               "mal": "മഞ്ഞ",
-              "kan": "ಹಳದಿ"
+              "kan": "ಹಳದಿ",
+              "urd": "Yellow",
+              "ori": "Yellow"
             }
           }
         },
