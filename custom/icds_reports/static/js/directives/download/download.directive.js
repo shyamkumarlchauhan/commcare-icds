@@ -597,7 +597,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     vm.isVisible = function (level) {
         return level === 0 || (vm.selectedLocations[level - 1] && vm.selectedLocations[level - 1] !== 'all') &&
             !(vm.isIncentiveReportSelected() && level > 2) && !(vm.isLadySupervisorSelected() && level > 2) &&
-            !(vm.isTakeHomeRationReportSelected() && level > 3);
+            !(vm.isTakeHomeRationReportSelected() && level > 3) && !(vm.isPPRSelected() && level >= 1);
     };
 
     vm.selectedFilterOptions = function () {
