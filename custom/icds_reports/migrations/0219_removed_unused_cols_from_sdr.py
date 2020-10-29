@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icds_reports', '0217_rebuild_db_views'),
+        ('icds_reports', '0218_removed_unused_cols_person_tb'),
     ]
 
     operations = [
