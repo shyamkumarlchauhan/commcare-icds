@@ -2061,6 +2061,7 @@ def update_child_vaccine_table(target_date):
 def _aggregate_child_health_sam_mam_form(state_id, day):
     AggregateSamMamForm.aggregate(state_id, day)
 
+
 @track_time
 def _aggregate_awc_sam_mam_panchayat_form(state_id, day):
     AggregateSamMamPanchayatForm.aggregate(state_id, day)
