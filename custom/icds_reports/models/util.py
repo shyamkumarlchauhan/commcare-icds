@@ -81,7 +81,7 @@ class AggregationRecord(models.Model):
         if self.interval == 0:
             return True
 
-        if self.internal == -1:  # two months aggregation
+        if self.interval == -1:  # two months aggregation
             if self.run_date.day in (1, 2, 3):
                 return True
             if self.run_date.day == 11:  # for performance report

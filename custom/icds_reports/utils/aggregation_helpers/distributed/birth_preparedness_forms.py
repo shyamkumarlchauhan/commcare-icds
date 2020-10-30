@@ -11,7 +11,7 @@ class BirthPreparednessFormsAggregationDistributedHelper(StateBasedAggregationDi
     helper_key = 'birth-preparedness-forms'
     ucr_data_source_id = 'static-dashboard_birth_preparedness_forms'
     aggregate_parent_table = AGG_CCS_RECORD_BP_TABLE
-    months_required = 3
+    months_required = 4
 
     def data_from_ucr_query(self):
         current_month_start = month_formatter(self.month)

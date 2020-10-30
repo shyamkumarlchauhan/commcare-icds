@@ -11,7 +11,7 @@ class SamMamFormAggregationDistributedHelper(StateBasedAggregationDistributedHel
     helper_key = 'sam-mam-form'
     ucr_data_source_id = 'static-sam_mam_visit'
     aggregate_parent_table = AGG_SAM_MAM_TABLE
-    months_required = 3
+    months_required = 4
 
     def data_from_ucr_query(self):
         current_month_start = month_formatter(self.month)
