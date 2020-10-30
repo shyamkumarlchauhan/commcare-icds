@@ -137,7 +137,8 @@
           "asm": "\u09ae\u09b9\u09bf\u09b2\u09be",
           "pan": "\u0a14\u0a30\u0a24",
           "kan": "\u0cae\u0cb9\u0cbf\u0cb3\u0cc6",
-          "urd": "\u0639\u0648\u0631\u062a"
+          "urd": "\u0639\u0648\u0631\u062a",
+          "ori": "ମହିଳା"
         },
         "width": null,
         "css_class": null,
@@ -166,7 +167,8 @@
           "asm": "\u09b8\u09be\u09ae\u09cd\u09ad\u09be\u09ac\u09cd\u09df \u09aa\u09cd\u09f0\u09b8\u09f1\u09f0 \u09a4\u09be\u09f0\u09bf\u0996",
           "pan": "\u0a1c\u0a23\u0a47\u0a2a\u0a47 \u0a26\u0a40 \u0a38\u0a70\u0a2d\u0a3e\u0a35\u0a3f\u0a24 \u0a2e\u0a3f\u0a24\u0a40",
           "kan": "\u0cb9\u0cc6\u0cb0\u0cbf\u0c97\u0cc6\u0caf \u0c85\u0c82\u0ca6\u0cbe\u0c9c\u0cc1 \u0ca6\u0cbf\u0ca8\u0cbe\u0c82\u0c95",
-          "urd": "Delivery \u06a9\u06cc \u062a\u062e\u0645\u06cc\u0646\u06cc \u062a\u0627\u0631\u06cc\u062e"
+          "urd": "Delivery \u06a9\u06cc \u062a\u062e\u0645\u06cc\u0646\u06cc \u062a\u0627\u0631\u06cc\u062e",
+          "ori": "ସମ୍ଭାବ୍ୟ ପ୍ରସବ ତାରିଖ"
         },
         "width": null,
         "css_class": null,
