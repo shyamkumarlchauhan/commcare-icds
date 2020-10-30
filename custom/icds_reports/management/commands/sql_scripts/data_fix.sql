@@ -338,7 +338,7 @@ SELECT
 
 	FROM
 	"child_health_monthly" chm
-	WHERE chm.month='{month}' AND chm.awc_id='d4d302b0dc914e17a20f52da28a07d49' AND chm.supervisor_id='91e033b10a8441e0adfb87e27467cb2d'
+	WHERE chm.month='{month}' AND chm.state_id='96dacff698ed4ea2be48a5c952646114'
 	GROUP BY chm.awc_id, chm.supervisor_id,
 					 chm.month, chm.sex, chm.age_tranche, chm.caste,
 					 coalesce_disabled, coalesce_minority, coalesce_resident
@@ -468,7 +468,7 @@ UPDATE "agg_child_health_{month}" agg_child_health
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
         FROM "agg_child_health_{month}" agg_child
-        WHERE agg_child.aggregation_level=5 AND agg_child.awc_id='d4d302b0dc914e17a20f52da28a07d49'
+        WHERE agg_child.aggregation_level=5 AND agg_child.state_id='96dacff698ed4ea2be48a5c952646114'
         GROUP BY state_id, district_id,block_id,supervisor_id, gender, age_tranche
     ) ut 
     WHERE agg_child_health.supervisor_id = ut.supervisor_id and 
@@ -555,7 +555,7 @@ UPDATE "agg_child_health_{month}" agg_child_health
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
         FROM "agg_child_health_{month}" agg_child
-        WHERE agg_child.aggregation_level=4 AND agg_child.supervisor_id='91e033b10a8441e0adfb87e27467cb2d'
+        WHERE agg_child.aggregation_level=4 AND agg_child.state_id='96dacff698ed4ea2be48a5c952646114'
         GROUP BY state_id, district_id,block_id, gender, age_tranche
     ) ut 
     WHERE agg_child_health.block_id = ut.block_id and 
@@ -646,7 +646,7 @@ UPDATE "agg_child_health_{month}" agg_child_health
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
         FROM "agg_child_health_{month}" agg_child
-        WHERE agg_child.aggregation_level=3 AND agg_child.block_id='0ee077e98e594d1eb471dfe4978b38e9'
+        WHERE agg_child.aggregation_level=3 AND agg_child.state_id='96dacff698ed4ea2be48a5c952646114'
         GROUP BY state_id, district_id,gender, age_tranche
     ) ut 
     WHERE agg_child_health.district_id = ut.district_id and 
@@ -734,7 +734,7 @@ UPDATE "agg_child_health_{month}" agg_child_health
         SUM(weighed_and_born_in_month) as ut.weighed_and_born_in_month,
         SUM(height_measured_in_month) as ut.height_measured_in_month
         FROM "agg_child_health_{month}" agg_child
-        WHERE agg_child.aggregation_level=2 AND agg_child.district_id='e92cd85ec16e42c493dec30273333923'
+        WHERE agg_child.aggregation_level=2 AND agg_child.state_id='96dacff698ed4ea2be48a5c952646114'
         GROUP BY state_id, tt.district_id,gender, age_tranche
     ) ut 
     WHERE agg_child_health.state_id = ut.state_id and 
