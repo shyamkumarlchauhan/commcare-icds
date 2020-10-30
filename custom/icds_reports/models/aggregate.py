@@ -975,8 +975,6 @@ class AggregateComplementaryFeedingForms(models.Model, AggregateMixin):
     """Aggregated data based on AWW App, Home Visit Scheduler module,
     Complementary Feeding form.
 
-    A child table exists for each state_id and month.
-
     A row exists for every case that has ever had a Complementary Feeding Form
     submitted against it.
     """
@@ -1040,8 +1038,6 @@ class AggregateCcsRecordComplementaryFeedingForms(models.Model, AggregateMixin):
     """Aggregated data based on AWW App, Home Visit Scheduler module,
     Complementary Feeding form.
 
-    A child table exists for each state_id and month.
-
     A row exists for every ccs_record case that has ever had a Complementary Feeding Form
     submitted against it.
     """
@@ -1074,8 +1070,6 @@ class AggregateChildHealthPostnatalCareForms(models.Model, AggregateMixin):
     """Aggregated data for child health cases based on
     AWW App, Home Visit Scheduler module,
     Post Natal Care and Exclusive Breastfeeding forms.
-
-    A child table exists for each state_id and month.
 
     A row exists for every case that has ever had a Complementary Feeding Form
     submitted against it.
@@ -1156,8 +1150,6 @@ class AggregateCcsRecordPostnatalCareForms(models.Model, AggregateMixin):
     AWW App, Home Visit Scheduler module,
     Post Natal Care and Exclusive Breastfeeding forms.
 
-    A child table exists for each state_id and month.
-
     A row exists for every case that has ever had a Complementary Feeding Form
     submitted against it.
     """
@@ -1202,8 +1194,6 @@ class AggregateChildHealthTHRForms(models.Model, AggregateMixin):
     """Aggregated data for child_health cases based on
     Take Home Ration forms
 
-    A child table exists for each state_id and month.
-
     A row exists for every child_health case that has had a THR Form
     submitted against it this month.
     """
@@ -1235,8 +1225,6 @@ class AggregateChildHealthTHRForms(models.Model, AggregateMixin):
 class AggregateCcsRecordTHRForms(models.Model, AggregateMixin):
     """Aggregated data for ccs_record cases based on
     Take Home Ration forms
-
-    A child table exists for each state_id and month.
 
     A row exists for every ccs_record case that has had a THR Form
     submitted against it this month.
@@ -1322,8 +1310,6 @@ class AggregateGrowthMonitoringForms(models.Model, AggregateMixin):
     376FA2E1 -> Delivery
     b183124a -> Growth Monitoring
     7a557541 -> Advanced Growth Monitoring
-
-    A child table exists for each state_id and month.
     """
 
     # partitioned based on these fields
@@ -1516,8 +1502,6 @@ class AggregateCcsRecordDeliveryForms(models.Model, AggregateMixin):
     """Aggregated data for ccs_record cases based on
     Delivery forms
 
-    A child table exists for each state_id and month.
-
     A row exists for every ccs_record case that has had a Delivery Form
     submitted against it this month.
     """
@@ -1604,8 +1588,6 @@ class AggregateInactiveAWW(models.Model, AggregateMixin):
 class AggregateChildHealthDailyFeedingForms(models.Model, AggregateMixin):
     """Aggregated data for child_health cases based on
     Daily Feeding forms
-
-    A child table exists for each state_id and month.
 
     A row exists for every child_health case that has had a daily feeding form
     submitted against it this month.
@@ -1771,8 +1753,6 @@ class AggregateAdolescentGirlsRegistrationForms(models.Model, AggregateMixin):
 class AggregateMigrationForms(models.Model, AggregateMixin):
     """Aggregated data for migration
 
-    A migration table exists for each state_id and month.
-
     A row exists for every person case that has had a record of migration
     submitted against it this month.
     """
@@ -1799,9 +1779,7 @@ class AggregateMigrationForms(models.Model, AggregateMixin):
 class AggregateAvailingServiceForms(models.Model, AggregateMixin):
     """ Aggregated data for the availing services
 
-    A availing services exists for each state_id
-
-    A row for every person case that has ever had an availing services form
+    A row for every person case that has ever had an availing services form submitted
     """
     state_id = models.TextField(null=True)
     supervisor_id = models.TextField(null=True)
