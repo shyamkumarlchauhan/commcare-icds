@@ -1,11 +1,21 @@
 import os
+import re
+import sys
 
+from django import forms
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
+from captcha.fields import CaptchaField
+
+from corehq.apps.domain.extension_points import (
+    additional_authentication_form_fields,
+    additional_invitation_form_fields,
+    additional_password_reset_form_fields,
+    custom_domain_module,
+    custom_password_clean,
+)
 from corehq.apps.reports.extension_points import user_query_mutators
-from custom.icds import icds_toggles
-from corehq.apps.domain.extension_points import custom_domain_module
 from corehq.apps.userreports.extension_points import (
     custom_ucr_expressions,
     custom_ucr_report_filter_values,
@@ -15,10 +25,12 @@ from corehq.apps.userreports.extension_points import (
 )
 from corehq.extensions.extension_points import domain_specific_urls
 from corehq.tabs.extension_points import (
+    uitab_classes,
     uitab_dropdown_items,
-    uitab_sidebar_items, uitab_classes,
+    uitab_sidebar_items,
 )
 from corehq.toggles import custom_toggle_modules
+from custom.icds import icds_toggles
 from custom.icds.const import ICDS_APPS_ROOT
 from custom.icds_core.const import (
     LocationReassignmentDownloadOnlyView_urlname,
@@ -27,11 +39,27 @@ from custom.icds_core.const import (
     SMSUsageReport_urlname,
 )
 
-
 SUPPORTED_DOMAINS = [
     'icds-cas',
     'cas-lab',
 ]
+
+def _get_uppercase_unicode_regexp():
+    # rather than add another dependency (regex library)
+    # http://stackoverflow.com/a/17065040/10840
+    uppers = ['[']
+    for i in range(sys.maxunicode):
+        c = chr(i)
+        if c.isupper():
+            uppers.append(c)
+    uppers.append(']')
+    upper_group = "".join(uppers)
+    return re.compile(upper_group, re.UNICODE)
+
+
+SPECIAL = re.compile(r"\W", re.UNICODE)
+NUMBER = re.compile(r"\d", re.UNICODE)  # are there other unicode numerals?
+UPPERCASE = _get_uppercase_unicode_regexp()
 
 
 @uitab_dropdown_items.extend(domains=SUPPORTED_DOMAINS)
@@ -172,3 +200,40 @@ def icds_emwf_options_user_query_mutators(domain):
     return [
         filter_users_in_test_locations,
     ]
+
+
+@custom_password_clean.extend()
+def _clean_password(txt_password):
+    strength = _legacy_get_password_strength(txt_password)
+    message = _('Password is not strong enough. Requirements: 1 special character, '
+                '1 number, 1 capital letter, minimum length of 8 characters.')
+    if strength['score'] < 2:
+        raise forms.ValidationError(message)
+
+
+def _legacy_get_password_strength(value):
+    # 1 Special Character, 1 Number, 1 Capital Letter with the length of Minimum 8
+    # initial score rigged to reach 2 when all requirements are met
+    score = -2
+    if SPECIAL.search(value):
+        score += 1
+    if NUMBER.search(value):
+        score += 1
+    if UPPERCASE.search(value):
+        score += 1
+    if len(value) >= 8:
+        score += 1
+    return {"score": score}
+
+
+@additional_authentication_form_fields.extend()
+def captcha_field():
+    return {'captcha': CaptchaField(label=_("Type the letters in the box"))}
+
+@additional_invitation_form_fields.extend()
+def captcha_field():
+    return {'captcha': CaptchaField(label=_("Type the letters in the box"))}
+
+@additional_password_reset_form_fields.extend()
+def captcha_field():
+    return {'captcha': CaptchaField(label=_("Type the letters in the box"))}
