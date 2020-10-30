@@ -73,8 +73,8 @@ INSERT INTO "icds_dashboard_growth_monitoring_forms" (
                     '1970-01-01'
                 ) AS latest_time_end_processed
             FROM "ucr_icds-cas_static-dashboard_growth_moni_4ebf0625"
-            WHERE  timeend < '{next_month}' AND child_health_case_id IS NOT NULL AND state_id IS NOT NULL AND state_id <> ''
-            AND child_health_case_id = '78feefc9-451f-4f35-8974-726915d414d6'
+            WHERE  timeend < '{next_month}' AND child_health_case_id IS NOT NULL AND state_id='96dacff698ed4ea2be48a5c952646114'
+            AND child_health_case_id = '78feefc9-451f-4f35-8974-726915d414d6' AND supervisor_id='91e033b10a8441e0adfb87e27467cb2d'
             WINDOW
                 weight_child AS (
                     PARTITION BY supervisor_id, child_health_case_id
