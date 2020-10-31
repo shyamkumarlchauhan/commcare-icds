@@ -1423,8 +1423,9 @@ def build_missing_disha_dump(month, state_name):
     DishaDump(state_name, month).build_export_json(query_master=True)
 
 
-@periodic_task_on_envs(settings.ICDS_ENVS, run_every=crontab(hour=17, minute=0, day_of_month='12'),
-                       acks_late=True, queue='icds_aggregation_queue')
+# To uncomment it after we recover from the form lag because of system down.
+# @periodic_task_on_envs(settings.ICDS_ENVS, run_every=crontab(hour=17, minute=0, day_of_month='12'),
+#                        acks_late=True, queue='icds_aggregation_queue')
 def build_incentive_report(agg_date=None):
     state_ids = (SQLLocation.objects
                  .filter(domain=DASHBOARD_DOMAIN, location_type__name='state')
