@@ -10,7 +10,7 @@ from corehq.apps.locations.models import SQLLocation
 class BiharApiDemographicsHelper(BaseICDSAggregationDistributedHelper):
     helper_key = 'agg-bihar_api_demographics'
     tablename = BIHAR_API_DEMOGRAPHICS_TABLE
-    months_required = 3
+    months_required = 4
 
     def __init__(self, month):
         self.month = transform_day_to_month(month)
