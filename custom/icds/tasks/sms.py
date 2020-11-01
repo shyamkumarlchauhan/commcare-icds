@@ -30,14 +30,18 @@ from corehq.apps.sms.models import (
 from corehq.util.celery_utils import periodic_task_on_envs, task
 from corehq.util.files import file_extention_from_filename
 from custom.icds_core.view_utils import is_icds_cas_project
+
+from custom.icds.const import (
+    MONTHLY_SMS_REPORT_RECIPIENTS,
+    SMS_DAILY_LIMIT_EXCEEDED_RECIPIENTS,
+)
 from custom.icds.utils.custom_sms_report import CustomSMSReportTracker
 
 
 @periodic_task_on_envs(settings.ICDS_ENVS, run_every=crontab(day_of_month='2', minute=0, hour=0), queue='sms_queue')
 def send_monthly_sms_report():
     subject = _('Monthly SMS report')
-    recipients = ['mshastri@dimagi.com', 'akaul@dimagi-associate.com', 'dsivaramakrishnan@dimagi.com',
-                  'pgoyal@dimagi.com', 'asharma@dimagi.com']
+    recipients = MONTHLY_SMS_REPORT_RECIPIENTS
     try:
         start_date = date.today().replace(day=1) - relativedelta(months=1)
         first_day, last_day = calendar.monthrange(start_date.year, start_date.month)
@@ -109,12 +113,7 @@ def send_sms_limit_exceeded_alert(sender, instance, **kwargs):
     if is_icds_cas_project(instance.domain):
         domain_obj = Domain.get_by_name(instance.domain)
         subject = "SMS Daily Limit exceeded"
-        recipients = [
-            'ndube@dimagi.com',
-            'dsivaramakrishnan@dimagi.com',
-            'mshashtri@dimagi.com',
-            'asharma@dimagi.com'
-        ]
+        recipients = SMS_DAILY_LIMIT_EXCEEDED_RECIPIENTS
         if domain_obj:
             sms_daily_limit = domain_obj.get_daily_outbound_sms_limit()
             message = _("""
