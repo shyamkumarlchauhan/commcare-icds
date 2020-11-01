@@ -34,10 +34,8 @@ class TestViews(TestCase):
 
     def _assertProductionLogin(self, response):
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'dimagi.com')
         self.assertNotContains(response, 'Ministry of Women and Child Development')
 
     def _assertICDSLogin(self, response):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Ministry of Women and Child Development')
-        self.assertNotContains(response, 'dimagi.com')
