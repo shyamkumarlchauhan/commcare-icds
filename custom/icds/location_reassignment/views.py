@@ -100,7 +100,6 @@ class LocationReassignmentView(BaseLocationView):
                 "adjective": _("locations"),
                 "plural_noun": _("Location Reassignment Request File"),
                 "verb": _("Perform"),
-                "help_link": "https://confluence.dimagi.com/display/ICDS/Location+Reassignment",
             },
         })
         context.update({
