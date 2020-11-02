@@ -22,7 +22,9 @@ def validate_dashboard_users_upload(worksheet):
 
     :returns: list of error messages
     """
-    column_names = worksheet[0]
+    column_names = worksheet.fieldnames
+    # read all rows since we can do it only once
+    worksheet = list(worksheet)
     errors = []
     usernames = location_codes = roles = None
 
@@ -31,23 +33,21 @@ def validate_dashboard_users_upload(worksheet):
     role_col_name = _get_column_name(column_names, ROLE_COLUMN)
     location_code_col_name = _get_column_name(column_names, LOCATION_CODE_COLUMN)
 
-    # Use the elements of a specified row to represent individual columns
-    worksheet.name_columns_by_row(0)
-
     if username_col_name:
-        usernames = worksheet.column[username_col_name]
-        errors.extend(__check_unique(worksheet, username_col_name))
+        usernames = _get_column_values(worksheet, username_col_name)
+        errors.extend(__check_unique(username_col_name, usernames))
         list_of_roles = ["dpo", "dpa", "dhd", "sbp"]
         errors.extend(__check_no_of_rows(list_of_roles, usernames))
         list_of_roles = ["cdpo", "bhd", "bpa"]
         errors.extend(__check_no_of_rows(list_of_roles, usernames))
     if password_col_name:
-        errors.extend(__check_unique(worksheet, password_col_name))
+        passwords = _get_column_values(worksheet, password_col_name)
+        errors.extend(__check_unique(password_col_name, passwords))
     if role_col_name:
-        roles = worksheet.column[role_col_name]
+        roles = _get_column_values(worksheet, role_col_name)
     if location_code_col_name:
-        location_codes = worksheet.column[location_code_col_name]
-        errors.extend(__check_numeric(worksheet, location_code_col_name))
+        location_codes = _get_column_values(worksheet, location_code_col_name)
+        errors.extend(__check_numeric(location_code_col_name, location_codes))
 
     if usernames and location_codes:
         errors.extend(
@@ -68,27 +68,28 @@ def validate_mobile_users_upload(worksheet):
 
     :returns: list of error messages
     """
-    column_names = worksheet[0]
+    column_names = worksheet.fieldnames
+    # read all rows since we can do it only once
+    worksheet = list(worksheet)
     errors = []
 
     username_col_name = _get_column_name(column_names, USERNAME_COLUMN)
     password_col_name = _get_column_name(column_names, PASSWORD_COLUMN)
     location_code_col_name = _get_column_name(column_names, LOCATION_CODE_COLUMN)
-
-    # Use the elements of a specified row to represent individual columns
-    worksheet.name_columns_by_row(0)
+    usernames = location_codes = None
 
     if username_col_name:
-        errors.extend(__check_unique(worksheet, username_col_name))
-        errors.extend(__check_numeric(worksheet, username_col_name))
+        usernames = _get_column_values(worksheet, username_col_name)
+        errors.extend(__check_unique(username_col_name, usernames))
+        errors.extend(__check_numeric(username_col_name, usernames))
     if password_col_name:
-        errors.extend(__check_unique(worksheet, password_col_name))
+        passwords = _get_column_values(worksheet, password_col_name)
+        errors.extend(__check_unique(password_col_name, passwords))
     if location_code_col_name:
-        errors.extend(__check_numeric(worksheet, location_code_col_name))
+        location_codes = _get_column_values(worksheet, location_code_col_name)
+        errors.extend(__check_numeric(location_code_col_name, location_codes))
 
     if username_col_name and location_code_col_name:
-        usernames = worksheet.column[username_col_name]
-        location_codes = worksheet.column[location_code_col_name]
         if usernames and location_codes:
             errors.extend(
                 __check_numeric_part(
@@ -109,180 +110,132 @@ def validate_inventory_upload(mobile, inventory, district, number_of_awcs):
     :returns: list of error messages
     """
     rand = int(random() * 100)
-    mobile_colname_list = mobile[0]
-    mobile_username_index = mobile_password_index = None
-    mobile_username = mobile_password = None
-    for index, value in enumerate(mobile_colname_list):
-        if "username" in str(value).lower():
-            mobile_username_index = index
-        if "password" in str(value).lower():
-            mobile_password_index = index
-        if "role" in str(value).lower():
-            mobile_role_index = index
-        if "location" and "code" in str(value).lower():
-            mobile_location_code_index = index
-    mobile.name_columns_by_row(0)
+    mobile = list(mobile)
 
-    if mobile_username_index is not None:
-        mobile_username = mobile.column[mobile_colname_list[mobile_username_index]]
-    if mobile_password_index is not None:
-        mobile_password = mobile.column[mobile_colname_list[mobile_password_index]]
+    mobile_username = _get_column_values(mobile, USERNAME_COLUMN)
+    mobile_password = _get_column_values(mobile, PASSWORD_COLUMN)
 
-    inventory_colname_list = inventory[0]
-    inventory_username_index = inventory_password_index = None
-    inventory_state_code_index = inventory_state_name_index = None
-    inventory_district_code_index = inventory_district_name_index = inventory_sub_district_name_index = None
-    inventory_project_code_index = inventory_project_name_index = None
-    inventory_sector_code_index = inventory_sector_name_index = None
-    inventory_awc_name_index = inventory_awc_code_index = None
-    inventory_aww_name_index = inventory_lgd_name_index = inventory_lgd_code_index = None
-    inventory_username = inventory_password = None
-    inventory_state_code = inventory_state_name = None
-    inventory_district_code = inventory_district_name = None
-    inventory_project_code = inventory_project_name = None
-    inventory_sector_code = inventory_sector_name = None
-    inventory_awc_code = inventory_awc_name = None
-    inventory_lgd_code = inventory_lgd_name = None
-    inventory_aww_name = inventory_sub_district_name = None
-    for index, value in enumerate(inventory_colname_list):
-        value = str(value).lower()
-        if "username" in value:
-            inventory_username_index = index
-        if "password" in value:
-            inventory_password_index = index
-        if "sl" in value:
-            inventory_sl_index = index
-        if "state" in value and "code" in value:
-            inventory_state_code_index = index
-        if "state" in value and "name" in value:
-            inventory_state_name_index = index
-        if "district" in value and "code" in value:
-            inventory_district_code_index = index
+    inventory_username_col_name = None
+    inventory_password_col_name = None
+    inventory_state_code_col_name = None
+    inventory_state_name_col_name = None
+    inventory_district_code_col_name = None
+    inventory_district_name_col_name = None
+    inventory_sub_district_name_col_name = None
+    inventory_project_code_col_name = None
+    inventory_project_name_col_name = None
+    inventory_sector_code_col_name = None
+    inventory_sector_name_col_name = None
+    inventory_awc_name_col_name = None
+    inventory_awc_code_col_name = None
+    inventory_aww_name_col_name = None
+    inventory_lgd_name_col_name = None
+    inventory_lgd_code_col_name = None
+    inventory_username = None
+    inventory_password = None
+    inventory_state_code = None
+    inventory_state_name = None
+    inventory_district_code = None
+    inventory_district_name = None
+    inventory_sub_district_name = None
+    inventory_project_code = None
+    inventory_project_name = None
+    inventory_sector_code = None
+    inventory_sector_name = None
+    inventory_awc_code = None
+    inventory_awc_name = None
+    inventory_lgd_code = None
+    inventory_lgd_name = None
+    inventory_aww_name = None
+
+    for col_name in inventory.fieldnames:
+        if "username" in col_name:
+            inventory_username_col_name = col_name
+        if "password" in col_name:
+            inventory_password_col_name = col_name
+        if "state" in col_name and "code" in col_name:
+            inventory_state_code_col_name = col_name
+        if "state" in col_name and "name" in col_name:
+            inventory_state_name_col_name = col_name
+        if "district" in col_name and "code" in col_name:
+            inventory_district_code_col_name = col_name
         if (
-            "district" in value
-            and "name" in value
-            and "sub" not in value
+            "district" in col_name
+            and "name" in col_name
+            and "sub" not in col_name
         ):
-            inventory_district_name_index = index
+            inventory_district_name_col_name = col_name
         if (
-            "sub" in value
-            and "district" in value
-            and "name" in value
+            "sub" in col_name
+            and "district" in col_name
+            and "name" in col_name
         ):
-            inventory_sub_district_name_index = index
-        if "project" in value and "code" in value:
-            inventory_project_code_index = index
-        if "project" in value and "name" in value:
-            inventory_project_name_index = index
-        if "sector" in value and "code" in value:
-            inventory_sector_code_index = index
-        if "sector" in value and "name" in value:
-            inventory_sector_name_index = index
-        if "awc" in value and "name" in value:
-            inventory_awc_name_index = index
-        if "awc" in value and "code" in value:
-            inventory_awc_code_index = index
-        if "awc" in value and "type" in value:
-            inventory_awc_type_index = index
+            inventory_sub_district_name_col_name = col_name
+        if "project" in col_name and "code" in col_name:
+            inventory_project_code_col_name = col_name
+        if "project" in col_name and "name" in col_name:
+            inventory_project_name_col_name = col_name
+        if "sector" in col_name and "code" in col_name:
+            inventory_sector_code_col_name = col_name
+        if "sector" in col_name and "name" in col_name:
+            inventory_sector_name_col_name = col_name
+        if "awc" in col_name and "name" in col_name:
+            inventory_awc_name_col_name = col_name
+        if "awc" in col_name and "code" in col_name:
+            inventory_awc_code_col_name = col_name
         if (
-            "aww" in value
-            and "name" in value
-            and "helper" not in value
+            "aww" in col_name
+            and "name" in col_name
+            and "helper" not in col_name
         ):
-            inventory_aww_name_index = index
-        if "city" in value and "name" in value:
-            inventory_lgd_name_index = index
-        if "lgd" in value and "code" in value:
-            inventory_lgd_code_index = index
+            inventory_aww_name_col_name = col_name
+        if "city" in col_name and "name" in col_name:
+            inventory_lgd_name_col_name = col_name
+        if "lgd" in col_name and "code" in col_name:
+            inventory_lgd_code_col_name = col_name
 
-    inventory.name_columns_by_row(0)
-    if inventory_username_index is not None:
-        inventory_username = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_username_index, number_of_awcs
-        )
-    if inventory_password_index is not None:
-        inventory_password = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_password_index, number_of_awcs
-        )
-    if inventory_state_code_index is not None:
-        inventory_state_code = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_state_code_index, number_of_awcs
-        )
-    if inventory_state_name_index is not None:
-        inventory_state_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_state_name_index, number_of_awcs
-        )
-    if inventory_district_code_index is not None:
-        inventory_district_code = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_district_code_index, number_of_awcs
-        )
-    if inventory_district_name_index is not None:
-        inventory_district_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_district_name_index, number_of_awcs
-        )
-    if inventory_sub_district_name_index is not None:
-        inventory_sub_district_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_sub_district_name_index, number_of_awcs
-        )
-    if inventory_project_code_index is not None:
-        inventory_project_code = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_project_code_index, number_of_awcs
-        )
-    if inventory_project_name_index is not None:
-        inventory_project_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_project_name_index, number_of_awcs
-        )
-    if inventory_sector_code_index is not None:
-        inventory_sector_code = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_sector_code_index, number_of_awcs
-        )
-    if inventory_sector_name_index is not None:
-        inventory_sector_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_sector_name_index, number_of_awcs
-        )
-    if inventory_awc_code_index is not None:
-        inventory_awc_code = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_awc_code_index, number_of_awcs
-        )
-    if inventory_awc_name_index is not None:
-        inventory_awc_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_awc_name_index, number_of_awcs
-        )
-    if inventory_lgd_code_index is not None:
-        inventory_lgd_code = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_lgd_code_index, number_of_awcs
-        )
-    if inventory_lgd_name_index is not None:
-        inventory_lgd_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_lgd_name_index, number_of_awcs
-        )
-    if inventory_aww_name_index is not None:
-        inventory_aww_name = __get_column_till_awc(
-            inventory, inventory_colname_list, inventory_aww_name_index, number_of_awcs
-        )
+    # read all rows since we can do it only once
+    inventory = list(inventory)
+    if inventory_username_col_name:
+        inventory_username = _get_column_values(inventory, inventory_username_col_name)[:number_of_awcs]
+    if inventory_password_col_name:
+        inventory_password = _get_column_values(inventory, inventory_password_col_name)[:number_of_awcs]
+    if inventory_state_code_col_name:
+        inventory_state_code = _get_column_values(inventory, inventory_state_code_col_name)[:number_of_awcs]
+    if inventory_state_name_col_name:
+        inventory_state_name = _get_column_values(inventory, inventory_state_name_col_name)[:number_of_awcs]
+    if inventory_district_code_col_name:
+        inventory_district_code = _get_column_values(inventory, inventory_district_code_col_name)[:number_of_awcs]
+    if inventory_district_name_col_name:
+        inventory_district_name = _get_column_values(inventory, inventory_district_name_col_name)[:number_of_awcs]
+    if inventory_sub_district_name_col_name:
+        inventory_sub_district_name = _get_column_values(inventory, inventory_sub_district_name_col_name)[:number_of_awcs]
+    if inventory_project_code_col_name:
+        inventory_project_code = _get_column_values(inventory, inventory_project_code_col_name)[:number_of_awcs]
+    if inventory_project_name_col_name:
+        inventory_project_name = _get_column_values(inventory, inventory_project_name_col_name)[:number_of_awcs]
+    if inventory_sector_code_col_name:
+        inventory_sector_code = _get_column_values(inventory, inventory_sector_code_col_name)[:number_of_awcs]
+    if inventory_sector_name_col_name:
+        inventory_sector_name = _get_column_values(inventory, inventory_sector_name_col_name)[:number_of_awcs]
+    if inventory_awc_code_col_name:
+        inventory_awc_code = _get_column_values(inventory, inventory_awc_code_col_name)[:number_of_awcs]
+    if inventory_awc_name_col_name:
+        inventory_awc_name = _get_column_values(inventory, inventory_awc_name_col_name)[:number_of_awcs]
+    if inventory_lgd_code_col_name:
+        inventory_lgd_code = _get_column_values(inventory, inventory_lgd_code_col_name)[:number_of_awcs]
+    if inventory_lgd_name_col_name:
+        inventory_lgd_name = _get_column_values(inventory, inventory_lgd_name_col_name)[:number_of_awcs]
+    if inventory_aww_name_col_name:
+        inventory_aww_name = _get_column_values(inventory, inventory_aww_name_col_name)[:number_of_awcs]
 
-    district_colname_list = district[0]
-    district_district_name_index = district_sub_district_name_index = None
+    district_column_names = district.fieldnames
     district_district_name = district_sub_district_name = None
-    for index, value in enumerate(district_colname_list):
-        if "state" and "code" in str(value).lower():
-            district_state_code_index = index
-        if "state" and "name" in str(value).lower():
-            district_state_name_index = index
-        if "district" and "name" in str(value).lower():
-            district_district_name_index = index
-        if "sub" and "district" and "name" in str(value).lower():
-            district_sub_district_name_index = index
-
-    district.name_columns_by_row(0)
-    if district_district_name_index is not None:
-        district_district_name = district.column[
-            district_colname_list[district_district_name_index]
-        ]
-    if district_sub_district_name_index is not None:
-        district_sub_district_name = district.column[
-            district_colname_list[district_sub_district_name_index]
-        ]
+    for index, col_name in enumerate(district_column_names):
+        if "district" and "name" in col_name:
+            district_district_name = col_name
+        if "sub" and "district" and "name" in col_name:
+            district_sub_district_name = col_name
 
     inventory_district_code_dict = defaultdict(list)
     inventory_project_code_dict = defaultdict(list)
@@ -394,10 +347,10 @@ def validate_inventory_upload(mobile, inventory, district, number_of_awcs):
     if inventory_awc_code:
         errors.extend(__check_no_of_digits(11, inventory_awc_code, "awc code"))
         errors.extend(__check_blank(inventory_awc_code, "AWC code"))
-    if inventory_awc_code_index is not None:
+    if inventory_awc_code_col_name:
         errors.extend(
             __check_unique(
-                inventory, inventory_colname_list[inventory_awc_code_index], number_of_awcs
+                inventory_awc_code_col_name, _get_column_values(inventory, inventory_awc_code_col_name), number_of_awcs
             )
         )
     if inventory_awc_name:
@@ -423,16 +376,20 @@ def validate_inventory_upload(mobile, inventory, district, number_of_awcs):
     return errors
 
 
-def __check_unique(sheet, column_name, number_of_awcs=None):
+def _get_column_values(worksheet, column_name):
+    return list(row.get(column_name) for row in worksheet)
+
+
+def __check_unique(column_name, column_values, number_of_awcs=None):
     """Checks for duplicates
 
     :param number_of_awcs: Only to used for inventory file
     :returns: list of error messages
     """
     try:
-        column = sheet.column[column_name][:int(number_of_awcs)]
+        column = column_values[:int(number_of_awcs)]
     except:
-        column = sheet.column[column_name]
+        column = column_values
     if len(column) == len(set(column)):
         return []
 
@@ -445,7 +402,7 @@ def __check_unique(sheet, column_name, number_of_awcs=None):
             occurrences = [row + 2 for row in value]
             errors.append(
                 f"Possible duplicates of value {str(key)} found in column {column_name}"
-                f"at rows {','.join(occurrences)}")
+                f" at rows {','.join(map(str, occurrences))}")
     return errors
 
 
@@ -466,9 +423,9 @@ def __check_blank(rows, col_name):
     return errors
 
 
-def __check_numeric(worksheet, column_name):
+def __check_numeric(column_name, column_values):
     errors = []
-    for index, value in enumerate(worksheet.column[column_name]):
+    for index, value in enumerate(column_values):
         if not str(value).isnumeric():
             errors.append(
                 f"{column_name} contains non-numeric characters at row {str(index + 2)} i.e {value}")
@@ -633,4 +590,4 @@ def _get_column_name(column_names, column_name):
     for index, value in enumerate(column_names):
         col_name = str(value)
         if column_name in col_name.lower():
-            return index
+            return col_name
