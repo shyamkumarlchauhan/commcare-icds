@@ -30,6 +30,7 @@ from custom.icds.const import (
     CHILDREN_WEIGHED_REPORT_ID,
     DAYS_AWC_OPEN_REPORT_ID,
     HOME_VISIT_REPORT_ID,
+    SMS_TEAM,
     SUPERVISOR_APP_ID,
     THR_REPORT_ID,
     UCR_V2_AG_ALIAS,
@@ -324,7 +325,6 @@ def is_aggregate_inactive_aww_data_fresh(send_email=False):
     if not last_submission:
         return False
     is_fresh = last_submission >= (datetime.today() - timedelta(days=1)).date()
-    SMS_TEAM = ['{}@{}'.format('icds-sms-rule', 'dimagi.com')]
     if not send_email:
         return is_fresh
     _soft_assert = soft_assert(to=SMS_TEAM, send_to_ops=False)
