@@ -1,0 +1,25 @@
+{% extends "hqwebapp/base_section.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load hq_shared_tags %}
+
+{% block page_content %}
+  <div class="container">
+    <div class="row">
+      <div class="page-header">
+        <h1>
+          {% trans "Validate Users and Inventory Files" %}
+        </h1>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <div class="panel panel-modern-gray panel-form-only">
+          <div class="panel-body">
+            {% crispy form %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}

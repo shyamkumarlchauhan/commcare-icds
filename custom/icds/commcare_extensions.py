@@ -26,7 +26,7 @@ from custom.icds_core.const import (
     ManageHostedCCZ_urlname,
     SMSUsageReport_urlname,
 )
-
+from extensions.icds.custom.icds.importers.views import ValidateUserInventoryImportsView
 
 SUPPORTED_DOMAINS = [
     'icds-cas',
@@ -57,14 +57,20 @@ def icds_uitab_sidebar_items(tab_name, tab, domain, request):
             ]),
         ]
 
-    if tab_name == "ProjectUsersTab" and icds_toggles.PERFORM_LOCATION_REASSIGNMENT.enabled_for_request(request):
+    if tab_name == "ProjectUsersTab":
+        custom_links = [
+            {
+                'title': _("Validate Users/Inventory Uploads"),
+                'url': reverse(ValidateUserInventoryImportsView.urlname, args=[domain])
+            }
+        ]
+        if icds_toggles.PERFORM_LOCATION_REASSIGNMENT.enabled_for_request(request):
+            custom_links.append({
+                'title': _("Location Reassignment"),
+                'url': reverse(LocationReassignmentView_urlname, args=[domain])
+            })
         return [
-            (_('Organization'), [
-                {
-                    'title': _("Location Reassignment"),
-                    'url': reverse(LocationReassignmentView_urlname, args=[domain])
-                }
-            ])
+            (_('Organization'), custom_links)
         ]
 
     if tab_name == "MessagingTab" and icds_toggles.ICDS_CUSTOM_SMS_REPORT.enabled_for_request(request):
