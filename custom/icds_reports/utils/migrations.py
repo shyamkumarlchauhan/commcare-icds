@@ -35,7 +35,8 @@ def get_view_migrations():
         'bihar_vaccine.sql',
         'poshan_progress_report_view.sql',
         'daily_thr_ccs_record.sql',
-        'daily_thr_child_health.sql'
+        'daily_thr_child_health.sql',
+        'inactive_aww_view.sql'
     ]
     migrator = RawSQLMigration((SQL_TEMPLATES_ROOT, 'database_views'))
     operations = []
