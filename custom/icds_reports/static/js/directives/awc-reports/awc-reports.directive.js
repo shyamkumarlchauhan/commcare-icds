@@ -1799,12 +1799,6 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
                 'heading': 'Mother Phone Number',
                 'class': 'medium-col',
                 'value': renderMotherPhoneNumber
-            },
-            {
-                'mData': 'beneficiary_status',
-                'heading': 'Status',
-                'class': 'medium-col',
-                'value': renderBeneficairyStatus
             }
         ],
         'pregnant': [
@@ -1932,6 +1926,17 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             }
         ],
     };
+
+    if (dateHelperService.getSelectedDate() >= new Date(2020, 0)) {
+        vm.awcReportTableData['beneficiary'].push(
+            {
+                'mData': 'beneficiary_status',
+                'heading': 'Status',
+                'class': 'medium-col',
+                'value': renderBeneficairyStatus
+            }
+        )
+    }
 
     vm.dtColumns = [];
     if (vm.awcReportTableData[vm.step] && !isMobile) {
