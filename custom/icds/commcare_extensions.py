@@ -26,6 +26,7 @@ from custom.icds_core.const import (
     ManageHostedCCZ_urlname,
     SMSUsageReport_urlname,
 )
+from corehq.apps.users.extension_points import translations_audio_path_updater, get_older_translation_rows
 
 
 SUPPORTED_DOMAINS = [
@@ -171,4 +172,18 @@ def icds_emwf_options_user_query_mutators(domain):
     from custom.icds.report_filters import filter_users_in_test_locations
     return [
         filter_users_in_test_locations,
+    ]
+
+@translations_audio_path_updater.extend()
+def update_audio_path_if_required():
+    from custom.icds.utils.upload_app_translations import update_audio_path_if_required
+    return [
+        update_audio_path_if_required
+    ]
+
+@get_older_translation_rows.extend()
+def get_older_rows():
+    from custom.icds.utils.upload_app_translations import get_older_rows
+    return [
+        get_older_rows
     ]
