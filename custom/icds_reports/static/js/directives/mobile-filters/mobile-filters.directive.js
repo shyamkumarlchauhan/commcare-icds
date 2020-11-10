@@ -6,6 +6,8 @@ function MobileFiltersController($scope, $rootScope) {
     var vm = this;
     vm.showGenderFilter = false;
     vm.showAgeFilter = false;
+    // Using binding variables inside onInit lifecycle hook to properly initialize controller variables
+    // Reference: https://stackoverflow.com/a/38591834/12839195
     vm.$onInit = function () {
         if (vm.selectSddDate) {
             $scope.selectedTab = MONTH;
