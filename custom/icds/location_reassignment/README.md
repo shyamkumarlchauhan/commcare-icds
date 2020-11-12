@@ -25,7 +25,7 @@ Hence, to perform location reassignment
    Similarly, the users assigned to the old locations are deactivated and new ones are created and assigned to the new locations.<br/>
    If a location is reassigned, all of it's descendants should be considered too.
 2. from data perspective, reassign cases from old to new locations.<br/>
-   Forms submitted are NOT moved. This is due to feasibility challenges and in order to keep data updates to minimal. This also then helps to the history of submissions unaltered.
+   Forms submitted are NOT moved/reassigned. This is in order to keep the history of submissions unaltered.
 
 Supported workflows:
 -------------------------------
