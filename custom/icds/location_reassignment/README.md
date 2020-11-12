@@ -10,7 +10,7 @@ On CommCareHQ
 For ICDS
 1. Location Site Code is "mostly" expected to be same as the username of the mobile worker assigned to that location, depending on the level that location is.
    For example, It is same for AWW but can be different for block/district level users.
-2. For ICDS, the site code is same as the LGD code and they are maintained as such that the LGD code of the location is formed from the LGD code of the ancestor locations. So if the site code or the LGD code of any location changes, the site code of all the descendant locations would need to be changed.
+2. For ICDS, the site code of a location is formed by concatenating the site codes of the ancestor locations along with a code for the location itself, in the end. So if the site code of any location changes, the site code of all the descendant locations would need to be changed as well.
 
 So new locations can’t reuse site codes from old locations and hence would always need new site codes.
 
