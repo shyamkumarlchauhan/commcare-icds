@@ -182,14 +182,13 @@ def icds_emwf_options_user_query_mutators(domain):
 
 @custom_clean_password.extend()
 def clean_password(password):
-    strength = _password_strength(password)
+    strength = password_strength(password)
     message = _('Password is not strong enough. Requirements: 1 special character, '
                 '1 number, 1 capital letter, minimum length of 8 characters.')
-    if strength['score'] < 2:
-        raise forms.ValidationError(message)
+    return strength, message
 
 
-def _password_strength(value):
+def password_strength(value):
     # 1 Special Character, 1 Number, 1 Capital Letter with the length of Minimum 8
     # initial score rigged to reach 2 when all requirements are met
     score = -2
