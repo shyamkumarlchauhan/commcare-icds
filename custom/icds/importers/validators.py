@@ -45,21 +45,21 @@ def validate_dashboard_users_upload(worksheet):
 
     errors = []
     if usernames:
-        errors.extend(__check_unique(username_col_name, usernames))
-        errors.extend(__check_no_of_rows(["dpo", "dpa", "dhd", "sbp"], usernames))
-        errors.extend(__check_no_of_rows(["cdpo", "bhd", "bpa"], usernames))
+        errors.extend(_check_unique(username_col_name, usernames))
+        errors.extend(_check_no_of_rows(["dpo", "dpa", "dhd", "sbp"], usernames))
+        errors.extend(_check_no_of_rows(["cdpo", "bhd", "bpa"], usernames))
     if passwords:
-        errors.extend(__check_unique(password_col_name, passwords))
+        errors.extend(_check_unique(password_col_name, passwords))
     if location_codes:
-        errors.extend(__check_numeric(location_code_col_name, location_codes))
+        errors.extend(_check_numeric(location_code_col_name, location_codes))
 
     if usernames and location_codes:
         errors.extend(
-            __check_numeric_part(DASHBOARD, usernames, location_codes,
-                                 "username", "location code")
+            _check_numeric_part(DASHBOARD, usernames, location_codes,
+                                "username", "location code")
         )
     if usernames and roles:
-        errors.extend(__check_roles(usernames, roles))
+        errors.extend(_check_roles(usernames, roles))
 
     return errors
 
@@ -92,16 +92,16 @@ def validate_mobile_users_upload(worksheet):
 
     errors = []
     if usernames:
-        errors.extend(__check_unique(username_col_name, usernames))
-        errors.extend(__check_numeric(username_col_name, usernames))
+        errors.extend(_check_unique(username_col_name, usernames))
+        errors.extend(_check_numeric(username_col_name, usernames))
     if passwords:
-        errors.extend(__check_unique(password_col_name, passwords))
+        errors.extend(_check_unique(password_col_name, passwords))
     if location_codes:
-        errors.extend(__check_numeric(location_code_col_name, location_codes))
+        errors.extend(_check_numeric(location_code_col_name, location_codes))
 
     if usernames and location_codes:
         errors.extend(
-            __check_numeric_part(
+            _check_numeric_part(
                 MOBILE, usernames, location_codes, username_col_name, location_code_col_name
             )
         )
@@ -215,11 +215,11 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
                     f"and state name {b}")
 
     if inventory_district_code and inventory_district_name:
-        errors.extend(__check_blank(inventory_district_code, "District code"))
-        errors.extend(__check_blank(inventory_district_name, "District name"))
+        errors.extend(_check_blank(inventory_district_code, "District code"))
+        errors.extend(_check_blank(inventory_district_name, "District name"))
         errors.extend(
-            __check_no_of_digits(5, inventory_district_code,
-                                 "inventory_district_code")
+            _check_no_of_digits(5, inventory_district_code,
+                                "inventory_district_code")
         )
 
         for code, name in itertools.zip_longest(
@@ -240,7 +240,7 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
                     f"District code does not match with state code at row {str(index)}")
 
     if inventory_project_code:
-        errors.extend(__check_no_of_digits(
+        errors.extend(_check_no_of_digits(
             7, inventory_project_code, "project code"))
 
     if inventory_project_code and inventory_project_name and inventory_district_name:
@@ -256,7 +256,7 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
 
     if inventory_project_code and inventory_district_code:
         errors.extend(
-            __check_starting_digits(
+            _check_starting_digits(
                 5,
                 inventory_project_code,
                 "Project Code",
@@ -265,11 +265,11 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
             )
         )
     if inventory_project_code:
-        errors.extend(__check_blank(inventory_project_code, "Project code"))
+        errors.extend(_check_blank(inventory_project_code, "Project code"))
     if inventory_project_name:
-        errors.extend(__check_blank(inventory_project_name, "Project name"))
+        errors.extend(_check_blank(inventory_project_name, "Project name"))
     if inventory_sector_code:
-        errors.extend(__check_no_of_digits(
+        errors.extend(_check_no_of_digits(
             9, inventory_sector_code, "sector code"))
 
     if inventory_sector_code and inventory_sector_name and inventory_district_name:
@@ -285,7 +285,7 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
 
     if inventory_sector_code and inventory_project_code:
         errors.extend(
-            __check_starting_digits(
+            _check_starting_digits(
                 7,
                 inventory_sector_code,
                 "Sector Code",
@@ -294,36 +294,36 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
             )
         )
     if inventory_sector_code:
-        errors.extend(__check_blank(inventory_sector_code, "Sector code"))
+        errors.extend(_check_blank(inventory_sector_code, "Sector code"))
     if inventory_sector_name:
-        errors.extend(__check_blank(inventory_sector_name, "Sector name"))
+        errors.extend(_check_blank(inventory_sector_name, "Sector name"))
     if inventory_awc_code:
-        errors.extend(__check_no_of_digits(11, inventory_awc_code, "awc code"))
-        errors.extend(__check_blank(inventory_awc_code, "AWC code"))
+        errors.extend(_check_no_of_digits(11, inventory_awc_code, "awc code"))
+        errors.extend(_check_blank(inventory_awc_code, "AWC code"))
     if inventory_awc_code_col_name:
         errors.extend(
-            __check_unique(
+            _check_unique(
                 inventory_awc_code_col_name, _get_column_values(inventory_worksheet, inventory_awc_code_col_name),
                 number_of_awcs
             )
         )
     if inventory_awc_name:
-        errors.extend(__check_blank(inventory_awc_name, "AWC name"))
+        errors.extend(_check_blank(inventory_awc_name, "AWC name"))
     if inventory_lgd_code:
-        errors.extend(__check_blank(inventory_lgd_code, "LGD code"))
-        errors.extend(__check_no_of_digits(6, inventory_lgd_code, "lgd code"))
+        errors.extend(_check_blank(inventory_lgd_code, "LGD code"))
+        errors.extend(_check_no_of_digits(6, inventory_lgd_code, "lgd code"))
     if inventory_lgd_name:
-        errors.extend(__check_blank(inventory_lgd_name, "LGD name"))
+        errors.extend(_check_blank(inventory_lgd_name, "LGD name"))
     if inventory_aww_name:
-        errors.extend(__check_blank(inventory_aww_name, "AWW name"))
+        errors.extend(_check_blank(inventory_aww_name, "AWW name"))
     if inventory_district_name and district_district_name:
         errors.extend(
-            __find_dist_subdist("District", inventory_district_name,
+            _find_dist_subdist("District", inventory_district_name,
                                 district_district_name)
         )
     if inventory_sub_district_name and district_sub_district_name:
         errors.extend(
-            __find_dist_subdist(
+            _find_dist_subdist(
                 "Sub-District", inventory_sub_district_name, district_sub_district_name
             )
         )
@@ -336,7 +336,7 @@ def _get_column_values(worksheet, column_name):
     return []
 
 
-def __check_unique(column_name, column_values, number_of_awcs=None):
+def _check_unique(column_name, column_values, number_of_awcs=None):
     """Checks for duplicates
 
     :param number_of_awcs: Only to used for inventory file
@@ -362,7 +362,7 @@ def __check_unique(column_name, column_values, number_of_awcs=None):
     return errors
 
 
-def __check_blank(rows, col_name):
+def _check_blank(rows, col_name):
     """This function checks for blank rows in the list provided and returns a list containing the errors
 
     Arguments:
@@ -379,7 +379,7 @@ def __check_blank(rows, col_name):
     return errors
 
 
-def __check_numeric(column_name, column_values):
+def _check_numeric(column_name, column_values):
     errors = []
     for index, value in enumerate(column_values):
         if not str(value).isnumeric():
@@ -388,7 +388,7 @@ def __check_numeric(column_name, column_values):
     return errors
 
 
-def __check_no_of_rows(list_of_roles, column):
+def _check_no_of_rows(list_of_roles, column):
     """Function to check whether the no of rows for any role within the set of roles received
     is equal to each other or not
 
@@ -410,7 +410,7 @@ def __check_no_of_rows(list_of_roles, column):
         return []
 
 
-def __check_numeric_part(mode, column1, column2, column1_name, column2_name):
+def _check_numeric_part(mode, column1, column2, column1_name, column2_name):
     """Function to compare the numeric part of first column value to 2nd column value
 
     Args:
@@ -439,7 +439,7 @@ def __check_numeric_part(mode, column1, column2, column1_name, column2_name):
     return errors
 
 
-def __check_roles(username_column_list, role_column_list):
+def _check_roles(username_column_list, role_column_list):
     """Function that checks if proper roles are defined to each username
 
     Args:
@@ -463,24 +463,7 @@ def __check_roles(username_column_list, role_column_list):
     return errors
 
 
-def __get_column_till_awc(inventory, inventory_colname_list, column_index, number_of_awcs):
-    """A function that returns a list of values from the data in a particular column from the inventory excel sheet,
-    from first row till nth row (n = number_of_awcs).
-
-    Args:
-        inventory {pyexcel.sheet.Sheet} -- The inventory file sheet uploaded
-        inventory_colname_list {iterable list} -- The list of column names from inventory sheet
-        column_index {int} -- The index in colname list corresponding to the required column
-        number_of_awcs {str} -- The no of rows to be extracted, in string form
-
-    Returns:
-        {list} -- a list containing all the errors
-    """
-    number_of_awcs = int(number_of_awcs)
-    return inventory.column[inventory_colname_list[column_index]][:number_of_awcs]
-
-
-def __check_no_of_digits(no_of_digits, column, column_name):
+def _check_no_of_digits(no_of_digits, column, column_name):
     """Function to check if all numeric entries in a particular column
     are composed of a given fixed number of digits
 
@@ -500,7 +483,7 @@ def __check_no_of_digits(no_of_digits, column, column_name):
     return errors
 
 
-def __check_starting_digits(no_of_digits, column1, column1_str, column2, column2_str):
+def _check_starting_digits(no_of_digits, column1, column1_str, column2, column2_str):
     """A function that checks the starting digits of column1 with the value in column2.
         The no of starting digits is defined using the no_of_digits parameter.
 
@@ -523,7 +506,7 @@ def __check_starting_digits(no_of_digits, column1, column1_str, column2, column2
     return errors
 
 
-def __find_dist_subdist(colname, inventory_dist_subdist, district_dist_subdist):
+def _find_dist_subdist(colname, inventory_dist_subdist, district_dist_subdist):
     """Function to check if the district and sub district are correctly mapped in the district and inventory file
 
     Args:
