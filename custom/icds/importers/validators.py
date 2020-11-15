@@ -118,56 +118,13 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
     :param number_of_awcs: integer value extracted from the inventory file name
     :returns: list of error messages
     """
-    rand = int(random() * 100)
-    mobile_worksheet = list(mobile_worksheet)
-
-    mobile_username = _get_column_values(mobile_worksheet, USERNAME_COLUMN)
-    mobile_password = _get_column_values(mobile_worksheet, PASSWORD_COLUMN)
-
-    inventory_username_col_name = None
-    inventory_password_col_name = None
-    inventory_state_code_col_name = None
-    inventory_state_name_col_name = None
-    inventory_district_code_col_name = None
     inventory_district_name_col_name = None
-    inventory_sub_district_name_col_name = None
-    inventory_project_code_col_name = None
-    inventory_project_name_col_name = None
-    inventory_sector_code_col_name = None
-    inventory_sector_name_col_name = None
-    inventory_awc_name_col_name = None
-    inventory_awc_code_col_name = None
     inventory_aww_name_col_name = None
-    inventory_lgd_name_col_name = None
-    inventory_lgd_code_col_name = None
-    inventory_username = None
-    inventory_password = None
-    inventory_state_code = None
-    inventory_state_name = None
-    inventory_district_code = None
-    inventory_district_name = None
-    inventory_sub_district_name = None
-    inventory_project_code = None
-    inventory_project_name = None
-    inventory_sector_code = None
-    inventory_sector_name = None
-    inventory_awc_code = None
-    inventory_awc_name = None
-    inventory_lgd_code = None
-    inventory_lgd_name = None
-    inventory_aww_name = None
 
-    for col_name in inventory_worksheet.fieldnames:
-        if "username" in col_name:
-            inventory_username_col_name = col_name
-        if "password" in col_name:
-            inventory_password_col_name = col_name
-        if "state" in col_name and "code" in col_name:
-            inventory_state_code_col_name = col_name
-        if "state" in col_name and "name" in col_name:
-            inventory_state_name_col_name = col_name
-        if "district" in col_name and "code" in col_name:
-            inventory_district_code_col_name = col_name
+    # find columns
+    inventory_worksheet_columns = inventory_worksheet.fieldnames
+    for col_name in inventory_worksheet_columns:
+        # find special columns that need check for both present and missing parts
         if (
             "district" in col_name
             and "name" in col_name
@@ -175,83 +132,63 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
         ):
             inventory_district_name_col_name = col_name
         if (
-            "sub" in col_name
-            and "district" in col_name
-            and "name" in col_name
-        ):
-            inventory_sub_district_name_col_name = col_name
-        if "project" in col_name and "code" in col_name:
-            inventory_project_code_col_name = col_name
-        if "project" in col_name and "name" in col_name:
-            inventory_project_name_col_name = col_name
-        if "sector" in col_name and "code" in col_name:
-            inventory_sector_code_col_name = col_name
-        if "sector" in col_name and "name" in col_name:
-            inventory_sector_name_col_name = col_name
-        if "awc" in col_name and "name" in col_name:
-            inventory_awc_name_col_name = col_name
-        if "awc" in col_name and "code" in col_name:
-            inventory_awc_code_col_name = col_name
-        if (
             "aww" in col_name
             and "name" in col_name
             and "helper" not in col_name
         ):
             inventory_aww_name_col_name = col_name
-        if "city" in col_name and "name" in col_name:
-            inventory_lgd_name_col_name = col_name
-        if "lgd" in col_name and "code" in col_name:
-            inventory_lgd_code_col_name = col_name
+
+    inventory_username_col_name = _get_column_name(inventory_worksheet_columns, USERNAME_COLUMN)
+    inventory_password_col_name = _get_column_name(inventory_worksheet_columns, PASSWORD_COLUMN)
+    inventory_state_code_col_name = _get_column_name(inventory_worksheet_columns, ['state', 'code'])
+    inventory_state_name_col_name = _get_column_name(inventory_worksheet_columns, ['state', 'name'])
+    inventory_district_code_col_name = _get_column_name(inventory_worksheet_columns, ['district', 'code'])
+    inventory_sub_district_name_col_name = _get_column_name(inventory_worksheet_columns, ['sub', 'district', 'name'])
+    inventory_project_code_col_name = _get_column_name(inventory_worksheet_columns, ['project', 'code'])
+    inventory_project_name_col_name = _get_column_name(inventory_worksheet_columns, ['project', 'name'])
+    inventory_sector_code_col_name = _get_column_name(inventory_worksheet_columns, ['sector', 'code'])
+    inventory_sector_name_col_name = _get_column_name(inventory_worksheet_columns, ['sector', 'name'])
+    inventory_awc_name_col_name = _get_column_name(inventory_worksheet_columns, ['awc', 'name'])
+    inventory_awc_code_col_name = _get_column_name(inventory_worksheet_columns, ['awc', 'code'])
+    inventory_lgd_name_col_name = _get_column_name(inventory_worksheet_columns, ['city', 'name'])
+    inventory_lgd_code_col_name = _get_column_name(inventory_worksheet_columns, ['lgd', 'code'])
+
+    # find values
+    # read all rows since we can do it only once
+    mobile_worksheet = list(mobile_worksheet)
+    mobile_username = _get_column_values(mobile_worksheet, USERNAME_COLUMN)
+    mobile_password = _get_column_values(mobile_worksheet, PASSWORD_COLUMN)
 
     # read all rows since we can do it only once
     inventory_worksheet = list(inventory_worksheet)
-    if inventory_username_col_name:
-        inventory_username = _get_column_values(inventory_worksheet, inventory_username_col_name)[:number_of_awcs]
-    if inventory_password_col_name:
-        inventory_password = _get_column_values(inventory_worksheet, inventory_password_col_name)[:number_of_awcs]
-    if inventory_state_code_col_name:
-        inventory_state_code = _get_column_values(inventory_worksheet, inventory_state_code_col_name)[:number_of_awcs]
-    if inventory_state_name_col_name:
-        inventory_state_name = _get_column_values(inventory_worksheet, inventory_state_name_col_name)[:number_of_awcs]
-    if inventory_district_code_col_name:
-        inventory_district_code = _get_column_values(inventory_worksheet,
-                                                     inventory_district_code_col_name)[:number_of_awcs]
-    if inventory_district_name_col_name:
-        inventory_district_name = _get_column_values(inventory_worksheet,
-                                                     inventory_district_name_col_name)[:number_of_awcs]
-    if inventory_sub_district_name_col_name:
-        inventory_sub_district_name = _get_column_values(inventory_worksheet,
-                                                         inventory_sub_district_name_col_name)[:number_of_awcs]
-    if inventory_project_code_col_name:
-        inventory_project_code = _get_column_values(inventory_worksheet,
-                                                    inventory_project_code_col_name)[:number_of_awcs]
-    if inventory_project_name_col_name:
-        inventory_project_name = _get_column_values(inventory_worksheet,
-                                                    inventory_project_name_col_name)[:number_of_awcs]
-    if inventory_sector_code_col_name:
-        inventory_sector_code = _get_column_values(inventory_worksheet,
-                                                   inventory_sector_code_col_name)[:number_of_awcs]
-    if inventory_sector_name_col_name:
-        inventory_sector_name = _get_column_values(inventory_worksheet,
-                                                   inventory_sector_name_col_name)[:number_of_awcs]
-    if inventory_awc_code_col_name:
-        inventory_awc_code = _get_column_values(inventory_worksheet, inventory_awc_code_col_name)[:number_of_awcs]
-    if inventory_awc_name_col_name:
-        inventory_awc_name = _get_column_values(inventory_worksheet, inventory_awc_name_col_name)[:number_of_awcs]
-    if inventory_lgd_code_col_name:
-        inventory_lgd_code = _get_column_values(inventory_worksheet, inventory_lgd_code_col_name)[:number_of_awcs]
-    if inventory_lgd_name_col_name:
-        inventory_lgd_name = _get_column_values(inventory_worksheet, inventory_lgd_name_col_name)[:number_of_awcs]
-    if inventory_aww_name_col_name:
-        inventory_aww_name = _get_column_values(inventory_worksheet, inventory_aww_name_col_name)[:number_of_awcs]
+    inventory_username = _get_column_values(inventory_worksheet, inventory_username_col_name)[:number_of_awcs]
+    inventory_password = _get_column_values(inventory_worksheet, inventory_password_col_name)[:number_of_awcs]
+    inventory_state_code = _get_column_values(inventory_worksheet, inventory_state_code_col_name)[:number_of_awcs]
+    inventory_state_name = _get_column_values(inventory_worksheet, inventory_state_name_col_name)[:number_of_awcs]
+    inventory_district_code = _get_column_values(inventory_worksheet,
+                                                 inventory_district_code_col_name)[:number_of_awcs]
+    inventory_district_name = _get_column_values(inventory_worksheet,
+                                                 inventory_district_name_col_name)[:number_of_awcs]
+    inventory_sub_district_name = _get_column_values(inventory_worksheet,
+                                                     inventory_sub_district_name_col_name)[:number_of_awcs]
+    inventory_project_code = _get_column_values(inventory_worksheet,
+                                                inventory_project_code_col_name)[:number_of_awcs]
+    inventory_project_name = _get_column_values(inventory_worksheet,
+                                                inventory_project_name_col_name)[:number_of_awcs]
+    inventory_sector_code = _get_column_values(inventory_worksheet,
+                                               inventory_sector_code_col_name)[:number_of_awcs]
+    inventory_sector_name = _get_column_values(inventory_worksheet,
+                                               inventory_sector_name_col_name)[:number_of_awcs]
+    inventory_awc_code = _get_column_values(inventory_worksheet, inventory_awc_code_col_name)[:number_of_awcs]
+    inventory_awc_name = _get_column_values(inventory_worksheet, inventory_awc_name_col_name)[:number_of_awcs]
+    inventory_lgd_code = _get_column_values(inventory_worksheet, inventory_lgd_code_col_name)[:number_of_awcs]
+    inventory_lgd_name = _get_column_values(inventory_worksheet, inventory_lgd_name_col_name)[:number_of_awcs]
+    inventory_aww_name = _get_column_values(inventory_worksheet, inventory_aww_name_col_name)[:number_of_awcs]
 
+    # find columns
     district_column_names = district_worksheet.fieldnames
-    district_district_name = district_sub_district_name = None
-    for index, col_name in enumerate(district_column_names):
-        if "district" and "name" in col_name:
-            district_district_name = col_name
-        if "sub" and "district" and "name" in col_name:
-            district_sub_district_name = col_name
+    district_district_name = _get_column_name(district_column_names, ['district', 'name'])
+    district_sub_district_name = _get_column_name(district_column_names, ['sub', 'district', 'name'])
 
     inventory_district_code_dict = defaultdict(list)
     inventory_project_code_dict = defaultdict(list)
@@ -259,6 +196,7 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
     errors = []
 
     if mobile_username and mobile_password and inventory_username and inventory_password:
+        rand = int(random() * 100)
         if not (
             mobile_username[rand] == inventory_username[rand]
             and mobile_password[rand] == inventory_password[rand]
@@ -289,8 +227,7 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
         ):
             if name not in inventory_district_code_dict[code]:
                 inventory_district_code_dict[code].append(name)
-    print('district_map:')
-    print(inventory_district_code_dict)
+
     for key, value in inventory_district_code_dict.items():
         if len(value) > 1:
             errors.append(
@@ -394,7 +331,9 @@ def validate_inventory_upload(mobile_worksheet, inventory_worksheet, district_wo
 
 
 def _get_column_values(worksheet, column_name):
-    return list(row.get(column_name) for row in worksheet)
+    if column_name:
+        return list(row.get(column_name) for row in worksheet)
+    return []
 
 
 def __check_unique(column_name, column_values, number_of_awcs=None):
@@ -603,9 +542,13 @@ def __find_dist_subdist(colname, inventory_dist_subdist, district_dist_subdist):
     return errors
 
 
-def _get_column_name(column_names, column_name):
-    # get column name that matches the required column name
-    for name in column_names:
-        col_name = str(name)
-        if column_name in col_name.lower():
-            return col_name
+def _get_column_name(column_names, names):
+    # get column name that contains the required names
+    names = [names] if not isinstance(names, list) else names
+    for column_name in column_names:
+        column_name_lower = str(column_name).lower()
+        for name in names:
+            if name not in column_name_lower:
+                break
+        else:
+            return column_name
