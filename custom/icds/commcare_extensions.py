@@ -183,9 +183,9 @@ def icds_emwf_options_user_query_mutators(domain):
 @custom_clean_password.extend()
 def clean_password(password):
     strength = password_strength(password)
-    message = _('Password is not strong enough. Requirements: 1 special character, '
-                '1 number, 1 capital letter, minimum length of 8 characters.')
-    return strength, message
+    if strength['score'] < 2:
+        return _('Password is not strong enough. Requirements: 1 special character, '
+                 '1 number, 1 capital letter, minimum length of 8 characters.')
 
 
 def password_strength(value):
