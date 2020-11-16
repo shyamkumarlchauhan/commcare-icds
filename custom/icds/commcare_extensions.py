@@ -182,25 +182,14 @@ def icds_emwf_options_user_query_mutators(domain):
 
 @custom_clean_password.extend()
 def clean_password(password):
-    strength = password_strength(password)
-    if strength['score'] < 2:
+    if not _complex_password(password):
         return _('Password is not strong enough. Requirements: 1 special character, '
                  '1 number, 1 capital letter, minimum length of 8 characters.')
 
 
-def password_strength(value):
+def _complex_password(password):
     # 1 Special Character, 1 Number, 1 Capital Letter with the length of Minimum 8
-    # initial score rigged to reach 2 when all requirements are met
-    score = -2
-    if SPECIAL.search(value):
-        score += 1
-    if NUMBER.search(value):
-        score += 1
-    if UPPERCASE.search(value):
-        score += 1
-    if len(value) >= 8:
-        score += 1
-    return {"score": score}
+    return len(password) >= 8 and all(regex.search(password) for regex in (SPECIAL, NUMBER, UPPERCASE))
 
 
 def _get_uppercase_unicode_regexp():
