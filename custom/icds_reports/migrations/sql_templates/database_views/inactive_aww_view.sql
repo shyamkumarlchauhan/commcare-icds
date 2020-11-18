@@ -19,4 +19,4 @@ CREATE VIEW inactive_aww_view AS
     FROM "public"."icds_reports_aggregateinactiveaww" "aww"
     LEFT OUTER JOIN "public"."awc_location_local" "loc" ON (
         ("loc"."doc_id" = "aww"."awc_id")
-    ) WHERE "aww"."awc_id" IS NULL AND "loc"."doc_id" != 'All'
+    ) WHERE "loc"."aggregation_level" = 5
