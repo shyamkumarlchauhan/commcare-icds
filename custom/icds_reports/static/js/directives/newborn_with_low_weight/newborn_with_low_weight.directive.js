@@ -51,7 +51,7 @@ function NewbornWithLowBirthController($scope, $routeParams, $location, $filter,
                 indicator_value: lowBirth,
             },
             {
-                indicator_name: 'Total Number of children born and weight in given month: ',
+                indicator_name: 'Total Number of children born and weighed in given month: ',
                 indicator_value: inMonthTotal,
             },
             {
@@ -59,11 +59,11 @@ function NewbornWithLowBirthController($scope, $routeParams, $location, $filter,
                 indicator_value: percent,
             },
             {
-                indicator_name: '% of children with weight in normal: ',
+                indicator_name: '% newborns with normal weight: ',
                 indicator_value: percentNormal,
             },
             {
-                indicator_name: '% Unweighted' + chosenFilters + ': ',
+                indicator_name: '% Unweighed newborns' + chosenFilters + ': ',
                 indicator_value: unweighedPercent,
             },
         ];
@@ -94,7 +94,7 @@ function NewbornWithLowBirthController($scope, $routeParams, $location, $filter,
                 indicator_value: $filter('indiaNumbers')(dataInMonth.low_birth),
             },
             {
-                indicator_name: 'Total Number of children born and weight in given month: ',
+                indicator_name: 'Total Number of children born and weighed in given month: ',
                 indicator_value: $filter('indiaNumbers')(dataInMonth.in_month),
             },
             {
@@ -104,13 +104,13 @@ function NewbornWithLowBirthController($scope, $routeParams, $location, $filter,
                 ),
             },
             {
-                indicator_name: '% of children with weight in normal: ',
+                indicator_name: '% newborns with normal weight: ',
                 indicator_value: d3.format('.2%')(
                     (dataInMonth.in_month - dataInMonth.low_birth) / (dataInMonth.in_month || 1)
                 ),
             },
             {
-                indicator_name: '% Unweighted: ',
+                indicator_name: '% Unweighed newborns: ',
                 indicator_value: d3.format('.2%')(
                     (dataInMonth.all - dataInMonth.in_month) / (dataInMonth.all || 1)
                 ),

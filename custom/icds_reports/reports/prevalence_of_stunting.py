@@ -143,7 +143,7 @@ def get_prevalence_of_stunting_data_map(domain, config, loc_level, show_test=Fal
                     'value': indian_formatted_number(measured_total)
                 },
                 {
-                    'indicator': 'Number of Children{} unmeasured:'.format(chosen_filters),
+                    'indicator': 'Number of Children{} with height unmeasured:'.format(chosen_filters),
                     'value': indian_formatted_number(all_total - measured_total)
                 },
                 {
@@ -155,7 +155,7 @@ def get_prevalence_of_stunting_data_map(domain, config, loc_level, show_test=Fal
                     'value': '%.2f%%' % (moderate_total * 100 / float(measured_total or 1))
                 },
                 {
-                    'indicator': '% children{} with normal stunted growth:'.format(chosen_filters),
+                    'indicator': '% children{} with normal height-for-age:'.format(chosen_filters),
                     'value': '%.2f%%' % (normal_total * 100 / float(measured_total or 1))
                 }
             ]

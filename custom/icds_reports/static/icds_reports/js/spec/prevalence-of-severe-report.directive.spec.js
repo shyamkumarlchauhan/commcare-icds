@@ -89,7 +89,7 @@ describe('Prevalence Of Severe Directive feature flag disable', function () {
             '<p>test</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>15</strong></div>' +
-            '<div>Number of Children (0 - 5 years) unmeasured: <strong>15</strong></div>' +
+            '<div>Number of Children (0 - 5 years) with weight and height unmeasured: <strong>15</strong></div>' +
             '<div>% Severely Acute Malnutrition (0 - 5 years): <strong>33.33%</strong></div>' +
             '<div>% Moderately Acute Malnutrition (0 - 5 years): <strong>33.33%</strong></div>' +
             '<div>% Normal (0 - 5 years): <strong>33.33%</strong></div></div>');
@@ -174,7 +174,7 @@ describe('Prevalence Of Severe Directive feature flag disable', function () {
         var expected = '<p><strong>Jul 2017</strong></p><br/>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>10</strong></div>' +
-            '<div>Number of Children (0 - 5 years) unmeasured: <strong>20</strong></div>' +
+            '<div>Number of Children (0 - 5 years) with weight and height unmeasured: <strong>20</strong></div>' +
             '<div>% children (0 - 5 years)  with Normal Acute Malnutrition: <strong>10.00%</strong></div>' +
             '<div>% children (0 - 5 years)  with Moderate Acute Malnutrition (MAM): <strong>15.00%</strong></div>' +
             '<div>% children (0 - 5 years)  with Severe Acute Malnutrition (SAM): <strong>20.00%</strong></div>';
@@ -188,7 +188,7 @@ describe('Prevalence Of Severe Directive feature flag disable', function () {
             '<p>Ambah</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>0</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>0</strong></div>' +
-            '<div>Number of Children (0 - 5 years) unmeasured: <strong>0</strong></div>' +
+            '<div>Number of Children (0 - 5 years) with weight and height unmeasured: <strong>0</strong></div>' +
             '<div>% Severely Acute Malnutrition (0 - 5 years): <strong>NaN%</strong></div>' +
             '<div>% Moderately Acute Malnutrition (0 - 5 years): <strong>NaN%</strong></div>' +
             '<div>% Normal (0 - 5 years): <strong>NaN%</strong></div></div>';
@@ -317,7 +317,7 @@ describe('Prevalence Of Severe Directive feature flag enable', function () {
             '<p>test</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>15</strong></div>' +
-            '<div>Number of Children (0 - 5 years) unmeasured: <strong>15</strong></div>' +
+            '<div>Number of Children (0 - 5 years) with weight and height unmeasured: <strong>15</strong></div>' +
             '<div>% Severely Acute Malnutrition (0 - 5 years): <strong>33.33%</strong></div>' +
             '<div>% Moderately Acute Malnutrition (0 - 5 years): <strong>33.33%</strong></div>' +
             '<div>% Normal (0 - 5 years): <strong>33.33%</strong></div></div>');
@@ -402,7 +402,7 @@ describe('Prevalence Of Severe Directive feature flag enable', function () {
         var expected = '<p><strong>Jul 2017</strong></p><br/>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>10</strong></div>' +
-            '<div>Number of Children (0 - 5 years) unmeasured: <strong>20</strong></div>' +
+            '<div>Number of Children (0 - 5 years) with weight and height unmeasured: <strong>20</strong></div>' +
             '<div>% children (0 - 5 years)  with Normal Acute Malnutrition: <strong>10.00%</strong></div>' +
             '<div>% children (0 - 5 years)  with Moderate Acute Malnutrition (MAM): <strong>15.00%</strong></div>' +
             '<div>% children (0 - 5 years)  with Severe Acute Malnutrition (SAM): <strong>20.00%</strong></div>';
@@ -416,7 +416,7 @@ describe('Prevalence Of Severe Directive feature flag enable', function () {
             '<p>Ambah</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>0</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>0</strong></div>' +
-            '<div>Number of Children (0 - 5 years) unmeasured: <strong>0</strong></div>' +
+            '<div>Number of Children (0 - 5 years) with weight and height unmeasured: <strong>0</strong></div>' +
             '<div>% Severely Acute Malnutrition (0 - 5 years): <strong>NaN%</strong></div>' +
             '<div>% Moderately Acute Malnutrition (0 - 5 years): <strong>NaN%</strong></div>' +
             '<div>% Normal (0 - 5 years): <strong>NaN%</strong></div></div>';

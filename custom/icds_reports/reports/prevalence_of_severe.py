@@ -144,7 +144,7 @@ def get_prevalence_of_severe_data_map(domain, config, loc_level, show_test=False
                     'value': indian_formatted_number(measured_for_all_locations)
                 },
                 {
-                    'indicator': 'Number of children{} unmeasured:'.format(chosen_filters),
+                    'indicator': 'Number of children{} with weight and height unmeasured:'.format(chosen_filters),
                     'value': indian_formatted_number(height_eligible_for_all_locations - weighed_for_all_locations)
                 },
                 {

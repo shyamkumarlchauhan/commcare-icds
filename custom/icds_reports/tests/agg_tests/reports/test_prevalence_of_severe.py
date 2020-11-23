@@ -118,7 +118,7 @@ class TestPrevalenceOfSevere(TestCase):
                 {'indicator': 'Total Children (0 - 5 years) weighed in given month:', 'value': '695'},
                 {'indicator': 'Total Children (0 - 5 years) with weight and height measured in given month:',
                  'value': '31'},
-                {'indicator': 'Number of children (0 - 5 years) unmeasured:', 'value': '294'},
+                {'indicator': 'Number of children (0 - 5 years) with weight and height unmeasured:', 'value': '294'},
                 {'indicator': '% Severely Acute Malnutrition (0 - 5 years):', 'value': '0.00%'},
                 {'indicator': '% Moderately Acute Malnutrition (0 - 5 years):', 'value': '25.81%'},
                 {'indicator': '% Normal (0 - 5 years):', 'value': '61.29%'}
