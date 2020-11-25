@@ -116,70 +116,70 @@ class ISSNIPMonthlyReport(object):
                 'caste': 'sc',
                 'sex': 'M',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             sc_girls_48_72=Count(self.filter_by({
                 'caste': 'sc',
                 'sex': 'F',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             st_boys_48_72=Count(self.filter_by({
                 'caste': 'st',
                 'sex': 'M',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             st_girls_48_72=Count(self.filter_by({
                 'caste': 'st',
                 'sex': 'F',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             obc_boys_48_72=Count(self.filter_by({
                 'caste': 'obc',
                 'sex': 'M',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             obc_girls_48_72=Count(self.filter_by({
                 'caste': 'obc',
                 'sex': 'F',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             general_boys_48_72=Count(self.filter_by({
                 'caste': 'other',
                 'sex': 'M',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             general_girls_48_72=Count(self.filter_by({
                 'caste': 'other',
                 'sex': 'F',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             total_boys_48_72=Count(self.filter_by({
                 'sex': 'M',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             total_girls_48_72=Count(self.filter_by({
                 'sex': 'F',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21
+                'lunch_count__gte': 21
             }, 'case_id', None)),
             minority_boys_48_72_num=Count(self.filter_by({
                 'sex': 'M',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21,
+                'lunch_count__gte': 21,
                 'minority': 'yes'
             }, 'case_id', None)),
             minority_girls_48_72_num=Count(self.filter_by({
                 'sex': 'F',
                 'age_tranche__in': ['48', '60', '72'],
-                'days_ration_given_child__gt': 21,
+                'lunch_count__gte': 21,
                 'minority': 'yes'
             }, 'case_id', None)),
             pre_sc_boys_48_72=Count(self.filter_by({
