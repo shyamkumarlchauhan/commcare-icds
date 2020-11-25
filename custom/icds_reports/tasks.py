@@ -1465,65 +1465,24 @@ def aggregate_validation_helper(agg_date):
                                    .order_by('awc_id'))
     is_launched_check_bad_data = []
     home_conduct_check_bad_data = []
-    eligibility_check_bad_data = []
-    missed_ids_from_performance = []
-    missed_ids_from_aggregate = []
-    performance_index = 0
-    aggregate_index = 0
-    while performance_index < len(awc_performance_rows_list) and aggregate_index < len(awc_aggregate_rows_list):
-        awc_from_performance = awc_performance_rows_list[performance_index]
-        awc_from_aggregate = awc_aggregate_rows_list[aggregate_index]
-        awc_id_from_performance = awc_from_performance['awc_id']
-        awc_id_from_aggregate = awc_from_aggregate['awc_id']
-        # skipping unmatched rows
-        while awc_id_from_performance != awc_id_from_aggregate:
-            if awc_id_from_performance > awc_id_from_aggregate:
-                missed_ids_from_performance.append(awc_id_from_performance)
-                aggregate_index += 1
-            else:
-                missed_ids_from_aggregate.append(awc_id_from_aggregate)
-                performance_index += 1
-            awc_from_performance = awc_performance_rows_list[performance_index]
-            awc_from_aggregate = awc_aggregate_rows_list[aggregate_index]
 
-        # check for launched AWCs
-        row_data = get_awc_is_launched_mismatch_row(awc_from_performance, awc_from_aggregate)
-        if row_data is not None:
-            is_launched_check_bad_data.append(row_data)
+    awc_aggregate_rows_dict = {row['awc_id']: row for row in awc_aggregate_rows_list}
 
-        # check for home conduct percentage
-        row_data = get_awc_home_conduct_mismatch_row(awc_from_performance, awc_from_aggregate)
-        if row_data is not None:
-            home_conduct_check_bad_data.append(row_data)
 
-        # check for eligibility
-        row_data = get_awc_eligibility_mismatch_row(awc_from_performance)
-        if row_data is not None:
-            eligibility_check_bad_data.append(row_data)
+    for awc_from_performance in awc_performance_rows_list:
 
-        # incrementing the indexes
-        performance_index += 1
-        aggregate_index += 1
+        if awc_from_performance['awc_id'] in awc_aggregate_rows_dict:
+            awc_from_aggregate = awc_aggregate_rows_dict[awc_from_performance['awc_id']]
 
-    mismatched_performance_awc_ids_length = len(missed_ids_from_performance)
-    mismatched_aggregate_awc_ids_length = len(missed_ids_from_aggregate)
+            # check for launched AWCs
+            row_data = get_awc_is_launched_mismatch_row(awc_from_performance, awc_from_aggregate)
+            if row_data is not None:
+                is_launched_check_bad_data.append(row_data)
 
-    awc_ids_mismatch_count = mismatched_performance_awc_ids_length
-    if mismatched_performance_awc_ids_length < mismatched_aggregate_awc_ids_length:
-        awc_ids_mismatch_count = mismatched_aggregate_awc_ids_length
-
-    # merging two mismatched awc_ids into a single list
-    awc_ids_mismatched_list = []
-    for i in range(awc_ids_mismatch_count):
-        try:
-            awc_id_mismatched_row = [missed_ids_from_performance[i], missed_ids_from_aggregate[i]]
-        except IndexError:
-            if i >= mismatched_performance_awc_ids_length:
-                missed_ids_from_performance.append('')
-            if i >= mismatched_aggregate_awc_ids_length:
-                missed_ids_from_aggregate.append('')
-            awc_id_mismatched_row = [missed_ids_from_performance[i], missed_ids_from_aggregate[i]]
-        awc_ids_mismatched_list.append(awc_id_mismatched_row)
+            # check for home conduct percentage
+            row_data = get_awc_home_conduct_mismatch_row(awc_from_performance, awc_from_aggregate)
+            if row_data is not None:
+                home_conduct_check_bad_data.append(row_data)
 
     file_attachments = []
     if len(is_launched_check_bad_data) > 0:
@@ -1536,18 +1495,6 @@ def aggregate_validation_helper(agg_date):
         csv_columns = ['awc_id_from_performance', 'awc_id_from_aggregate', 'AwwIncentiveReport', 'AggAwc']
         file_attachments.append({"csv_columns": csv_columns, "data": home_conduct_check_bad_data,
                                  "filename": datetime.now().strftime('incentive_report_awc_home_conduct mismatch'
-                                                                     '_%s.csv' % SERVER_DATETIME_FORMAT)})
-
-    if len(eligibility_check_bad_data) > 0:
-        csv_columns = ['awc_id_from_performance', 'Expected eligibility', 'Eligibility from performance record']
-        file_attachments.append({"csv_columns": csv_columns, "data": eligibility_check_bad_data,
-                                 "filename": datetime.now().strftime('incentive_report_awc_eligibility_mismatch'
-                                                                     '_%s.csv' % SERVER_DATETIME_FORMAT)})
-
-    if awc_ids_mismatch_count > 0:
-        csv_columns = ['awc_ids_from_performance', 'awc_ids_from_aggregate']
-        file_attachments.append({"csv_columns": csv_columns, "data": awc_ids_mismatched_list,
-                                 "filename": datetime.now().strftime('incentive_report_awc_ids_mismatch'
                                                                      '_%s.csv' % SERVER_DATETIME_FORMAT)})
 
     if len(file_attachments) > 0:
@@ -1584,57 +1531,26 @@ def get_awc_home_conduct_mismatch_row(performance_row, awcagg_row):
      from aggregate report
     """
     # checking if valid_visits or valid_denominator is zero or None as they are treated as valid cases
-    if performance_row['valid_visits'] is None or performance_row['visit_denominator'] in [0, None]:
-        home_conduct_from_report = 'None'
-    else:
-        home_conduct_from_report = performance_row['valid_visits'] / performance_row['visit_denominator']
-    if awcagg_row['valid_visits'] is None or awcagg_row['expected_visits'] in [0, None]:
-        home_conduct_from_awc = 'None'
-    else:
-        home_conduct_from_awc = awcagg_row['valid_visits'] / awcagg_row['expected_visits']
+
+    def _home_visits(valid_visits, expected_visits):
+        if valid_visits is None or expected_visits in [0, None]:
+            home_conduct_from_report = 'None'
+        else:
+            denominator = expected_visits or 1
+            home_conduct_from_report = valid_visits / round(denominator)
+            home_conduct_from_report = 1 if home_conduct_from_report > 1 else home_conduct_from_report
+
+        return home_conduct_from_report
+
+    visits_conduct_report = _home_visits(performance_row['valid_visits'], performance_row['visit_denominator'])
+
+    visits_conduct_agg_awc = _home_visits(awcagg_row['valid_visits'], awcagg_row['expected_visits'])
+
     # checking if home conduct (valid_visits/valid_denominator) from incentive report is same as that of aggregate
-    if home_conduct_from_report != home_conduct_from_awc:
-        row_data = [performance_row['awc_id'], awcagg_row['awc_id'], home_conduct_from_report,
-                    home_conduct_from_awc]
+    if visits_conduct_report != visits_conduct_agg_awc:
+        row_data = [performance_row['awc_id'], awcagg_row['awc_id'], visits_conduct_report,
+                    visits_conduct_agg_awc]
         return row_data
-    return None
-
-
-def get_awc_eligibility_mismatch_row(performance_row):
-    """
-    :param performance_row: AWCIncentiveReport object with 'awc_id', 'is_launched', 'valid_visits',
-     'visit_denominator', 'wer_weighed', 'wer_eligible', 'incentive_eligible'.
-    :return: None if no mismatch or return a row with expected eligibility and actual eligibility
-    """
-    # checking if valid_visits or valid_denominator is zero or None as they are treated as valid cases
-    if performance_row['valid_visits'] is None or performance_row['visit_denominator'] in [0, None]:
-        is_eligible = True
-    else:
-        # checking if valid_visits/valid_denominator > 0.6(60%)
-        home_conduct_from_report = performance_row['valid_visits'] / performance_row['visit_denominator']
-        if home_conduct_from_report > 0.6:
-            is_eligible = True
-        else:
-            is_eligible = False
-    if is_eligible:
-        # checking if wer_weighed or wer_eligible is zero or None as they are treated as valid cases
-        if performance_row['wer_weighed'] is None or performance_row['wer_eligible'] in [0, None]:
-            is_eligible = True
-        else:
-            # checking if wer_weighed/wer_eligible > 0.6(60%)
-            weigh_eligibility = performance_row['wer_weighed'] / performance_row['wer_eligible']
-            if weigh_eligibility > 0.6:
-                is_eligible = True
-            else:
-                is_eligible = False
-    if not performance_row['incentive_eligible']:
-        if is_eligible and performance_row['is_launched']:
-            return [performance_row['awc_id'], is_eligible and performance_row['is_launched'],
-                    performance_row['incentive_eligible']]
-    else:
-        if not (is_eligible and performance_row['is_launched']):
-            return [performance_row['awc_id'], is_eligible and performance_row['is_launched'],
-                    performance_row['incentive_eligible']]
     return None
 
 
