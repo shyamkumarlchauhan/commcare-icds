@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule, DAILY, WEEKLY, MO
 
 from django.db.models import F
-from django.db.models.aggregates import Sum, Avg
+from django.db.models.aggregates import Sum, Avg, Max
 from django.utils.translation import ugettext as _
 
 from corehq.util.view_utils import absolute_reverse
@@ -1291,7 +1291,7 @@ def get_pregnant_details(case_id, awc_id):
 @icds_quickcache([
     'start', 'length', 'order', 'reversed_order', 'awc_id'
 ], timeout=30 * 60)
-def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
+def get_awc_report_lactating(start, length, order, reversed_order, awc_id, beta=False):
     latest_available_month = date.today() - timedelta(days=1)
     first_day_month = latest_available_month.replace(day=1)
     data = CcsRecordMonthlyView.objects.filter(
@@ -1313,6 +1313,15 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
             'num_pnc_visits', 'breastfed_at_birth', 'is_ebf', 'num_rations_distributed', 'month'
         )
         data_count = data.count()
+
+        if beta:
+            breastfed_data = CcsRecordMonthlyView.objects.filter(
+                awc_id=awc_id,
+                date_death=None,
+                case_id__in=case_ids,
+            ).annotate(breastfed_at_birth=Max('breastfed_at_birth')).values('case_id').order_by('case_id')
+
+            breastfed_data_dict = {row['case_id']: row['breastfed_at_birth'] for row in breastfed_data}
     else:
         data = []
         data_count = 0
@@ -1336,6 +1345,8 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
         )
 
     for row in data:
+        if beta:
+            row['breastfed_at_birth'] = breastfed_data_dict[row['case_id']]
         config['data'].append(base_data(row))
 
     def ordering_format(record):

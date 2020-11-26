@@ -965,7 +965,8 @@ class AwcReportsView(BaseReportView):
                     length,
                     order_by_name_column,
                     reversed_order,
-                    config['awc_id']
+                    config['awc_id'],
+                    icds_features_flag
                 )
         elif step == 'take_home_ration':
             data = get_awc_report_thr(
