@@ -68,7 +68,13 @@ sdr_pw_lw_children_report = prepare_excel_reports(config, aggregation_level, inc
 icds_file = get_object_or_404(IcdsFile, blob_id=sdr_pw_lw_children_report['uuid'])
 fstream = icds_file.get_file_from_blobdb()
 
-with open('sdr_pw_lw_children_report_aug.xlsx', 'wb') as fout:
+config['beneficiary_category'] = 'children_3_6'
+sdr_children_3_6_report = prepare_excel_reports(config, aggregation_level, include_test, False, '', 'icds-cas',
+                                                  export_format, indicator)
+icds_file = get_object_or_404(IcdsFile, blob_id=sdr_children_3_6_report['uuid'])
+fstream = icds_file.get_file_from_blobdb()
+
+with open('sdr_children_3_6_report_aug.xlsx', 'wb') as fout:
     fout.write(fstream.read())
 
 indicator = 15
