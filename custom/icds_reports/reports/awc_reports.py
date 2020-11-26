@@ -1319,9 +1319,8 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id, beta=
                 awc_id=awc_id,
                 date_death=None,
                 case_id__in=case_ids,
-            ).annotate(breastfed_at_birth=Max('breastfed_at_birth')).values('case_id').order_by('case_id')
-
-            breastfed_data_dict = {row['case_id']: row['breastfed_at_birth'] for row in breastfed_data}
+            ).values('case_id').annotate(breastfed_at_birth_latest=Max('breastfed_at_birth')).order_by('case_id')
+            breastfed_data_dict = {row['case_id']: row['breastfed_at_birth_latest'] for row in breastfed_data}
     else:
         data = []
         data_count = 0
