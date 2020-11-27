@@ -1,13 +1,14 @@
 import json
 from collections import Counter
 
+from corehq.apps.domain.dbaccessors import get_doc_ids_in_domain_by_type
 from corehq.apps.domain.models import Domain
 from corehq.apps.dump_reload.couch.dump import _get_toggles_to_migrate, get_doc_ids_to_dump
-from corehq.apps.dump_reload.couch.id_providers import DocTypeIDProvider
 from corehq.apps.dump_reload.exceptions import DomainDumpError
 from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
 from corehq.apps.users.models import CommCareUser
 from corehq.blobs.models import BlobMeta
+from corehq.util.couch import get_document_class_by_doc_type
 from dimagi.utils.couch.database import iter_docs
 
 EXCLUDE_MODELS_COUCH = {
@@ -79,7 +80,8 @@ def users(domain, context):
 
 
 def mobile_auth_records(domain, context):
-    doc_class, doc_ids = DocTypeIDProvider('MobileAuthKeyRecord').get_doc_ids(domain)
+    doc_class = get_document_class_by_doc_type('MobileAuthKeyRecord')
+    doc_ids = get_doc_ids_in_domain_by_type(domain, 'MobileAuthKeyRecord')
     for doc in iter_docs(doc_class.get_db(), doc_ids, chunksize=500):
         if doc["user_id"] in context.user_ids:
             yield doc
