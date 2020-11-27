@@ -42,13 +42,14 @@ def dump_couch_data(domain, context, output, blob_meta_output):
         if doc_type != current_doc_type:
             print(f"Dump of {current_doc_type} complete: {counter[current_doc_type]}")
             print(f"Starting dump of {doc_type}")
+            current_doc_type = doc_type
 
         counter[doc_type] += 1
         if counter[doc_type] % 500 == 0:
             print(f"\t{doc_type} progress: {counter[doc_type]}")
 
         total_progress = sum(counter.values())
-        if total_progress % 1000:
+        if total_progress % 1000 == 0:
             print(f"Total progress: {total_progress}")
         json.dump(obj, output)
         output.write('\n')
