@@ -1,7 +1,7 @@
 import os
-from functools import cached_property
 
 from django.core.management.base import BaseCommand
+from django.utils.functional import cached_property
 
 from corehq.apps.cleanup.utils import confirm
 from corehq.apps.locations.dbaccessors import get_users_by_location_id
