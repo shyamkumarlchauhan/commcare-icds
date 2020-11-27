@@ -10,6 +10,7 @@ from corehq.apps.dump_reload.util import get_model_class
 from corehq.blobs import CODES
 from corehq.blobs.models import BlobMeta
 from corehq.sql_db.util import split_list_by_db_partition
+from custom.icds.data_management.state_dump.couch import BLOB_META_STATS_KEY
 from dimagi.utils.chunked import chunked
 
 ALWAYS_EXCLUDE_MODELS_SQL = {
@@ -35,12 +36,10 @@ ALWAYS_EXCLUDE_MODELS_SQL = {
     "sms.SMS",
     "smsforms.SQLXFormsSession",
     "ota.DemoUserRestore",  # can be re-generated
+    "blobs.BlobMeta"  # these are exported along with other models
 }
 
-FILTERED_SQL_MODELS = {
-    "auth.User",
-    "mobile_auth.SQLMobileAuthKeyRecord",
-    "locations.SQLLocation",
+SHARDED_MODELS = {
     "form_processor.XFormInstanceSQL",
     "form_processor.XFormOperationSQL",
     "form_processor.CommCareCaseSQL",
@@ -51,14 +50,24 @@ FILTERED_SQL_MODELS = {
     "form_processor.LedgerTransaction",
 }
 
+FILTERED_SQL_MODELS = {
+    "auth.User",
+    "mobile_auth.SQLMobileAuthKeyRecord",
+    "locations.SQLLocation",
+} | SHARDED_MODELS
+
+
 AVAILABLE_SQL_TYPES = (
-    set(APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP.keys()) -
+    set(APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP) -
     ALWAYS_EXCLUDE_MODELS_SQL -
-    {"blobs.BlobMeta"}  # these are exported along with other models
-)
+    SHARDED_MODELS
+) | {
+    "form_processor.XFormInstanceSQL",
+    "form_processor.CommCareCaseSQL"
+}
 
 
-def dump_simple_sql_data(domain, context, output):
+def dump_simple_sql_data(domain, context, output, blob_meta_output, logger):
     stats = Counter()
     data = get_simple_sql_data(domain, context, stats)
     JsonLinesSerializer().serialize(
@@ -70,9 +79,9 @@ def dump_simple_sql_data(domain, context, output):
     return stats
 
 
-def dump_form_case_data(domain, context, output, blob_output):
+def dump_form_case_data(domain, context, output, blob_meta_output, logger):
     stats = Counter()
-    data = get_form_case_data(domain, context, blob_output, stats)
+    data = get_form_case_data(domain, context, blob_meta_output, stats)
     JsonLinesSerializer().serialize(
         data,
         use_natural_foreign_keys=False,
@@ -133,14 +142,17 @@ class AndFilter:
 
 
 def get_form_case_data(domain, context, blob_output, stats):
-    form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
-    case_filter = AndFilter(IDFilter("owner_id", context.owner_ids), SimpleFilter("domain"))
-    builders = [
-        (
+    builders = []
+    if not context.types or "form_processor.XFormInstanceSQL" in context.types:
+        form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
+        builders.append((
             FilteredModelIteratorBuilder("form_processor.XFormInstanceSQL", form_filter),
             [("form_processor.XFormOperationSQL", "form")]
-        ),
-        (
+        ))
+
+    if not context.types or "form_processor.CommCareCaseSQL" in context.types:
+        case_filter = AndFilter(IDFilter("owner_id", context.owner_ids), SimpleFilter("domain"))
+        builders.append((
             FilteredModelIteratorBuilder("form_processor.CommCareCaseSQL", case_filter),
             [
                 ("form_processor.CommCareCaseIndexSQL", "case"),
@@ -148,8 +160,8 @@ def get_form_case_data(domain, context, blob_output, stats):
                 ("form_processor.LedgerValue", "case"),
                 ("form_processor.LedgerTransaction", "case"),
             ]
-        ),
-     ]
+        ))
+
     for builder, related_models in builders:
         for model_class, prepared_builder in get_prepared_builders(domain, [builder]):
             for iterator in prepared_builder.iterators():
@@ -191,5 +203,5 @@ def get_form_attachments(models, stats):
             type_code=CODES.form_xml, parent_id__in=parent_ids
         ).iterator()
         for obj in meta:
-            stats['blobs.BlobMeta'] += 1
+            stats[BLOB_META_STATS_KEY] += 1
             yield obj
