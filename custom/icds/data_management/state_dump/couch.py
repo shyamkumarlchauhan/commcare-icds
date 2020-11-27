@@ -37,7 +37,7 @@ def dump_couch_data(domain, context, output, blob_meta_output):
     counter = Counter()
     for obj in _extract_blob_meta(data, blob_meta_output):
         counter[obj["doc_type"]] += 1
-        json.dump(obj.to_json(), output)
+        json.dump(obj, output)
         output.write('\n')
     return counter
 
