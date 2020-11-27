@@ -16,6 +16,7 @@ EXCLUDE_MODELS_COUCH = {
     "RepeatRecord",
     "Group",
     "CommCareMultimedia",  # new app being developed with it's own MM
+    "WebUser",  # excluding these since they are all internal Dimagi users
 
     # filter maybe
     "ReportNotification",
@@ -28,7 +29,6 @@ EXCLUDE_MODELS_COUCH = {
     # Filter
     "LinkedApplication",
     "MobileAuthKeyRecord",
-    "WebUser",
     "CommCareUser",
 }
 
@@ -40,7 +40,8 @@ def dump_couch_data(domain, context, output, blob_meta_output):
     for obj in _extract_blob_meta(data, blob_meta_output):
         doc_type = obj["doc_type"]
         if doc_type != current_doc_type:
-            print(f"Dump of {current_doc_type} complete: {counter[current_doc_type]}")
+            if current_doc_type:
+                print(f"\tDump of {current_doc_type} complete: {counter[current_doc_type]}")
             print(f"Starting dump of {doc_type}")
             current_doc_type = doc_type
 
