@@ -2,6 +2,7 @@ import os
 
 from django.core.management.base import BaseCommand
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 
 from corehq.apps.cleanup.utils import confirm
 from corehq.apps.locations.dbaccessors import get_users_by_location_id
@@ -9,7 +10,7 @@ from corehq.apps.locations.models import SQLLocation
 
 OWNER = "owner_ids"
 
-USER = "users_ids"
+USER = "user_ids"
 
 LOCATION = "location_ids"
 
@@ -89,5 +90,5 @@ def _write_data(filename, data):
 
 
 def get_state_id_filename(domain, state, name):
-    state = state.replace(" ", "_")
+    state = slugify(state)
     return f'{domain}-{state}-{name}.csv'
