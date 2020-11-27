@@ -36,8 +36,20 @@ EXCLUDE_MODELS_COUCH = {
 def dump_couch_data(domain, context, output, blob_meta_output):
     data = get_couch_data(domain, context)
     counter = Counter()
+    current_doc_type = None
     for obj in _extract_blob_meta(data, blob_meta_output):
-        counter[obj["doc_type"]] += 1
+        doc_type = obj["doc_type"]
+        if doc_type != current_doc_type:
+            print(f"Dump of {current_doc_type} complete: {counter[current_doc_type]}")
+            print(f"Starting dump of {doc_type}")
+
+        counter[doc_type] += 1
+        if counter[doc_type] % 500 == 0:
+            print(f"\t{doc_type} progress: {counter[doc_type]}")
+
+        total_progress = sum(counter.values())
+        if total_progress % 1000:
+            print(f"Total progress: {total_progress}")
         json.dump(obj, output)
         output.write('\n')
     return counter
