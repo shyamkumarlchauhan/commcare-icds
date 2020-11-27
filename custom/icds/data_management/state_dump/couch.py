@@ -7,9 +7,7 @@ from corehq.apps.dump_reload.couch.id_providers import DocTypeIDProvider
 from corehq.apps.dump_reload.exceptions import DomainDumpError
 from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
 from corehq.apps.users.models import CommCareUser
-from corehq.blobs import get_blob_db, NotFound
 from corehq.blobs.models import BlobMeta
-from custom.icds.data_management.state_dump import DumpBlobMeta
 from dimagi.utils.couch.database import iter_docs
 
 EXCLUDE_MODELS_COUCH = {
