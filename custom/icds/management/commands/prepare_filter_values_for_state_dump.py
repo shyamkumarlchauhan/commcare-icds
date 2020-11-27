@@ -41,9 +41,7 @@ class Command(BaseCommand):
                 user_ids.append(user._id)
                 owner_ids.extend(user.get_owner_ids())
 
-        _write_data(context.location_id_file, location_ids)
-        _write_data(context.user_id_file, user_ids)
-        _write_data(context.owner_id_file, owner_ids)
+        context.write_data(location_ids, user_ids, owner_ids)
 
 
 class FilterContext:
@@ -77,6 +75,11 @@ class FilterContext:
 
     def validate(self):
         return len(self.files_exist()) == 3
+
+    def write_data(self, location_ids, user_ids, owner_ids):
+        _write_data(self.location_id_file, location_ids)
+        _write_data(self.user_id_file, user_ids)
+        _write_data(self.owner_id_file, owner_ids)
 
 
 def _write_data(filename, data):
