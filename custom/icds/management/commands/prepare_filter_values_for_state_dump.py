@@ -10,7 +10,7 @@ from corehq.apps.locations.models import SQLLocation
 
 OWNER = "owner_ids"
 
-USER = "user_ids"
+USER = "user_data"
 
 LOCATION = "location_ids"
 
@@ -35,26 +35,38 @@ class Command(BaseCommand):
 
         location = SQLLocation.active_objects.get(domain=domain_name, location_type__name="state", name=state)
         location_ids = list(location.get_descendants(include_self=True).values_list("location_id", flat=True))
-        user_ids = []
+        user_data = []
         owner_ids = []
         for location_id in location_ids:
             for user in get_users_by_location_id(domain_name, location_id):
-                user_ids.append(user._id)
+                user_data.append(",".join([user._id, user.username]))
                 owner_ids.extend(user.get_owner_ids())
 
-        context.write_data(location_ids, user_ids, owner_ids)
+        context.write_data(location_ids, user_data, owner_ids)
 
 
 class FilterContext:
     def __init__(self, domain, state, types=None):
         self.location_id_file = get_state_id_filename(domain, state, LOCATION)
-        self.user_id_file = get_state_id_filename(domain, state, USER)
+        self.user_data_file = get_state_id_filename(domain, state, USER)
         self.owner_id_file = get_state_id_filename(domain, state, OWNER)
         self.types = types
 
     @cached_property
     def user_ids(self):
-        return self.load_file(self.user_id_file)
+        return {
+            row[0] for row in self.user_data
+        }
+
+    @cached_property
+    def usernames(self):
+        return {
+            row[1] for row in self.user_data
+        }
+
+    @cached_property
+    def user_data(self):
+        return [line.split(",") for line in self.load_file(self.user_data_file)]
 
     @cached_property
     def owner_ids(self):
@@ -71,16 +83,16 @@ class FilterContext:
     def files_exist(self):
         return [
             path
-            for path in (self.location_id_file, self.user_id_file, self.owner_id_file)
+            for path in (self.location_id_file, self.user_data_file, self.owner_id_file)
             if os.path.exists(path)
         ]
 
     def validate(self):
         return len(self.files_exist()) == 3
 
-    def write_data(self, location_ids, user_ids, owner_ids):
+    def write_data(self, location_ids, user_data, owner_ids):
         _write_data(self.location_id_file, location_ids)
-        _write_data(self.user_id_file, user_ids)
+        _write_data(self.user_data_file, user_data)
         _write_data(self.owner_id_file, owner_ids)
 
 

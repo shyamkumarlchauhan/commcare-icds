@@ -4,9 +4,12 @@ import os
 import zipfile
 from datetime import datetime
 
+from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 
 from corehq.apps.dump_reload.const import DATETIME_FORMAT
+from corehq.apps.dump_reload.util import get_model_label
+from corehq.blobs.models import BlobMeta
 from custom.icds.data_management.state_dump.couch import dump_couch_data, AVAILABLE_COUCH_TYPES, dump_toggle_data, \
     dump_domain_object, BLOB_META_STATS_KEY
 from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES, dump_simple_sql_data, dump_form_case_data
@@ -33,8 +36,15 @@ class Command(BaseCommand):
                  f'\bAvailable couch types are: {", ".join(AVAILABLE_COUCH_TYPES)}'
                  f'\nAvailable SQL types are: {AVAILABLE_SQL_TYPES}'
         )
+        parser.add_argument(
+            '--output-path', help="Write output data to this path"
+        )
 
     def handle(self, domain_name, state, **options):
+        output = options.get("output_path", None)
+        if output and os.path.exists(output):
+            raise CommandError(f"Path exists: {output}")
+
         backends = {
             'domain': dump_domain_object,
             'toggles': dump_toggle_data,
@@ -42,7 +52,7 @@ class Command(BaseCommand):
             'sql': dump_simple_sql_data,
             'sql-sharded': dump_form_case_data
         }
-        backend = options.get("backend", None)
+        backend = options.get("dumper", None)
         selected_backends = [backend] if backend else list(backends)
 
         self.utcnow = datetime.utcnow().strftime(DATETIME_FORMAT)
@@ -50,7 +60,7 @@ class Command(BaseCommand):
         if not context.validate():
             print("Some state ID files are missing. Have you run 'prepare_filter_values_for_state_dump'?")
 
-        zipname = 'data-dump-{}-{}-{}.zip'.format(domain_name, "_".join(selected_backends), self.utcnow)
+        zipname = output or 'data-dump-{}-{}-{}.zip'.format(domain_name, "_".join(selected_backends), self.utcnow)
         meta = {}  # {dumper_slug: {model_name: count}}
         for slug, backend_fn in backends.items():
             if slug in selected_backends:
@@ -79,7 +89,7 @@ class Command(BaseCommand):
         blob_name = f"sql-{slug}-blob_meta"
         blob_stats = stats.pop(BLOB_META_STATS_KEY, None)
         if blob_stats:
-            meta[blob_name] = blob_stats
+            meta[blob_name] = {get_model_label(BlobMeta): blob_stats}
 
         with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
             z.write(filename, '{}.gz'.format(slug))
@@ -90,7 +100,6 @@ class Command(BaseCommand):
         os.remove(blob_meta_filename)
 
         return meta
-
 
     def _print_stats(self, meta):
         self.stdout.ending = '\n'

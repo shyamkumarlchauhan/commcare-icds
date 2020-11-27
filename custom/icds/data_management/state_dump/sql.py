@@ -67,7 +67,7 @@ AVAILABLE_SQL_TYPES = (
 }
 
 
-def dump_simple_sql_data(domain, context, output, blob_meta_output, logger):
+def dump_simple_sql_data(domain, context, output, blob_meta_output):
     stats = Counter()
     data = get_simple_sql_data(domain, context, stats)
     JsonLinesSerializer().serialize(
@@ -79,7 +79,7 @@ def dump_simple_sql_data(domain, context, output, blob_meta_output, logger):
     return stats
 
 
-def dump_form_case_data(domain, context, output, blob_meta_output, logger):
+def dump_form_case_data(domain, context, output, blob_meta_output):
     stats = Counter()
     data = get_form_case_data(domain, context, blob_meta_output, stats)
     JsonLinesSerializer().serialize(
@@ -167,7 +167,7 @@ def get_form_case_data(domain, context, blob_output, stats):
             for iterator in prepared_builder.iterators():
                 for chunk in chunked(iterator, 500, list):
                     yield from chunk
-                    stats[model_class] += len(chunk)
+                    stats[prepared_builder.model_label] += len(chunk)
                     dump_form_attachments(model_class, chunk, blob_output, stats)
                     yield from get_related(prepared_builder, chunk, related_models, stats)
 

@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import Counter
 
 from corehq.apps.domain.dbaccessors import get_doc_ids_in_domain_by_type
@@ -10,6 +11,10 @@ from corehq.apps.users.models import CommCareUser
 from corehq.blobs.models import BlobMeta
 from corehq.util.couch import get_document_class_by_doc_type
 from dimagi.utils.couch.database import iter_docs
+
+
+logger = logging.getLogger("couch_dump")
+
 
 BLOB_META_STATS_KEY = "blob_meta"
 
@@ -41,24 +46,26 @@ AVAILABLE_COUCH_TYPES = list(
 )
 
 
-def dump_domain_object(domain, context, output, blob_meta_output, logger):
+def dump_domain_object(domain, context, output, blob_meta_output):
     data = get_domain(domain, context)
-    return _dump_couch_data(data, output, blob_meta_output, logger)
+    return _dump_couch_data(data, output, blob_meta_output, meta_tag="Domain")
 
 
-def dump_toggle_data(domain, context, output, blob_meta_output, logger):
+def dump_toggle_data(domain, context, output, blob_meta_output):
     data = get_toggles(domain, context)
-    return _dump_couch_data(data, output, blob_meta_output, logger)
+    return _dump_couch_data(data, output, blob_meta_output, meta_tag="Toggle")
 
 
-def dump_couch_data(domain, context, output, blob_meta_output, logger):
+def dump_couch_data(domain, context, output, blob_meta_output):
     data = get_couch_data(domain, context)
-    return _dump_couch_data(data, output, blob_meta_output, logger)
+    return _dump_couch_data(data, output, blob_meta_output)
 
 
-def _dump_couch_data(data, output, blob_meta_output, logger):
+def _dump_couch_data(data, output, blob_meta_output, meta_tag=None):
     counter = Counter()
+    doc_types = {}
     current_doc_type = None
+
     for obj in _extract_blob_meta(data, blob_meta_output, counter):
         doc_type = obj["doc_type"]
         if doc_type != current_doc_type:
@@ -67,8 +74,14 @@ def _dump_couch_data(data, output, blob_meta_output, logger):
             logger.info(f"Starting dump of {doc_type}")
             current_doc_type = doc_type
 
-        counter[doc_type] += 1
-        if counter[doc_type] % 500 == 0:
+        stats_key = meta_tag
+        if not stats_key:
+            if doc_type not in doc_types:
+                doc_types[doc_type] = get_document_class_by_doc_type(doc_type)
+            stats_key = '{}.{}'.format(doc_types[doc_type]._meta.app_label, doc_types[doc_type].__name__)
+
+        counter[stats_key] += 1
+        if counter[meta_tag] % 500 == 0:
             logger.info(f"\t{doc_type} progress: {counter[doc_type]}")
 
         total_progress = sum(counter.values())
@@ -81,8 +94,6 @@ def _dump_couch_data(data, output, blob_meta_output, logger):
 
 def get_couch_data(domain, context):
     dumper_map = {
-        "Domain": get_domain,
-        "Toggle": get_toggles,
         "CommCareUser": users,
         "MobileAuthKeyRecord": mobile_auth_records,
     }
@@ -93,7 +104,7 @@ def get_couch_data(domain, context):
         ]
         dumpers.append(unfiltered_docs)
     else:
-        dumpers = [unfiltered_docs].extend(dumper_map.values())
+        dumpers = [unfiltered_docs] + list(dumper_map.values())
 
     for dumper in dumpers:
         yield from dumper(domain, context)
@@ -108,7 +119,8 @@ def get_domain(domain: str, context):
 
 
 def get_toggles(domain: str, context):
-    return _get_toggles_to_migrate(domain, context.user_ids)
+    print(context.usernames)
+    return _get_toggles_to_migrate(domain, context.usernames)
 
 
 def unfiltered_docs(domain, context):

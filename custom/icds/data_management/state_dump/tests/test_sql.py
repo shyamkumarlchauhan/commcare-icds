@@ -33,7 +33,7 @@ class TestSimpleSQLExport(BaseDumpLoadTest):
 
     def _get_dump_fn(self, context):
         def dump(output_stream):
-            return dump_simple_sql_data(self.domain_name, context, output_stream)
+            return dump_simple_sql_data(self.domain_name, context, output_stream, None)
         return dump
 
     def test(self):
