@@ -185,4 +185,5 @@ def _get_mock_context(location_ids, user_ids, owner_ids):
     context.location_ids = location_ids
     context.user_ids = user_ids
     context.owner_ids = owner_ids
+    context.types = None
     return context

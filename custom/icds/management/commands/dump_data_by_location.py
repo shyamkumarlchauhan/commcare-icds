@@ -5,7 +5,8 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 
 from corehq.apps.dump_reload.const import DATETIME_FORMAT
-from custom.icds.data_management.state_dump.couch import dump_couch_data
+from custom.icds.data_management.state_dump.couch import dump_couch_data, AVAILABLE_COUCH_TYPES
+from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES
 from custom.icds.management.commands.prepare_filter_values_for_state_dump import FilterContext
 
 
@@ -18,11 +19,23 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('domain_name')
         parser.add_argument('state', help="The name of the state")
+        parser.add_argument(
+            '-b', '--backend', choices=('couch', 'sql'),
+            help="Limit the data output to this backend"
+        )
+        parser.add_argument(
+            '-t', '--type', dest='doc_types', action='append', default=[],
+            help='An app_label, app_label.ModelName or CouchDB doc_type to limit the '
+                 'dump output to (use multiple --type to add multiple apps/models).'
+                 f'\bAvailable couch types are: {", ".join(AVAILABLE_COUCH_TYPES)}'
+                 f'\nAvailable SQL types are: {AVAILABLE_SQL_TYPES}'
+        )
 
     def handle(self, domain_name, state, **options):
+        backend = options.get("backend", None)
 
         self.utcnow = datetime.utcnow().strftime(DATETIME_FORMAT)
-        context = FilterContext(domain_name, state)
+        context = FilterContext(domain_name, state, options.get("type", []))
         if not context.validate():
             print("Some state ID files are missing. Have you run 'prepare_filter_values_for_state_dump'?")
 

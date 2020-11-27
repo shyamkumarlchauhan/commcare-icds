@@ -3,7 +3,7 @@ from collections import Counter
 from io import StringIO
 
 from corehq.apps.dump_reload.sql.dump import get_all_model_iterators_builders_for_domain, \
-    get_objects_to_dump_from_builders, get_model_iterator_builders_to_dump
+    get_objects_to_dump_from_builders, get_model_iterator_builders_to_dump, APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP
 from corehq.apps.dump_reload.sql.filters import FilteredModelIteratorBuilder, UsernameFilter, SimpleFilter, IDFilter
 from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
 from corehq.apps.dump_reload.util import get_model_class
@@ -12,7 +12,7 @@ from corehq.blobs.models import BlobMeta
 from corehq.sql_db.util import split_list_by_db_partition
 from dimagi.utils.chunked import chunked
 
-EXCLUDE_MODELS_SQL = {
+ALWAYS_EXCLUDE_MODELS_SQL = {
     # exclude always
     "app_manager.AppReleaseByLocation",
     "case_importer",
@@ -35,12 +35,12 @@ EXCLUDE_MODELS_SQL = {
     "sms.SMS",
     "smsforms.SQLXFormsSession",
     "ota.DemoUserRestore",  # can be re-generated
+}
 
-    # filter
+FILTERED_SQL_MODELS = {
     "auth.User",
     "mobile_auth.SQLMobileAuthKeyRecord",
     "locations.SQLLocation",
-    "blobs.BlobMeta",
     "form_processor.XFormInstanceSQL",
     "form_processor.XFormOperationSQL",
     "form_processor.CommCareCaseSQL",
@@ -50,6 +50,12 @@ EXCLUDE_MODELS_SQL = {
     "form_processor.LedgerValue",
     "form_processor.LedgerTransaction",
 }
+
+AVAILABLE_SQL_TYPES = (
+    set(APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP.keys()) -
+    ALWAYS_EXCLUDE_MODELS_SQL -
+    {"blobs.BlobMeta"}  # these are exported along with other models
+)
 
 
 def dump_simple_sql_data(domain, context, output):
@@ -77,8 +83,18 @@ def dump_form_case_data(domain, context, output, blob_output):
 
 
 def get_simple_sql_data(domain, context, stats):
-    unfiltered_builders = get_model_iterator_builders_to_dump(domain, EXCLUDE_MODELS_SQL)
-    filtered_builders = get_prepared_builders(domain, [
+    exclude = ALWAYS_EXCLUDE_MODELS_SQL | FILTERED_SQL_MODELS
+    if context.types:
+        excluded_types = set(context.types).intersection(ALWAYS_EXCLUDE_MODELS_SQL)
+        if excluded_types:
+            raise Exception(f"The following types are always excluded: {excluded_types}")
+
+        all_types = set(APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP.keys())
+        exclude = all_types - set(context.types) - FILTERED_SQL_MODELS
+
+    exclude.add("blobs.BlobMeta")
+    unfiltered_builders = get_model_iterator_builders_to_dump(domain, exclude)
+    builders = [
         FilteredModelIteratorBuilder('auth.User', UsernameFilter(context.user_ids)),
         FilteredModelIteratorBuilder(
             "mobile_auth.SQLMobileAuthKeyRecord", IDFilter("user_id", context.user_ids)
@@ -86,7 +102,13 @@ def get_simple_sql_data(domain, context, stats):
         FilteredModelIteratorBuilder(
             "locations.SQLLocation", IDFilter("location_id", context.location_ids)
         )
-    ])
+    ]
+    if context.types:
+        builders = [
+            b for b in builders
+            if b.model_label in context.types or b.model_label.split(".")[0] in context.types
+        ]
+    filtered_builders = get_prepared_builders(domain, builders)
     builders = itertools.chain(unfiltered_builders, filtered_builders)
     yield from get_objects_to_dump_from_builders(builders, stats, StringIO())
 

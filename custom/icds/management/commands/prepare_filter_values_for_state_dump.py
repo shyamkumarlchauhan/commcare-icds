@@ -46,10 +46,11 @@ class Command(BaseCommand):
 
 
 class FilterContext:
-    def __init__(self, domain, state):
+    def __init__(self, domain, state, types=None):
         self.location_id_file = get_state_id_filename(domain, state, LOCATION)
         self.user_id_file = get_state_id_filename(domain, state, USER)
         self.owner_id_file = get_state_id_filename(domain, state, OWNER)
+        self.types = types
 
     @cached_property
     def user_ids(self):

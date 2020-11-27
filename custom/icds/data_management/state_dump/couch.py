@@ -3,7 +3,7 @@ from collections import Counter
 
 from corehq.apps.domain.dbaccessors import get_doc_ids_in_domain_by_type
 from corehq.apps.domain.models import Domain
-from corehq.apps.dump_reload.couch.dump import _get_toggles_to_migrate, get_doc_ids_to_dump
+from corehq.apps.dump_reload.couch.dump import _get_toggles_to_migrate, get_doc_ids_to_dump, DOC_PROVIDERS_BY_DOC_TYPE
 from corehq.apps.dump_reload.exceptions import DomainDumpError
 from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
 from corehq.apps.users.models import CommCareUser
@@ -11,7 +11,7 @@ from corehq.blobs.models import BlobMeta
 from corehq.util.couch import get_document_class_by_doc_type
 from dimagi.utils.couch.database import iter_docs
 
-EXCLUDE_MODELS_COUCH = {
+EXCLUDE_COUCH_DOC_TYPES = {
     "Repeater",
     "RepeatRecord",
     "Group",
@@ -25,12 +25,22 @@ EXCLUDE_MODELS_COUCH = {
     "CaseExportInstance",
     "ExportInstance",
     "Application",  # builds up to 2018-03-06 12:33:32.617858
+    "LinkedApplication",  # new app being created
+}
 
-    # Filter
-    "LinkedApplication",
+FILTERED_COUCH_DOC_TYPES = {
     "MobileAuthKeyRecord",
     "CommCareUser",
 }
+
+UNFILTERED_DOC_TYPES = {
+    "Domain", "Toggle"
+}
+
+AVAILABLE_COUCH_TYPES = list(
+    (set(DOC_PROVIDERS_BY_DOC_TYPE.keys()) - EXCLUDE_COUCH_DOC_TYPES) |
+    FILTERED_COUCH_DOC_TYPES | UNFILTERED_DOC_TYPES
+)
 
 
 def dump_couch_data(domain, context, output, blob_meta_output):
@@ -58,14 +68,21 @@ def dump_couch_data(domain, context, output, blob_meta_output):
 
 
 def get_couch_data(domain, context):
-    dumpers = [
-        get_domain,
-        get_toggles,
-        unfiltered_docs,
-        users,
-        mobile_auth_records,
-        application,
-    ]
+    dumper_map = {
+        "Domain": get_domain,
+        "Toggle": get_toggles,
+        "CommCareUser": users,
+        "MobileAuthKeyRecord": mobile_auth_records,
+    }
+    if context.types:
+        dumpers = [
+            dumper for doc_type, dumper in dumper_map.items()
+            if doc_type in context.types
+        ]
+        dumpers.append(unfiltered_docs)
+    else:
+        dumpers = [unfiltered_docs].extend(dumper_map.values())
+
     for dumper in dumpers:
         for obj in dumper(domain, context):
             yield obj
@@ -84,7 +101,15 @@ def get_toggles(domain: str, context):
 
 
 def unfiltered_docs(domain, context):
-    for doc_class, doc_ids in get_doc_ids_to_dump(domain, EXCLUDE_MODELS_COUCH):
+    excluded_types = EXCLUDE_COUCH_DOC_TYPES | FILTERED_COUCH_DOC_TYPES
+    if context.types:
+        excluded_types = set(context.types).intersection(EXCLUDE_COUCH_DOC_TYPES)
+        if excluded_types:
+            raise Exception(f"The following doc types are always excluded: {excluded_types}")
+        all_doc_types = set(DOC_PROVIDERS_BY_DOC_TYPE.keys())
+        excluded_types = all_doc_types - set(context.types) - FILTERED_COUCH_DOC_TYPES
+
+    for doc_class, doc_ids in get_doc_ids_to_dump(domain, excluded_types):
         couch_db = doc_class.get_db()
         yield from iter_docs(couch_db, doc_ids, chunksize=500)
 
