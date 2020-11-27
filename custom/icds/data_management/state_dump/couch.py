@@ -99,7 +99,7 @@ def mobile_auth_records(domain, context):
             yield doc
 
 
-def application(domain, web_user_ids, mobile_user_ids):
+def application(domain, context):
     """Excluding apps for now. A new app will be built."""
     # Application, LinkedApplication
     # exclude doc["is_auto_generated"]
