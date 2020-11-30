@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tarfile
 import uuid
 import zipfile
 from datetime import datetime
@@ -138,14 +139,26 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
 
     def _dump_domain_data(self):
         call_command("dump_data_by_location", self.domain_name, self.state, output_path=self.dump_file_path)
+        blob_meta_name = 'sql-sql-sharded-blob_meta.gz'
         with zipfile.ZipFile(self.dump_file_path, 'r') as archive:
             archive_files = archive.namelist()
+            archive.extract(blob_meta_name)
+            self.addCleanup(_cleanup_files, [blob_meta_name])
             meta = json.loads(archive.read("meta.json"))
-        self.assertEqual(archive_files, [
+        self.assertEqual(set(archive_files), {
             'domain.gz', 'toggles.gz', 'couch.gz', 'sql.gz',
-            'sql-sharded.gz', 'sql-sql-sharded-blob_meta.gz', 'meta.json'
-        ])
+            'sql-sharded.gz', blob_meta_name, 'meta.json'
+        })
         self.assertEqual(meta, self.expected_meta)
+
+        self._dump_blobs(blob_meta_name)
+
+    def _dump_blobs(self, blob_meta_filename):
+        output = call_command("export_selected_blobs", blob_meta_filename, json_output=True)
+        blob_path = json.loads(output)["path"]
+        self.addCleanup(_cleanup_files, [blob_path])
+        with tarfile.open(blob_path, 'r:gz') as tgzfile:
+            self.assertEqual(len(tgzfile.getnames()), 2)
 
     def _prepare_filter_files(self):
         paths = call_command("prepare_filter_values_for_state_dump", self.domain_name, self.state, json_output=True)
