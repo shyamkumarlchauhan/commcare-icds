@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.core.management.base import BaseCommand
@@ -24,6 +25,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('domain_name')
         parser.add_argument('state', help="The name of the state")
+        parser.add_argument('--json-output', action="store_true", help="Produce JSON output for use in tests")
 
     def handle(self, domain_name, state, **options):
         context = FilterContext(domain_name, state)
@@ -43,6 +45,15 @@ class Command(BaseCommand):
                 owner_ids.extend(user.get_owner_ids())
 
         context.write_data(location_ids, user_data, owner_ids)
+        if options.get("json_output"):
+            # this is used in tests to allow cleanup of the files
+            return json.dumps({
+                "paths": {
+                    "location": context.location_id_file,
+                    "user": context.user_data_file,
+                    "owner": context.owner_id_file,
+                }
+            })
 
 
 class FilterContext:
