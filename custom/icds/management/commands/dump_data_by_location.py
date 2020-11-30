@@ -13,18 +13,18 @@ from corehq.blobs.models import BlobMeta
 from custom.icds.data_management.state_dump.couch import dump_couch_data, AVAILABLE_COUCH_TYPES, dump_toggle_data, \
     dump_domain_object, BLOB_META_STATS_KEY
 from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES, dump_simple_sql_data, dump_form_case_data
-from custom.icds.management.commands.prepare_filter_values_for_state_dump import FilterContext
+from custom.icds.management.commands.prepare_filter_values_for_location_dump import FilterContext
 
 
 class Command(BaseCommand):
-    help = """Dump a ICDS data for a single state.
+    help = """Dump a ICDS data for a single location.
 
-    Use in conjunction with `prepare_filter_values_for_state_dump`.
+    Use in conjunction with `prepare_filter_values_for_location_dump`.
     """
 
     def add_arguments(self, parser):
         parser.add_argument('domain_name')
-        parser.add_argument('state', help="The name of the state")
+        parser.add_argument('location', help="ID or name of the location.")
         parser.add_argument(
             '-d', '--dumper', choices=('domain', 'toggles', 'couch', 'sql', 'sql-sharded'),
             help="Limit the data output to this dumper"
@@ -40,7 +40,7 @@ class Command(BaseCommand):
             '--output-path', help="Write output data to this path"
         )
 
-    def handle(self, domain_name, state, **options):
+    def handle(self, domain_name, location, **options):
         output = options.get("output_path", None)
         if output and os.path.exists(output):
             raise CommandError(f"Path exists: {output}")
@@ -56,9 +56,9 @@ class Command(BaseCommand):
         selected_backends = [backend] if backend else list(backends)
 
         self.utcnow = datetime.utcnow().strftime(DATETIME_FORMAT)
-        context = FilterContext(domain_name, state, options.get("type", []))
+        context = FilterContext(domain_name, location, options.get("type", []))
         if not context.validate():
-            print("Some state ID files are missing. Have you run 'prepare_filter_values_for_state_dump'?")
+            print("Some location ID files are missing. Have you run 'prepare_filter_values_for_location_dump'?")
 
         zipname = output or 'data-dump-{}-{}-{}.zip'.format(domain_name, "_".join(selected_backends), self.utcnow)
         meta = {}  # {dumper_slug: {model_name: count}}
@@ -113,7 +113,6 @@ class Command(BaseCommand):
             count for model in meta.values() for count in model.values()
         )))
         self.stdout.write('{0}{0}'.format('-' * 38))
-
 
 
 def _get_filename(name, slug, domain, utcnow, ext="gz"):

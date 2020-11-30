@@ -24,18 +24,30 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('domain_name')
-        parser.add_argument('state', help="The name of the state")
+        parser.add_argument('location_id_or_name', help="The name or ID of the location")
         parser.add_argument('--json-output', action="store_true", help="Produce JSON output for use in tests")
 
-    def handle(self, domain_name, state, **options):
-        context = FilterContext(domain_name, state)
+    def handle(self, domain_name, location_id_or_name, **options):
+        context = FilterContext(domain_name, location_id_or_name)
         existing = context.files_exist()
         if existing:
             print("This will overwrite the following files:\n\t{}".format("\n\t".join(existing)))
             if not confirm("Do you want to continue?"):
                 return
 
-        location = SQLLocation.active_objects.get(domain=domain_name, location_type__name="state", name=state)
+        try:
+            location = SQLLocation.active_objects.get(location_id=location_id_or_name)
+        except SQLLocation.DoesNotExist:
+            locations = list(SQLLocation.active_objects.filter(domain=domain_name, name=location_id_or_name))
+            if len(locations) > 1:
+                print(f"Multiple locations found with name = '{location_id_or_name}'. Select one and use the ID "
+                      f"instead of the name:")
+                for location in locations:
+                    print(f"[{location.location_type.name}] {location.name}: {location.location_id}")
+                return
+
+            location = locations[0]
+
         location_ids = list(location.get_descendants(include_self=True).values_list("location_id", flat=True))
         user_data = []
         owner_ids = []
@@ -57,10 +69,10 @@ class Command(BaseCommand):
 
 
 class FilterContext:
-    def __init__(self, domain, state, types=None):
-        self.location_id_file = get_state_id_filename(domain, state, LOCATION)
-        self.user_data_file = get_state_id_filename(domain, state, USER)
-        self.owner_id_file = get_state_id_filename(domain, state, OWNER)
+    def __init__(self, domain, location, types=None):
+        self.location_id_file = get_location_id_filename(domain, location, LOCATION)
+        self.user_data_file = get_location_id_filename(domain, location, USER)
+        self.owner_id_file = get_location_id_filename(domain, location, OWNER)
         self.types = types
 
     @cached_property
@@ -113,6 +125,6 @@ def _write_data(filename, data):
         f.writelines(f"{item}\n" for item in data)
 
 
-def get_state_id_filename(domain, state, name):
+def get_location_id_filename(domain, state, name):
     state = slugify(state)
     return f'{domain}-{state}-{name}.csv'

@@ -161,7 +161,7 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
             self.assertEqual(len(tgzfile.getnames()), 2)
 
     def _prepare_filter_files(self):
-        paths = call_command("prepare_filter_values_for_state_dump", self.domain_name, self.state, json_output=True)
+        paths = call_command("prepare_filter_values_for_location_dump", self.domain_name, self.state, json_output=True)
         self.addCleanup(_cleanup_files, json.loads(paths)["paths"])
 
 
