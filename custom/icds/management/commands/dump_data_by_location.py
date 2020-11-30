@@ -16,6 +16,14 @@ from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES, dump
 from custom.icds.management.commands.prepare_filter_values_for_location_dump import FilterContext
 
 
+DUMPERS = {
+    'domain': dump_domain_object,
+    'toggles': dump_toggle_data,
+    'couch': dump_couch_data,
+    'sql': dump_simple_sql_data,
+    'sql-sharded': dump_form_case_data
+}
+
 class Command(BaseCommand):
     help = """Dump a ICDS data for a single location.
 
@@ -45,60 +53,27 @@ class Command(BaseCommand):
         if output and os.path.exists(output):
             raise CommandError(f"Path exists: {output}")
 
-        backends = {
-            'domain': dump_domain_object,
-            'toggles': dump_toggle_data,
-            'couch': dump_couch_data,
-            'sql': dump_simple_sql_data,
-            'sql-sharded': dump_form_case_data
-        }
-        selected_backends = options.get("dumper", None) or list(backends)
+        selected_backends = options.get("dumper", None) or list(DUMPERS)
 
-        self.utcnow = datetime.utcnow().strftime(DATETIME_FORMAT)
         context = FilterContext(domain_name, location, options.get("type", []))
         if not context.validate():
             print("Some location ID files are missing. Have you run 'prepare_filter_values_for_location_dump'?")
 
-        zipname = output or 'data-dump-{}-{}-{}.zip'.format(domain_name, "_".join(selected_backends), self.utcnow)
+        zipname = output or 'data-dump-{}-{}-{}.zip'.format(
+            domain_name, "_".join(selected_backends), datetime.utcnow().strftime(DATETIME_FORMAT)
+        )
+
         meta = {}  # {dumper_slug: {model_name: count}}
-        for slug, backend_fn in backends.items():
-            if slug in selected_backends:
-                meta.update(
-                    self.dump_data_for_backend(domain_name, slug, backend_fn, context, zipname)
-                )
+        for slug in selected_backends:
+            meta.update(
+                dump_data_for_backend(domain_name, slug, context, zipname)
+            )
 
         with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
             z.writestr('meta.json', json.dumps(meta))
 
         self._print_stats(meta)
         self.stdout.write('\nData dumped to file: {}'.format(zipname))
-
-    def dump_data_for_backend(self, domain_name, slug, dumper, context, zipname):
-        self.stdout.ending = None
-        filename = _get_filename("dump", slug, domain_name, self.utcnow)
-        blob_meta_filename = _get_filename("blob_meta", slug, domain_name, self.utcnow)
-
-        with gzip.open(filename, 'wt') as data_stream, gzip.open(blob_meta_filename, 'wt') as blob_stream:
-            stats = dumper(domain_name, context, data_stream, blob_stream)
-
-        meta = {
-            slug: stats
-        }
-        # filename must match up with stats key
-        blob_name = f"sql-{slug}-blob_meta"
-        blob_stats = stats.pop(BLOB_META_STATS_KEY, None)
-        if blob_stats:
-            meta[blob_name] = {get_model_label(BlobMeta): blob_stats}
-
-        with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
-            z.write(filename, '{}.gz'.format(slug))
-            if blob_stats:
-                z.write(blob_meta_filename, f'{blob_name}.gz')
-
-        os.remove(filename)
-        os.remove(blob_meta_filename)
-
-        return meta
 
     def _print_stats(self, meta):
         self.stdout.ending = '\n'
@@ -114,5 +89,32 @@ class Command(BaseCommand):
         self.stdout.write('{0}{0}'.format('-' * 38))
 
 
-def _get_filename(name, slug, domain, utcnow, ext="gz"):
-    return '{}-{}-{}-{}.{}'.format(name, slug, domain, utcnow, ext)
+def dump_data_for_backend(domain_name, slug, context, zipname):
+    filename = _get_filename("dump", slug, domain_name)
+    blob_meta_filename = _get_filename("blob_meta", slug, domain_name)
+
+    dumper = DUMPERS[slug]
+    with gzip.open(filename, 'wt') as data_stream, gzip.open(blob_meta_filename, 'wt') as blob_stream:
+        stats = dumper(domain_name, context, data_stream, blob_stream)
+
+    meta = {
+        slug: stats
+    }
+    # filename must match up with meta key
+    blob_name = f"sql-{slug}-blob_meta"
+    blob_stats = stats.pop(BLOB_META_STATS_KEY, None)
+    if blob_stats:
+        meta[blob_name] = {get_model_label(BlobMeta): blob_stats}
+
+    with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
+        z.write(filename, '{}.gz'.format(slug))
+        if blob_stats:
+            z.write(blob_meta_filename, f'{blob_name}.gz')
+
+    os.remove(filename)
+    os.remove(blob_meta_filename)
+    return meta
+
+
+def _get_filename(name, slug, domain, ext="gz"):
+    return '{}-{}-{}-{}.{}'.format(name, slug, domain, datetime.utcnow().strftime(DATETIME_FORMAT), ext)
