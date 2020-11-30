@@ -79,9 +79,9 @@ def dump_simple_sql_data(domain, context, output, blob_meta_output):
     return stats
 
 
-def dump_form_case_data(domain, context, output, blob_meta_output):
+def dump_form_case_data(domain, context, output, blob_meta_output, limit_to_db):
     stats = Counter()
-    data = get_form_case_data(domain, context, blob_meta_output, stats)
+    data = get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
     JsonLinesSerializer().serialize(
         data,
         use_natural_foreign_keys=False,
@@ -122,11 +122,11 @@ def get_simple_sql_data(domain, context, stats):
     yield from get_objects_to_dump_from_builders(builders, stats, StringIO())
 
 
-def get_prepared_builders(domain, builders):
+def get_prepared_builders(domain, builders, limit_to_db=None):
     for builder in builders:
         _, model_class = get_model_class(builder.model_label)
         yield from get_all_model_iterators_builders_for_domain(
-            model_class, domain, [builder]
+            model_class, domain, [builder], limit_to_db=limit_to_db
         )
 
 
@@ -141,7 +141,7 @@ class AndFilter:
                 yield left & right
 
 
-def get_form_case_data(domain, context, blob_output, stats):
+def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
     builders = []
     if not context.types or "form_processor.XFormInstanceSQL" in context.types:
         form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
@@ -163,7 +163,7 @@ def get_form_case_data(domain, context, blob_output, stats):
         ))
 
     for builder, related_models in builders:
-        for model_class, prepared_builder in get_prepared_builders(domain, [builder]):
+        for model_class, prepared_builder in get_prepared_builders(domain, [builder], limit_to_db=limit_to_db):
             for iterator in prepared_builder.iterators():
                 for chunk in chunked(iterator, 500, list):
                     yield from chunk

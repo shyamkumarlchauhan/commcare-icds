@@ -119,7 +119,6 @@ def get_domain(domain: str, context):
 
 
 def get_toggles(domain: str, context):
-    print(context.usernames)
     return _get_toggles_to_migrate(domain, context.usernames)
 
 

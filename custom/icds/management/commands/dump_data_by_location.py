@@ -2,6 +2,8 @@ import gzip
 import json
 import os
 import zipfile
+from collections import namedtuple
+from concurrent import futures
 from datetime import datetime
 
 from django.core.management import CommandError
@@ -10,19 +12,22 @@ from django.core.management.base import BaseCommand
 from corehq.apps.dump_reload.const import DATETIME_FORMAT
 from corehq.apps.dump_reload.util import get_model_label
 from corehq.blobs.models import BlobMeta
+from corehq.sql_db.util import get_db_aliases_for_partitioned_query
 from custom.icds.data_management.state_dump.couch import dump_couch_data, AVAILABLE_COUCH_TYPES, dump_toggle_data, \
     dump_domain_object, BLOB_META_STATS_KEY
 from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES, dump_simple_sql_data, dump_form_case_data
 from custom.icds.management.commands.prepare_filter_values_for_location_dump import FilterContext
 
+Dumper = namedtuple("Dumper", "function, partition_dbs")
 
 DUMPERS = {
-    'domain': dump_domain_object,
-    'toggles': dump_toggle_data,
-    'couch': dump_couch_data,
-    'sql': dump_simple_sql_data,
-    'sql-sharded': dump_form_case_data
+    'domain': Dumper(dump_domain_object, False),
+    'toggles': Dumper(dump_toggle_data, False),
+    'couch': Dumper(dump_couch_data, False),
+    'sql': Dumper(dump_simple_sql_data, False),
+    'sql-sharded': Dumper(dump_form_case_data, True)
 }
+
 
 class Command(BaseCommand):
     help = """Dump a ICDS data for a single location.
@@ -47,11 +52,17 @@ class Command(BaseCommand):
         parser.add_argument(
             '--output-path', help="Write output data to this path"
         )
+        parser.add_argument('--thread-count', type=int,
+                            help="Max number of threads to use. If not set each dumper will use it's"
+                                 " own thread and the sharded dumper will use one thread for each"
+                                 " sharded database. Set to 0 to disable multi-threading.")
 
     def handle(self, domain_name, location, **options):
         output = options.get("output_path", None)
         if output and os.path.exists(output):
             raise CommandError(f"Path exists: {output}")
+
+        self.pool_size = options.get("thread_count")
 
         selected_backends = options.get("dumper", None) or list(DUMPERS)
 
@@ -63,17 +74,47 @@ class Command(BaseCommand):
             domain_name, "_".join(selected_backends), datetime.utcnow().strftime(DATETIME_FORMAT)
         )
 
-        meta = {}  # {dumper_slug: {model_name: count}}
+        args_list = []
         for slug in selected_backends:
-            meta.update(
-                dump_data_for_backend(domain_name, slug, context, zipname)
-            )
+            dumper = DUMPERS[slug]
+            args = (domain_name, slug, dumper, context, zipname)
+            if dumper.partition_dbs:
+                args_list.extend(
+                    args + (db,)
+                    for db in get_db_aliases_for_partitioned_query()
+                )
+            else:
+                args_list.append(args)
+
+        if self.pool_size == 0:
+            results = self._synchronous_dump(args_list)
+        else:
+            results = self._threaded_dump(args_list)
+
+        meta = {}  # {dumper_slug: {model_name: count}}
+        for result in results:
+            meta.update(result)
 
         with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
             z.writestr('meta.json', json.dumps(meta))
 
         self._print_stats(meta)
         self.stdout.write('\nData dumped to file: {}'.format(zipname))
+
+    def _synchronous_dump(self, args_list):
+        for args in args_list:
+            yield dump_data_for_backend(*args)
+
+    def _threaded_dump(self, args_list):
+        results = []
+        with futures.ThreadPoolExecutor(max_workers=self.pool_size) as executor:
+            for args in args_list:
+                results.append(
+                    executor.submit(dump_data_for_backend, *args)
+                )
+
+            for result in futures.as_completed(results):
+                yield result.result()
 
     def _print_stats(self, meta):
         self.stdout.ending = '\n'
@@ -89,13 +130,12 @@ class Command(BaseCommand):
         self.stdout.write('{0}{0}'.format('-' * 38))
 
 
-def dump_data_for_backend(domain_name, slug, context, zipname):
+def dump_data_for_backend(domain_name, slug, dumper, context, zipname, *args):
     filename = _get_filename("dump", slug, domain_name)
     blob_meta_filename = _get_filename("blob_meta", slug, domain_name)
 
-    dumper = DUMPERS[slug]
     with gzip.open(filename, 'wt') as data_stream, gzip.open(blob_meta_filename, 'wt') as blob_stream:
-        stats = dumper(domain_name, context, data_stream, blob_stream)
+        stats = dumper.function(domain_name, context, data_stream, blob_stream, *args)
 
     meta = {
         slug: stats

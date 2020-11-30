@@ -138,7 +138,7 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
             domain.delete()
 
     def _dump_domain_data(self):
-        call_command("dump_data_by_location", self.domain_name, self.state, output_path=self.dump_file_path)
+        call_command("dump_data_by_location", self.domain_name, self.state, output_path=self.dump_file_path, thread_count=0)
         blob_meta_name = 'sql-sql-sharded-blob_meta.gz'
         with zipfile.ZipFile(self.dump_file_path, 'r') as archive:
             archive_files = archive.namelist()
