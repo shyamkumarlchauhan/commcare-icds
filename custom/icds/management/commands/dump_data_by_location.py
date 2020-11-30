@@ -26,7 +26,7 @@ class Command(BaseCommand):
         parser.add_argument('domain_name')
         parser.add_argument('location', help="ID or name of the location.")
         parser.add_argument(
-            '-d', '--dumper', choices=('domain', 'toggles', 'couch', 'sql', 'sql-sharded'),
+            '-d', '--dumper', action='append', choices=('domain', 'toggles', 'couch', 'sql', 'sql-sharded'),
             help="Limit the data output to this dumper"
         )
         parser.add_argument(
@@ -52,8 +52,7 @@ class Command(BaseCommand):
             'sql': dump_simple_sql_data,
             'sql-sharded': dump_form_case_data
         }
-        backend = options.get("dumper", None)
-        selected_backends = [backend] if backend else list(backends)
+        selected_backends = options.get("dumper", None) or list(backends)
 
         self.utcnow = datetime.utcnow().strftime(DATETIME_FORMAT)
         context = FilterContext(domain_name, location, options.get("type", []))
