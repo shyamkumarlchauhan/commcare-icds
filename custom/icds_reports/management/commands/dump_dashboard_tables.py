@@ -16,10 +16,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('table_type', help="datasources, aggregated or misc")
+        parser.add_argument('state_id')
         parser.add_argument('domain_name', help="domain name")
         parser.add_argument('--directory', help="Directory to put the dumps of tables")
 
-    def handle(self, table_type, domain_name, *arg, **options):
+    def handle(self, table_type, state_id, domain_name, *arg, **options):
 
         directory = options.get('directory', 'data_dump')
         if not os.path.exists(directory):
@@ -43,16 +44,16 @@ class Command(BaseCommand):
 
         tables_to_dump = sorted(tables_to_dump)
         for table_name in with_progress_bar(tables_to_dump):
-            self.dump_table_data_to_csv(table_name, directory)
+            self.dump_table_data_to_csv(table_name, directory, state_id)
             print(f"Done with {table_name}")
 
     def static_datasources_table_names(self, domain_name):
         static_datasources = StaticDataSourceConfiguration.by_domain(domain_name)
         return [get_table_name(domain_name, datasource.table_id) for datasource in static_datasources ]
 
-    def dump_table_data_to_csv(table_name, directory):
+    def dump_table_data_to_csv(self, table_name, directory, state_id):
         query = f"""
-        COPY(select * from "{table_name}")
+        COPY(select * from "{table_name}" where state_id={state_id})
         TO STDOUT WITH CSV HEADER DELIMITER '\t' NULL 'null'  ENCODING 'UTF-8';
         """
 
