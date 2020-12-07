@@ -1,4 +1,5 @@
 import itertools
+import logging
 from collections import Counter
 from io import StringIO
 
@@ -8,13 +9,16 @@ from corehq.apps.dump_reload.sql.dump import get_all_model_iterators_builders_fo
     get_objects_to_dump_from_builders, get_model_iterator_builders_to_dump, APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP
 from corehq.apps.dump_reload.sql.filters import FilteredModelIteratorBuilder, UsernameFilter, SimpleFilter, IDFilter
 from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
-from corehq.apps.dump_reload.util import get_model_class
+from corehq.apps.dump_reload.util import get_model_class, get_model_label
 from corehq.blobs import CODES
 from corehq.blobs.models import BlobMeta
 from corehq.sql_db.config import plproxy_config
 from corehq.sql_db.util import split_list_by_db_partition
 from custom.icds.data_management.state_dump.couch import BLOB_META_STATS_KEY
 from dimagi.utils.chunked import chunked
+
+logger = logging.getLogger("sql_dump")
+
 
 ALWAYS_EXCLUDE_MODELS_SQL = {
     # exclude always
@@ -73,7 +77,7 @@ AVAILABLE_SQL_TYPES = (
 
 def dump_simple_sql_data(domain, context, output, blob_meta_output):
     stats = Counter()
-    data = get_simple_sql_data(domain, context, stats)
+    data = output_progress(get_simple_sql_data(domain, context, stats))
     JsonLinesSerializer().serialize(
         data,
         use_natural_foreign_keys=False,
@@ -85,7 +89,10 @@ def dump_simple_sql_data(domain, context, output, blob_meta_output):
 
 def dump_form_case_data(domain, context, output, blob_meta_output, limit_to_db=None):
     stats = Counter()
-    data = get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
+    data = output_progress(
+        get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db),
+        limit_to_db
+    )
     JsonLinesSerializer().serialize(
         data,
         use_natural_foreign_keys=False,
@@ -135,6 +142,17 @@ def get_prepared_builders(domain, builders, limit_to_db=None):
         yield from get_all_model_iterators_builders_for_domain(
             model_class, domain, [builder], limit_to_db=limit_to_db
         )
+
+
+def output_progress(iterable, db=None):
+    total_count = 0
+    db = f" ({db})" if db else ""
+    for obj in iterable:
+        total_count += 1
+        if total_count % 1000 == 0:
+            logger.info(f"Total progress %s: %s", db, total_count)
+
+        yield obj
 
 
 class AndFilter:
