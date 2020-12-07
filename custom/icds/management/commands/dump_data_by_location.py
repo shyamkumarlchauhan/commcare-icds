@@ -2,9 +2,10 @@ import gzip
 import json
 import os
 import zipfile
-from collections import namedtuple
+from collections import namedtuple, Counter
 from concurrent import futures
 from datetime import datetime
+from threading import Lock
 
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
@@ -68,7 +69,9 @@ class Command(BaseCommand):
 
         context = FilterContext(domain_name, location, options.get("type", []))
         if not context.validate():
-            print("Some location ID files are missing. Have you run 'prepare_filter_values_for_location_dump'?")
+            raise CommandError(
+                "Some location ID files are missing. Have you run 'prepare_filter_values_for_location_dump'?"
+            )
 
         zipname = output or 'data-dump-{}-{}-{}.zip'.format(
             domain_name, "_".join(selected_backends), datetime.utcnow().strftime(DATETIME_FORMAT)
@@ -86,10 +89,12 @@ class Command(BaseCommand):
             else:
                 args_list.append(args)
 
+        lock = Lock()
+
         if self.pool_size == 0:
-            results = self._synchronous_dump(args_list)
+            results = self._synchronous_dump(args_list, lock)
         else:
-            results = self._threaded_dump(args_list)
+            results = self._threaded_dump(args_list, lock)
 
         meta = {}  # {dumper_slug: {model_name: count}}
         for result in results:
@@ -101,16 +106,16 @@ class Command(BaseCommand):
         self._print_stats(meta)
         self.stdout.write('\nData dumped to file: {}'.format(zipname))
 
-    def _synchronous_dump(self, args_list):
+    def _synchronous_dump(self, args_list, lock):
         for args in args_list:
-            yield dump_data_for_backend(*args["args"], **args["kwargs"])
+            yield dump_data_for_backend(ziplock=lock, *args["args"], **args["kwargs"])
 
-    def _threaded_dump(self, args_list):
+    def _threaded_dump(self, args_list, lock):
         results = []
         with futures.ThreadPoolExecutor(max_workers=self.pool_size) as executor:
             for args in args_list:
                 results.append(
-                    executor.submit(dump_data_for_backend, *args["args"], **args["kwargs"])
+                    executor.submit(dump_data_for_backend, ziplock=lock, *args["args"], **args["kwargs"])
                 )
 
             for result in futures.as_completed(results):
@@ -119,18 +124,19 @@ class Command(BaseCommand):
     def _print_stats(self, meta):
         self.stdout.ending = '\n'
         self.stdout.write('{0} Dump Stats {0}'.format('-' * 32))
+        totals = Counter()
         for dumper, models in sorted(meta.items()):
-            self.stdout.write(dumper)
             for model, count in sorted(models.items()):
-                self.stdout.write("  {:<50}: {}".format(model, count))
+                totals[model] += count
+
+        for model, count in sorted(totals.items()):
+            self.stdout.write("  {:<50}: {}".format(model, count))
         self.stdout.write('{0}{0}'.format('-' * 38))
-        self.stdout.write('Dumped {} objects'.format(sum(
-            count for model in meta.values() for count in model.values()
-        )))
+        self.stdout.write('Dumped {} objects'.format(sum(totals.values())))
         self.stdout.write('{0}{0}'.format('-' * 38))
 
 
-def dump_data_for_backend(domain_name, slug, dumper, context, zipname, limit_to_db=None):
+def dump_data_for_backend(domain_name, slug, dumper, context, zipname, ziplock=None, limit_to_db=None):
     filename = _get_filename("dump", slug, domain_name, limit_to_db)
     blob_meta_filename = _get_filename("blob_meta", slug, domain_name, limit_to_db)
 
@@ -150,10 +156,11 @@ def dump_data_for_backend(domain_name, slug, dumper, context, zipname, limit_to_
     if blob_stats:
         meta[blob_key] = {get_model_label(BlobMeta): blob_stats}
 
-    with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
-        z.write(filename, f'{key}.gz')
-        if blob_stats:
-            z.write(blob_meta_filename, f'{blob_key}.gz')
+    with ziplock:
+        with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
+            z.write(filename, f'{key}.gz')
+            if blob_stats:
+                z.write(blob_meta_filename, f'{blob_key}.gz')
 
     os.remove(filename)
     os.remove(blob_meta_filename)
