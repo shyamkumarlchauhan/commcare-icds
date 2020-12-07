@@ -83,7 +83,7 @@ def dump_simple_sql_data(domain, context, output, blob_meta_output):
     return stats
 
 
-def dump_form_case_data(domain, context, output, blob_meta_output, limit_to_db):
+def dump_form_case_data(domain, context, output, blob_meta_output, limit_to_db=None):
     stats = Counter()
     data = get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
     JsonLinesSerializer().serialize(

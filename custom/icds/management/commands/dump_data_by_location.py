@@ -77,10 +77,10 @@ class Command(BaseCommand):
         args_list = []
         for slug in selected_backends:
             dumper = DUMPERS[slug]
-            args = (domain_name, slug, dumper, context, zipname)
+            args = {"args": (domain_name, slug, dumper, context, zipname), "kwargs": {}}
             if dumper.partition_dbs:
                 args_list.extend(
-                    args + (db,)
+                    {**args, **{"kwargs": {"limit_to_db": db}}}
                     for db in get_db_aliases_for_partitioned_query()
                 )
             else:
@@ -103,14 +103,14 @@ class Command(BaseCommand):
 
     def _synchronous_dump(self, args_list):
         for args in args_list:
-            yield dump_data_for_backend(*args)
+            yield dump_data_for_backend(*args["args"], **args["kwargs"])
 
     def _threaded_dump(self, args_list):
         results = []
         with futures.ThreadPoolExecutor(max_workers=self.pool_size) as executor:
             for args in args_list:
                 results.append(
-                    executor.submit(dump_data_for_backend, *args)
+                    executor.submit(dump_data_for_backend, *args["args"], **args["kwargs"])
                 )
 
             for result in futures.as_completed(results):
@@ -130,12 +130,13 @@ class Command(BaseCommand):
         self.stdout.write('{0}{0}'.format('-' * 38))
 
 
-def dump_data_for_backend(domain_name, slug, dumper, context, zipname, *args):
-    filename = _get_filename("dump", slug, domain_name)
-    blob_meta_filename = _get_filename("blob_meta", slug, domain_name)
+def dump_data_for_backend(domain_name, slug, dumper, context, zipname, limit_to_db=None):
+    filename = _get_filename("dump", slug, domain_name, limit_to_db)
+    blob_meta_filename = _get_filename("blob_meta", slug, domain_name, limit_to_db)
 
+    kwargs = {"limit_to_db": limit_to_db} if limit_to_db else {}
     with gzip.open(filename, 'wt') as data_stream, gzip.open(blob_meta_filename, 'wt') as blob_stream:
-        stats = dumper.function(domain_name, context, data_stream, blob_stream, *args)
+        stats = dumper.function(domain_name, context, data_stream, blob_stream, **kwargs)
 
     meta = {
         slug: stats
@@ -156,5 +157,6 @@ def dump_data_for_backend(domain_name, slug, dumper, context, zipname, *args):
     return meta
 
 
-def _get_filename(name, slug, domain, ext="gz"):
-    return '{}-{}-{}-{}.{}'.format(name, slug, domain, datetime.utcnow().strftime(DATETIME_FORMAT), ext)
+def _get_filename(name, slug, domain, limit_to_db, ext="gz"):
+    db = f"-{limit_to_db}" if limit_to_db else ""
+    return '{}-{}-{}{}-{}.{}'.format(name, slug, domain, db, datetime.utcnow().strftime(DATETIME_FORMAT), ext)
