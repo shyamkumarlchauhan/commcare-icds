@@ -16,6 +16,7 @@ from corehq.apps.dump_reload.tests.test_sql_dump_load import BaseDumpLoadTest, d
 from corehq.apps.locations.tests.util import setup_locations_and_types
 from corehq.apps.mobile_auth.models import MobileAuthKeyRecord
 from corehq.apps.products.models import SQLProduct
+from corehq.apps.sms.models import PhoneNumber
 from corehq.apps.users.models import CommCareUser
 from corehq.form_processor.tests.utils import use_sql_backend
 from corehq.toggles import all_toggles, NAMESPACE_DOMAIN
@@ -85,8 +86,15 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
             MobileAuthKeyRecord(
                 domain=self.domain_name, user_id=username, valid=datetime.utcnow(), expires=datetime.utcnow()
             ).save()
+            PhoneNumber.objects.create(
+                domain=self.domain_name,
+                owner_doc_type='CommCareUser',
+                owner_id=user.user_id,
+                pending_verification=False,
+                is_two_way=False
+            )
 
-            factory.create_or_update_case(
+            cases = factory.create_or_update_case(
                 CaseStructure(
                     attrs={'case_name': f'{username} child', 'owner_id': location.location_id, 'create': True},
                     indices=[
@@ -98,6 +106,13 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
                     ]
                 ), user_id=user.user_id
             )
+            PhoneNumber.objects.create(
+                domain=self.domain_name,
+                owner_doc_type='CommCareCase',
+                owner_id=cases[0].case_id,
+                pending_verification=False,
+                is_two_way=False
+            )
 
         self.expected_meta = {
             "domain": {"Domain": 1},
@@ -106,13 +121,15 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
                 "form_processor.XFormInstanceSQL": 2,
                 "form_processor.CommCareCaseSQL": 6,
                 "form_processor.CommCareCaseIndexSQL": 2,
-                "form_processor.CaseTransaction": 6
+                "form_processor.CaseTransaction": 6,
+                'sms.PhoneNumber': 2
             },
             "sql": {
                 "locations.LocationType": 3,
                 "products.SQLProduct": 1,
                 "auth.User": 2,
-                "locations.SQLLocation": 4
+                "locations.SQLLocation": 4,
+                'sms.PhoneNumber': 2
             },
             "couch": {"users.CommCareUser": 2},
             "toggles": {"Toggle": 2}

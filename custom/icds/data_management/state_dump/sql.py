@@ -2,6 +2,8 @@ import itertools
 from collections import Counter
 from io import StringIO
 
+from django.db import router
+
 from corehq.apps.dump_reload.sql.dump import get_all_model_iterators_builders_for_domain, \
     get_objects_to_dump_from_builders, get_model_iterator_builders_to_dump, APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP
 from corehq.apps.dump_reload.sql.filters import FilteredModelIteratorBuilder, UsernameFilter, SimpleFilter, IDFilter
@@ -9,6 +11,7 @@ from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
 from corehq.apps.dump_reload.util import get_model_class
 from corehq.blobs import CODES
 from corehq.blobs.models import BlobMeta
+from corehq.sql_db.config import plproxy_config
 from corehq.sql_db.util import split_list_by_db_partition
 from custom.icds.data_management.state_dump.couch import BLOB_META_STATS_KEY
 from dimagi.utils.chunked import chunked
@@ -36,7 +39,8 @@ ALWAYS_EXCLUDE_MODELS_SQL = {
     "sms.SMS",
     "smsforms.SQLXFormsSession",
     "ota.DemoUserRestore",  # can be re-generated
-    "blobs.BlobMeta"  # these are exported along with other models
+    "blobs.BlobMeta",  # these are exported along with other models
+    "sms.PhoneNumber",  # these are exported along with other models
 }
 
 SHARDED_MODELS = {
@@ -110,6 +114,9 @@ def get_simple_sql_data(domain, context, stats):
         ),
         FilteredModelIteratorBuilder(
             "locations.SQLLocation", IDFilter("location_id", context.location_ids)
+        ),
+        FilteredModelIteratorBuilder(
+            "sms.PhoneNumber", IDFilter("owner_id", context.user_ids)
         )
     ]
     if context.types:
@@ -141,13 +148,30 @@ class AndFilter:
                 yield left & right
 
 
+class RelatedFilter:
+    def __init__(self, related_field):
+        self.related_field = related_field
+
+    def get_filters(self, models):
+        return {f"{self.related_field}__in": models}
+
+
+class RelatedFilterById(RelatedFilter):
+    def __init__(self, related_field, model_id_field):
+        super().__init__(related_field)
+        self.model_id_field = model_id_field
+
+    def get_filters(self, models):
+        return {f"{self.related_field}__in": [getattr(model, self.model_id_field) for model in models]}
+
+
 def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
     builders = []
     if not context.types or "form_processor.XFormInstanceSQL" in context.types:
         form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
         builders.append((
             FilteredModelIteratorBuilder("form_processor.XFormInstanceSQL", form_filter),
-            [("form_processor.XFormOperationSQL", "form")]
+            [("form_processor.XFormOperationSQL", RelatedFilter("form"))]
         ))
 
     if not context.types or "form_processor.CommCareCaseSQL" in context.types:
@@ -155,10 +179,11 @@ def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
         builders.append((
             FilteredModelIteratorBuilder("form_processor.CommCareCaseSQL", case_filter),
             [
-                ("form_processor.CommCareCaseIndexSQL", "case"),
-                ("form_processor.CaseTransaction", "case"),
-                ("form_processor.LedgerValue", "case"),
-                ("form_processor.LedgerTransaction", "case"),
+                ("form_processor.CommCareCaseIndexSQL", RelatedFilter("case")),
+                ("form_processor.CaseTransaction", RelatedFilter("case")),
+                ("form_processor.LedgerValue", RelatedFilter("case")),
+                ("form_processor.LedgerTransaction", RelatedFilter("case")),
+                ("sms.PhoneNumber", RelatedFilterById("owner_id", "case_id")),
             ]
         ))
 
@@ -173,10 +198,14 @@ def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
 
 
 def get_related(builder, models, related_models, stats):
-    for related_label, related_field in related_models:
+    for related_label, related_filter in related_models:
         _, model_class = get_model_class(related_label)
-        related_models = model_class.objects.using(builder.db_alias).filter(
-            **{f"{related_field}__in": models}
+        using = builder.db_alias
+        db_for_write = router.db_for_write(model_class, using=using)
+        if db_for_write != using and db_for_write != plproxy_config.proxy_db:
+            using = db_for_write
+        related_models = model_class.objects.using(using).filter(
+            **related_filter.get_filters(models)
         ).iterator()
         for model in related_models:
             stats[related_label] += 1
