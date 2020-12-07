@@ -1,6 +1,6 @@
+import hashlib
 import os
 
-from corehq.util.log import with_progress_bar
 from django.core.management.base import BaseCommand
 
 from corehq.apps.userreports.models import StaticDataSourceConfiguration
@@ -23,6 +23,57 @@ class Command(BaseCommand):
         'static-it_report_follow_issue': 'user_location_id',
         'static-commcare_user_cases': 'commcare_location_id'
     }
+    agg_tables_not_partitioned = {
+        'awc_location': 'state_id',
+        'awc_location_local': 'state_id',
+        'ccs_record_monthly': 'state_id',
+        'icds_dashboard_comp_feed_form': 'state_id',
+        'icds_dashboard_ccs_record_cf_forms': 'state_id',
+        'icds_dashboard_ccs_record_postnatal_forms': 'state_id',
+        'icds_dashboard_child_health_postnatal_forms': 'state_id',
+        'icds_dashboard_child_health_thr_forms': 'state_id',
+        'icds_dashboard_ccs_record_thr_forms': 'state_id',
+        'icds_dashboard_ccs_record_bp_forms': 'state_id',
+        'icds_dashboard_ccs_record_delivery_forms': 'state_id',
+        'icds_dashboard_daily_child_health_thr_forms': 'state_id',
+        'icds_dashboard_daily_ccs_record_thr_forms': 'state_id',
+        'icds_dashboard_daily_feeding_forms': 'state_id',
+        'icds_dashboard_growth_monitoring_forms': 'state_id',
+        'icds_dashboard_sam_mam_forms': 'state_id',
+        'icds_dashboard_thr_v2': 'state_id',
+        'icds_dashboard_adolescent_girls_registration': 'state_id',
+        'icds_dashboard_migration_forms': 'state_id',
+        'icds_dashboard_availing_service_forms': 'state_id',
+        'daily_attendance': 'state_id',
+    }
+
+    agg_tables_month_partitioned = [
+        'agg_awc',
+        'agg_child_health',
+        'agg_ccs_record',
+        'agg_service_delivery_report',
+        'agg_awc_daily',
+        'agg_ls',
+        'child_health_monthly',
+        'icds_dashboard_user_activity',
+
+    ]
+    agg_tables_state_month_partitioned = [
+        ('icds_dashboard_infrastructure_forms', 'icds_db_infra_form_'),
+        ('icds_dashboard_ls_awc_visits_forms', 'icds_db_ls_awc_mgt_form_'),
+        ('icds_dashboard_ls_vhnd_forms', 'icds_db_ls_vhnd_form_'),
+        ('icds_dashboard_ls_beneficiary_forms','icds_db_ls_beneficiary_form_')
+
+    ]
+
+    misc_tables = [
+        'icds_months',
+        'icds_months_local',
+        'icds_reports_ucrreconciliationstatus',
+        'icds_reports_aggregatesqlprofile',
+        'icds_reports_aggregationrecord',
+
+    ]
 
     def add_arguments(self, parser):
         parser.add_argument('table_type', help="datasources, aggregated or misc")
@@ -43,7 +94,9 @@ class Command(BaseCommand):
         if table_type in ('datasources', 'all'):
             tables_to_dump += self.static_datasources_table_names(domain_name)
         elif table_type == ('aggregated', 'all'):
-            pass
+            tables_to_dump += [(table, filter_col) for table,filter_col in self.agg_tables_not_partitioned.items()]
+            tables_to_dump += [ (table, 'state_id') for table in self.get_agg_tables_partitioned()]
+            tables_to_dump += [(table, 'state_id') for table in self.get_agg_tables_state_partitioned()]
         elif table_type == ('misc', 'all'):
             pass
 
@@ -62,7 +115,6 @@ class Command(BaseCommand):
 
     def static_datasources_table_names(self, domain_name):
         static_datasources = StaticDataSourceConfiguration.by_domain(domain_name)
-
         return [
             (
                 get_table_name(domain_name, datasource.table_id),
@@ -123,3 +175,68 @@ class Command(BaseCommand):
                                                                               'supervisor_id',
                                                                               'block_id').order_by('doc_id')
         return list(query_set)
+
+
+    def get_agg_tables_partitioned(self):
+        # Query to find all partitioned attached to a table
+        query_tamplate = """
+        SELECT relname
+        FROM pg_class,pg_inherits
+        WHERE pg_class.oid=pg_inherits.inhrelid AND inhparent IN (SELECT oid FROM pg_class WHERE relname='{}')
+        ORDER BY relname;
+        """
+
+        # Shell command to dump the schema of tables
+        dump_query_template = """
+        sudo -u postgres pg_dump -d icds_ucr -s {child_tables} > {parent_table}.sql
+        """
+
+        all_agg_child_tables = []
+        for table in self.agg_tables_month_partitioned:
+            query = query_tamplate.format(table)
+            with connections[get_icds_ucr_citus_db_alias()].cursor() as db_cursor:
+                db_cursor.execute(query)
+                child_tables = [row[0] for row in db_cursor.fetchall()]
+                all_agg_child_tables += child_tables
+
+                child_tables = ['-t "{}"'.format(row[0]) for row in db_cursor.fetchall()]
+                dump_query = dump_query_template.format(
+                    child_tables=' '.join(child_tables),
+                    parent_table=table
+                )
+
+                with open('pg_dump_script.sh', 'a') as fout:
+                    fout.write(f"\n\n\n\n## TABLE NAME: {table}")
+                    fout.write(dump_query)
+
+        return all_agg_child_tables
+
+    def get_agg_tables_state_partitioned(self):
+
+        months_required = [
+            '2020-09-01',
+            '2020-08-01',
+            '2020-07-01',
+            '2020-06-01',
+        ]
+
+        # Shell command to dump the schema of tables
+        dump_query_template = """
+        sudo -u postgres pg_dump -d icds_ucr -s {child_tables} > {parent_table}.sql
+        """
+        all_agg_child_tables = []
+        for tablename, child_table_prefix in self.agg_tables_month_partitioned:
+            hashes = [hashlib.md5((self.state_id + month).encode('utf-8')).hexdigest()[8:] for month in months_required]
+            child_tables = [ child_table_prefix + hash for hash in hashes]
+            all_agg_child_tables += child_tables
+
+            dump_query = dump_query_template.format(
+                child_tables=' '.join(child_tables),
+                parent_table=tablename
+            )
+
+            with open('pg_dump_script_intermediary.sh', 'a') as fout:
+                fout.write(f"\n\n\n\n## TABLE NAME: {table}")
+                fout.write(dump_query)
+
+        return all_agg_child_tables
