@@ -138,20 +138,22 @@ def dump_data_for_backend(domain_name, slug, dumper, context, zipname, limit_to_
     with gzip.open(filename, 'wt') as data_stream, gzip.open(blob_meta_filename, 'wt') as blob_stream:
         stats = dumper.function(domain_name, context, data_stream, blob_stream, **kwargs)
 
-    meta = {
-        slug: stats
-    }
     db = f"-{limit_to_db}" if limit_to_db else ""
     # filename must match up with meta key
-    blob_name = f"sql-{slug}-blob_meta{db}"
+    key = f"{slug}{db}"
+    blob_key = f"sql-{slug}-blob_meta{db}"
+    meta = {
+        key: stats
+    }
+
     blob_stats = stats.pop(BLOB_META_STATS_KEY, None)
     if blob_stats:
-        meta[blob_name] = {get_model_label(BlobMeta): blob_stats}
+        meta[blob_key] = {get_model_label(BlobMeta): blob_stats}
 
     with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
-        z.write(filename, f'{slug}{db}.gz')
+        z.write(filename, f'{key}.gz')
         if blob_stats:
-            z.write(blob_meta_filename, f'{blob_name}.gz')
+            z.write(blob_meta_filename, f'{blob_key}.gz')
 
     os.remove(filename)
     os.remove(blob_meta_filename)
