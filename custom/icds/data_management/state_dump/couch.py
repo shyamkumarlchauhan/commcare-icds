@@ -74,14 +74,13 @@ def _dump_couch_data(data, output, blob_meta_output, meta_tag=None):
             logger.info(f"Starting dump of {doc_type}")
             current_doc_type = doc_type
 
-        stats_key = meta_tag
-        if not stats_key:
+        if not meta_tag:
             if doc_type not in doc_types:
                 doc_types[doc_type] = get_document_class_by_doc_type(doc_type)
-            stats_key = '{}.{}'.format(doc_types[doc_type]._meta.app_label, doc_types[doc_type].__name__)
+            meta_tag = '{}.{}'.format(doc_types[doc_type]._meta.app_label, doc_types[doc_type].__name__)
 
-        counter[stats_key] += 1
-        if counter[meta_tag] % 500 == 0:
+        counter[meta_tag] += 1
+        if counter[meta_tag] and counter[meta_tag] % 500 == 0:
             logger.info(f"\t{doc_type} progress: {counter[doc_type]}")
 
         total_progress = sum(counter.values())
