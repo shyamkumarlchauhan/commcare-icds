@@ -42,6 +42,9 @@
                 </li>
             </ul>
         </div>
+        <div class="alert alert-info col-md-12" ng-if="$ctrl.isPPRSelected()">
+          <strong>PPR is available only at National and state level</strong>
+        </div>
         <div class="form-horizontal black">
             <div class="form-group">
                 <label class="control-label col-sm-2" for="indicator">Program Area: <i class="fa fa-info-circle" uib-popover="Select the program area for which you want to download a tabular report."
