@@ -12,7 +12,9 @@ from custom.icds_reports.const import (
     AGG_GROWTH_MONITORING_TABLE,
     AGG_MIGRATION_TABLE,
     AGG_AVAILING_SERVICES_TABLE,
-    CHILD_DELIVERY_FORM_ID
+    CHILD_DELIVERY_FORM_ID,
+    AGG_SAM_MAM_TABLE,
+    AGG_SAM_MAM_PANCHAYAT_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers import (
     get_child_health_tablename,
@@ -148,7 +150,7 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
         height_eligible = "({} AND {} <= 60)".format(valid_in_month, age_in_months)
         fully_immunized_eligible = "({} AND {} > 12)".format(valid_in_month, age_in_months)
         immunized_age_in_days = "(child_tasks.immun_one_year_date - person_cases.dob)"
-        fully_immun_before_month = "(child_tasks.immun_one_year_date < {})".format(end_month_string)
+        fully_immun_before_month_end = "(child_tasks.immun_one_year_date < {})".format(end_month_string)
 
         columns = (
             ("awc_id", "child_health.awc_id"),
@@ -181,10 +183,13 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
                 "CASE WHEN {} AND child_health.lbw_open_count = 1 THEN 1 ELSE 0 END".format(born_in_month)),
             ("fully_immunized_eligible", "CASE WHEN {} THEN 1 ELSE 0 END".format(fully_immunized_eligible)),
             ("fully_immunized_on_time", "CASE WHEN {} AND {} <= 365 AND {} THEN 1 ELSE 0 END".format(
-                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month
+                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month_end
             )),
             ("fully_immunized_late", "CASE WHEN {} AND {} > 365 AND {} THEN 1 ELSE 0 END".format(
-                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month
+                fully_immunized_eligible, immunized_age_in_days, fully_immun_before_month_end
+            )),
+            ("fully_immun_before_month_end", "CASE WHEN {} THEN 1 ELSE 0 END".format(
+                fully_immun_before_month_end
             )),
             ("has_aadhar_id",
                 "CASE WHEN person_cases.aadhar_date < {} THEN  1 ELSE 0 END".format(end_month_string)),
@@ -260,6 +265,8 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
                 "CASE "
                 "WHEN date_trunc('MONTH', gm.height_child_last_recorded) = %(start_date)s THEN gm.height_child "
                 "ELSE NULL END"),
+            ("last_recorded_weight", "CASE WHEN {} THEN gm.weight_child ELSE NULL END".format(wer_eligible)),
+            ("last_recorded_height", "CASE WHEN {} THEN gm.height_child ELSE NULL END".format(height_eligible)),
             ("height_measured_in_month",
                 "CASE "
                 "WHEN date_trunc('MONTH', gm.height_child_last_recorded) = %(start_date)s AND {} THEN 1 "
@@ -372,14 +379,29 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             ("birth_weight", "child_health.birth_weight"),
             ("child_person_case_id", "child_health.mother_id"),
             ("delivery_nature", "del_form.delivery_nature"),
+            ("birth_status_in_month", "CASE WHEN {} THEN del_form.still_live_birth ELSE NULL END".format(born_in_month)),
             ("term_days", "(del_form.add::DATE - del_form.edd::DATE) + 280"),
             ("valid_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(valid_status_daily)),
             ("migration_status_daily", "CASE WHEN {} THEN 0 ELSE 1 END".format(not_migration_status_daily)),
             ("alive_status_daily", "CASE WHEN {} THEN 1 ELSE 0 END".format(alive_status_daily)),
             ("duplicate_status_daily", "CASE WHEN NOT {} AND person_cases.reason_closure in ('dupe_reg',"
                                        "'incorrect_reg') THEN 1 ELSE 0 END".format(open_status_daily)),
+            ("last_referral_date", "person_cases.last_referral_date"),
+            ("referral_health_problem", "person_cases.referral_health_problem"),
+            ("referral_reached_date", "person_cases.referral_reached_date"),
+            ("last_referral_discharge_date", "person_cases.last_referral_discharge_date"),
             ("seeking_services_status_daily",
-             "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily))
+             "CASE WHEN {} THEN 1 ELSE 0 END".format(seeking_services_status_daily)),
+            ("mother_resident_status", "del_form.mother_resident_status"),
+            ("sam_mam_visit_date_1", "sam_form.sam_mam_visit_date_1"),
+            ("sam_mam_visit_date_2", "sam_form.sam_mam_visit_date_2"),
+            ("sam_mam_visit_date_3", "sam_form.sam_mam_visit_date_3"),
+            ("sam_mam_visit_date_4", "sam_form.sam_mam_visit_date_4"),
+            ("poshan_panchayat_date_1", "sam_panch_form.poshan_panchayat_date_1"),
+            ("poshan_panchayat_date_2", "sam_panch_form.poshan_panchayat_date_2"),
+            ("poshan_panchayat_date_3", "sam_panch_form.poshan_panchayat_date_3"),
+            ("poshan_panchayat_date_4", "sam_panch_form.poshan_panchayat_date_4"),
+            ("weighed_within_3_days", "CASE WHEN {} THEN del_form.birth_weight_kg ELSE NULL END".format(born_in_month))
         )
         yield """
         INSERT INTO "{child_tablename}" (
@@ -426,6 +448,14 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
               AND child_health.supervisor_id = df.supervisor_id
             LEFT OUTER JOIN "{delivery_form}" del_form ON child_health.doc_id = del_form.child_health_case_id
               AND child_health.supervisor_id = del_form.supervisor_id
+            LEFT OUTER JOIN "{sam_mam_table}" sam_form ON child_health.doc_id = sam_form.child_health_case_id
+              AND child_health.supervisor_id = sam_form.supervisor_id
+              AND child_health.state_id = sam_form.state_id
+              AND sam_form.month = %(start_date)s
+            LEFT OUTER JOIN "{sam_mam_panchayat_table}" sam_panch_form ON child_health.awc_id = sam_panch_form.awc_id
+              AND child_health.supervisor_id = sam_panch_form.supervisor_id
+              AND child_health.state_id = sam_panch_form.state_id
+              AND sam_panch_form.month = %(start_date)s
             WHERE child_health.doc_id IS NOT NULL
               AND child_health.state_id = %(state_id)s
               AND {open_in_month}
@@ -447,7 +477,9 @@ class ChildHealthMonthlyAggregationDistributedHelper(BaseICDSAggregationDistribu
             child_tasks_case_ucr=self.child_tasks_case_ucr_tablename,
             person_cases_ucr=self.person_case_ucr_tablename,
             open_in_month=open_in_month,
-            delivery_form=get_table_name(self.domain, CHILD_DELIVERY_FORM_ID)
+            delivery_form=get_table_name(self.domain, CHILD_DELIVERY_FORM_ID),
+            sam_mam_table=AGG_SAM_MAM_TABLE,
+            sam_mam_panchayat_table=AGG_SAM_MAM_PANCHAYAT_TABLE
         ), {
             "start_date": self.month,
             "next_month": month_formatter(self.month + relativedelta(months=1)),

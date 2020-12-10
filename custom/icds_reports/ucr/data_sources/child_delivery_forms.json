@@ -19,7 +19,8 @@
     "icds-test",
     "icds-cas",
     "cas-lab",
-    "icds-cas-sandbox"
+    "icds-cas-sandbox",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",
@@ -696,6 +697,389 @@
         "display_name": null,
         "type": "boolean",
         "column_id": "lbw_M_migrant_birth_count"
+      },
+      {
+        "display_name": null,
+        "datatype": "date",
+        "expression": {
+          "expression": {
+            "datatype": "date",
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "meta",
+              "timeStart"
+            ]
+          },
+          "type": "root_doc"
+        },
+        "is_primary_key": false,
+        "transform": {},
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "timestart"
+      },
+      {
+        "display_name": null,
+        "datatype": "date",
+        "expression": {
+          "expression": {
+            "datatype": "date",
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "meta",
+              "timeEnd"
+            ]
+          },
+          "type": "root_doc"
+        },
+        "is_primary_key": false,
+        "transform": {},
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "timeend"
+      },
+      {
+        "datatype": "string",
+        "expression": {
+          "expression": {
+            "datatype": "string",
+            "type": "property_path",
+            "property_path": ["form", "case_load_ccs_record0", "case", "@case_id"]
+          },
+          "type": "root_doc"
+        },
+        "is_primary_key": false,
+        "type": "expression",
+        "column_id": "case_load_ccs_record0"
+      },
+      {
+        "datatype": "small_integer",
+        "expression": {
+          "expression": {
+            "datatype": "small_integer",
+            "type": "switch",
+            "switch_on": {
+              "type": "property_path",
+              "property_path": ["form", "where_born"]
+            },
+            "cases": {
+              "home": {
+                "type": "constant",
+                "constant": 1
+              },
+              "hospital": {
+                "type": "constant",
+                "constant": 2
+              },
+              "transit": {
+                "type": "constant",
+                "constant": 3
+              }
+            },
+            "default": {
+              "type": "constant",
+              "constant": 0
+            }
+          },
+          "type": "root_doc"
+        },
+        "type": "expression",
+        "column_id": "where_born"
+      },
+      {
+        "datatype": "small_integer",
+        "expression": {
+          "expression": {
+            "datatype": "small_integer",
+            "type": "switch",
+            "switch_on": {
+              "type": "property_path",
+              "property_path": ["form", "which_hospital"]
+            },
+            "cases": {
+              "block_phc": {
+                "type": "constant",
+                "constant": 1
+              },
+              "district_hospital": {
+                "type": "constant",
+                "constant": 2
+              },
+              "private": {
+                "type": "constant",
+                "constant": 3
+              }
+            },
+            "default": {
+              "type": "constant",
+              "constant": 0
+            }
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "which_hospital"
+      },
+      {
+        "column_id": "breastfed_at_birth",
+        "datatype": "small_integer",
+        "type": "expression",
+        "expression": {
+          "type": "conditional",
+          "test": {
+            "expression": {
+              "type": "reduce_items",
+              "items_expression": {
+                "type": "filter_items",
+                "items_expression": {
+                  "type": "property_path",
+                  "property_path": ["form", "child", "breastfed_within_first_hour"],
+                  "datatype": "array"
+                },
+                "filter_expression": {
+                  "type": "boolean_expression",
+                  "expression": {
+                    "type": "identity"
+                  },
+                  "operator": "eq",
+                  "property_value": "yes"
+                }
+              },
+              "aggregation_fn": "count"
+            },
+            "type": "boolean_expression",
+            "operator": "gt",
+            "property_value": 0
+          },
+          "expression_if_true": {
+            "type": "constant",
+            "constant": 1
+          },
+          "expression_if_false": {
+            "type": "constant",
+            "constant": 0
+          }
+        }
+      },
+      {
+        "datatype": "small_integer",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "datatype": "small_integer",
+            "property_path": ["form", "unscheduled_visit"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "unscheduled_visit"
+      },
+      {
+        "datatype": "small_integer",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "datatype": "small_integer",
+            "property_path": ["form", "days_visit_late"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "days_visit_late"
+      },
+      {
+        "datatype": "date",
+        "expression": {
+          "expression": {
+            "datatype": "date",
+            "type": "property_path",
+            "property_path": ["form", "next_due"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "next_visit"
+      },
+      {
+        "datatype": "small_integer",
+        "expression": {
+          "expression": {
+            "datatype": "small_integer",
+            "type": "property_path",
+            "property_path": ["form", "num_children_del"]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "num_children_del"
+      },
+      {
+        "datatype": "string",
+        "expression": {
+          "expression": {
+            "datatype": "string",
+            "type": "property_path",
+            "property_path": [
+              "form",
+              "meta",
+              "username"
+            ]
+          },
+          "type": "root_doc"
+        },
+        "is_nullable": true,
+        "type": "expression",
+        "column_id": "username"
+      },
+      {
+        "column_id": "received_on",
+        "datatype": "datetime",
+        "type": "expression",
+        "expression": {
+          "type": "root_doc",
+          "expression": {
+            "type": "property_name",
+            "datatype": "datetime",
+            "property_name": "received_on"
+          }
+        }
+      },
+      {
+        "column_id": "person_case_id",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "root_doc",
+          "expression": {
+            "type": "property_path",
+            "datatype": "string",
+            "property_path": [
+              "form",
+              "update_mother_person_case",
+              "update_mother_person_case",
+              "case",
+              "@case_id"
+            ]
+          }
+        }
+      },
+      {
+        "column_id": "total_children_died",
+        "datatype": "small_integer",
+        "type": "expression",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "property_path": ["form", "total_children_died"],
+            "datatype": "small_integer"
+          },
+          "type": "root_doc"
+        }
+      },
+      {
+        "column_id": "how_many_children",
+        "datatype": "small_integer",
+        "type": "expression",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "property_path": ["form", "how_many_children"],
+            "datatype": "small_integer"
+          },
+          "type": "root_doc"
+        }
+      },
+      {
+        "column_id": "mother_alive",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "property_path": ["form", "mother_alive"],
+            "datatype": "string"
+          },
+          "type": "root_doc"
+        }
+      },
+      {
+        "column_id": "mother_dob",
+        "datatype": "date",
+        "type": "expression",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "property_path": ["form", "mother_dob"],
+            "datatype": "date"
+          },
+          "type": "root_doc"
+        }
+      },
+      {
+        "column_id": "owner_id",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "property_path": ["form", "owner_id"],
+            "datatype": "string"
+          },
+          "type": "root_doc"
+        }
+      },
+      {
+        "column_id": "safe",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "expression": {
+            "type": "property_path",
+            "property_path": ["form", "safe"],
+            "datatype": "string"
+          },
+          "type": "root_doc"
+        }
+      },
+      {
+        "column_id": "low_birth_weight",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": [
+            "low_birth_weight"
+          ]
+        }
+      },
+      {
+        "column_id": "child_birth_weight_recorded",
+        "datatype": "small_integer",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": [
+            "child_birth_weight_recorded"
+          ]
+        }
+      },
+      {
+        "column_id": "child_alive",
+        "datatype": "string",
+        "type": "expression",
+        "expression": {
+          "type": "property_path",
+          "property_path": [
+            "child_alive"
+          ]
+        }
       }
     ],
     "named_expressions": {
@@ -842,6 +1226,9 @@
     "sql_column_indexes": [
       {
         "column_ids": ["supervisor_id", "child_health_case_id"]
+      },
+      {
+        "column_ids": ["received_on", "state_id" ]
       }
     ],
     "sql_settings": {

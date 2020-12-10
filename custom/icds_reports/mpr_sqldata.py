@@ -1,13 +1,23 @@
+from datetime import date
 from operator import mul, truediv, sub
-
+from datetime import date
 from corehq.apps.locations.models import SQLLocation
 from corehq.apps.reports.datatables import DataTablesHeader, DataTablesColumn, DataTablesColumnGroup
 
 from django.utils.translation import ugettext as _
 from custom.icds_reports.sqldata.base_identification import BaseIdentification
-from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization
-from custom.icds_reports.sqldata.base_populations import BasePopulation
+from custom.icds_reports.sqldata.base_operationalization import BaseOperationalization, \
+    BaseOperationalizationBeta
+from custom.icds_reports.sqldata.base_populations import BasePopulation, BasePopulationBeta
 from custom.icds_reports.utils import ICDSMixin, MPRData, ICDSDataTableColumn
+
+from custom.icds_reports.models.aggregate import AggChildHealth, AggAwc, AggServiceDeliveryReport, AggCcsRecord
+
+from custom.icds_reports.models.views import ServiceDeliveryReportView
+from custom.icds_reports.models.aggregate import AggChildHealth, AggMPRAwc, AggAwc
+from custom.icds_reports.utils import get_location_filter
+from django.db.models.aggregates import Sum
+from django.db.models import Case, When, Value, F
 
 
 class MPRIdentification(BaseIdentification):
@@ -32,9 +42,13 @@ class MPROperationalization(BaseOperationalization, MPRData):
     pass
 
 
+class MPROperationalizationBeta(BaseOperationalizationBeta, MPRData):
+    pass
+
+
 class MPRSectors(object):
 
-    title = 'd. No of Sectors'
+    title = 'c. No of Sectors'
     slug = 'sectors'
     has_sections = False
     subtitle = []
@@ -69,9 +83,14 @@ class MPRSectors(object):
             ]
 
 
+
 class MPRPopulation(BasePopulation, MPRData):
 
-    title = 'e. Total Population of Project'
+    title = 'd. Total Population of Project'
+
+
+class MPRPopulationBeta(BasePopulationBeta, MPRData):
+    title = 'd. Total Population of Project'
 
 
 class MPRBirthsAndDeaths(ICDSMixin, MPRData):
@@ -215,6 +234,229 @@ class MPRBirthsAndDeaths(ICDSMixin, MPRData):
         )
 
 
+class MPRBirthsAndDeathsBeta(MPRBirthsAndDeaths):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters['aggregation_level']>1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        mother_death_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            dead_F_resident_adult_count=F('mother_death_permanent_resident'),
+            dead_F_migrant_adult_count=F('mother_death_temp_resident'),
+            dead_preg_resident_count=F('pregnancy_death_permanent_resident'),
+            dead_preg_migrant_count=F('pregnancy_death_temp_resident'),
+            dead_del_resident_count=F('delivery_death_permanent_resident'),
+            dead_del_migrant_count=F('delivery_death_temp_resident'),
+            dead_pnc_resident_count=F('pnc_death_permanent_resident'),
+            dead_pnc_migrant_count=F('pnc_death_temp_resident'),
+        ).order_by('month').first()
+
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            live_F_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            live_M_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            live_F_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            live_M_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_F_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_M_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_F_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            still_M_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='live_birth_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_F_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='weighed_in_3_days_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_M_resident_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='weighed_in_3_days_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_F_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='weighed_in_3_days_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            weighed_M_migrant_birth_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='weighed_in_3_days_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_resident_neo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_resident_neo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_migrant_neo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_migrant_neo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_resident_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='post_neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_resident_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='post_neonatal_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_migrant_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='post_neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_migrant_postneo_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='post_neonatal_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_resident_child_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='total_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_resident_child_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='total_deaths_permanent_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_F_migrant_child_count=Sum(
+                Case(
+                    When(
+                        gender='F', then='total_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            ),
+            dead_M_migrant_child_count=Sum(
+                Case(
+                    When(
+                        gender='M', then='total_deaths_temp_resident'
+                    ),
+                    default=Value(0)
+                )
+            )
+        ).order_by('month').first()
+
+        if child_data:
+            data.update(child_data)
+        if mother_death_data:
+            data.update(mother_death_data)
+        data = {key: value if value else 0 for key, value in data.items()}
+        return data
+
+
 class MPRAWCDetails(ICDSMixin, MPRData):
 
     title = '3. Details of new registrations at AWC during the month'
@@ -280,6 +522,92 @@ class MPRAWCDetails(ICDSMixin, MPRData):
                 'M_migrant_count_1'
             ),
         )
+
+
+class MPRAWCDetailsBeta(MPRAWCDetails):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(self.config['location_id'], self.config['domain'])
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        if filters['aggregation_level'] > 1:
+            filters['aggregation_level'] -= 1
+        data = dict()
+
+        ccs_data = AggCcsRecord.objects.filter(**filters).values('month').annotate(
+            pregnant_resident_count=Sum('pregnant_permanent_resident'),
+            pregnant_migrant_count=Sum('pregnant_temp_resident')
+        ).order_by('month').first()
+
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            live_F_resident_birth_count=Sum(
+                Case(
+                    When(gender='F', then='live_birth_permanent_resident'), default=Value(0)
+                )
+            ),
+            live_M_resident_birth_count=Sum(
+                Case(
+                    When(gender='M', then='live_birth_permanent_resident'), default=Value(0)
+                )
+            ),
+            live_F_migrant_birth_count=Sum(
+                Case(
+                    When(gender='F', then='live_birth_temp_resident'), default=Value(0)
+                )
+            ),
+            live_M_migrant_birth_count=Sum(
+                Case(
+                    When(gender='M', then='live_birth_temp_resident'), default=Value(0)
+                )
+            ),
+            F_resident_count=Sum(
+                Case(
+                    When(gender='F', age_tranche__lte=36, then='permanent_resident'), default=Value(0)
+                )
+            ),
+            M_resident_count=Sum(
+                Case(
+                    When(gender='F', then='permanent_resident'), default=Value(0)
+                )
+            ),
+            F_migrant_count=Sum(
+                Case(
+                    When(gender='F', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+            M_migrant_count=Sum(
+                Case(
+                    When(gender='M', age_tranche__lte=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+            F_resident_count_1=Sum(
+                Case(
+                    When(gender='F', age_tranche__gt=36,  then='permanent_resident'), default=Value(0)
+                )
+            ),
+            M_resident_count_1=Sum(
+                Case(
+                    When(gender='M', age_tranche__gt=36, then='permanent_resident'), default=Value(0)
+                )
+            ),
+            F_migrant_count_1=Sum(
+                Case(
+                    When(gender='F', age_tranche__gt=36,  then='temp_resident'), default=Value(0)
+                )
+            ),
+            M_migrant_count_1=Sum(
+                Case(
+                    When(gender='M', age_tranche__gt=36, then='temp_resident'), default=Value(0)
+                )
+            ),
+        ).order_by('month').first()
+
+        if child_data:
+            data.update(child_data)
+
+        if ccs_data:
+            data.update(ccs_data)
+
+        return {key: value if value else 0 for key, value in data.items()}
 
 
 class MPRSupplementaryNutrition(ICDSMixin, MPRData):
@@ -412,6 +740,156 @@ class MPRSupplementaryNutrition(ICDSMixin, MPRData):
         )
 
 
+class MPRSupplementaryNutritionBeta(ICDSMixin, MPRData):
+
+    title = '4. Delivery of Supplementary Nutrition and Pre-School Education (PSE)'
+    slug = 'supplementary_nutrition'
+
+    def __init__(self, config, allow_conditional_agg=False):
+        super(MPRSupplementaryNutritionBeta, self).__init__(config, allow_conditional_agg)
+        self.awc_open_count = 0
+
+    @property
+    def subtitle(self):
+        return 'Average no. days AWCs were open during the month? %.1f' % (
+            self.awc_open_count / (self.awc_number or 1)
+        ),
+
+    @property
+    def headers(self):
+        return DataTablesHeader(
+            DataTablesColumn(''),
+            DataTablesColumn(_('Morning snacks/ breakfast')),
+            DataTablesColumn(_('Hot cooked meals/RTE')),
+            DataTablesColumn(_('Take home ration (THR')),
+            DataTablesColumn(_('PSE'))
+        )
+
+    @property
+    def rows(self):
+        if self.config['location_id']:
+            filters = get_location_filter(self.config['location_id'], self.config['domain'])
+            if filters.get('aggregation_level') > 1:
+                filters['aggregation_level'] -= 1
+
+            filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+            data = ServiceDeliveryReportView.objects.filter(**filters).values(
+                'num_launched_awcs',
+                'breakfast_served',
+                'hcm_served',
+                'thr_served',
+                'pse_provided',
+                'breakfast_25_days',
+                'hcm_25_days',
+                'pse_awc_25_days',
+                'breakfast_9_days',
+                'hcm_9_days',
+                'pse_awc_9_days',
+                'num_launched_awcs').order_by('month').first()
+
+            data = data if data else {}
+            self.awc_open_count = data.get('awc_days_open', 0)
+            rows = []
+            for row in self.row_config:
+                row_data = []
+                for idx, cell in enumerate(row):
+                    if isinstance(cell, dict):
+                        num = data.get(cell['column'], 0)
+                        if cell['second_value'] == 'location_number':
+                            denom = self.awc_number
+                        else:
+                            denom = data.get(cell['second_value'], 1)
+                        if 'format' in cell:
+                            cell_data = '%.1f%%' % (cell['func'](num, float(denom or 1)) * 100)
+                        else:
+                            cell_data = '%.1f' % cell['func'](num, float(denom or 1))
+                        row_data.append(cell_data)
+                    else:
+                        row_data.append(data.get(cell, cell if cell == '--' or idx == 0 else 0))
+                rows.append(row_data)
+            return rows
+
+    @property
+    def row_config(self):
+        return (
+            (
+                _('a. Average number of days services were provided'),
+                {
+                    'column': 'breakfast_served',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                },
+                {
+                    'column': 'hcm_served',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                },
+                {
+                    'column': 'thr_served',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                },
+                {
+                    'column': 'pse_provided',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                }
+            ),
+            (
+                _('b. % of AWCs provided supplementary food for 25 or more days'),
+                {
+                    'column': 'breakfast_25_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                {
+                    'column': 'hcm_25_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                '--',
+                '--'
+            ),
+            (
+                _('c. % of AWCs providing PSE for 25 or more days'),
+                '--',
+                '--',
+                '--',
+                {
+                    'column': 'pse_awc_25_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                }
+            ),
+            (
+                _('d. % of AWCs providing services for 9 days or less'),
+                {
+                    'column': 'breakfast_9_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                {
+                    'column': 'hcm_9_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                },
+                '',
+                {
+                    'column': 'pse_awc_9_days',
+                    'func': truediv,
+                    'second_value': "num_launched_awcs",
+                    'format': 'percent'
+                }
+            ),
+        )
+
+
 class MPRUsingSalt(ICDSMixin, MPRData):
 
     slug = 'using_salt'
@@ -423,6 +901,34 @@ class MPRUsingSalt(ICDSMixin, MPRData):
             data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
             use_salt = data.get('use_salt', 0)
             percent = "%.2f" % ((use_salt or 0) * 100 / float(self.awc_number or 1))
+            return [
+                ["Number of AWCs using Iodized Salt:", use_salt],
+                ["% of AWCs:", percent + " %"]
+            ]
+
+        return []
+
+
+class MPRUsingSaltBeta(ICDSMixin, MPRData):
+
+    slug = 'using_salt'
+    title = "5. Number of AWCs using Iodized Salt"
+
+    @property
+    def rows(self):
+        if self.config['location_id']:
+            filters = get_location_filter(self.config['location_id'], self.config['domain'])
+            if filters.get('aggregation_level') > 1:
+                filters['aggregation_level'] -= 1
+
+            filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+            awc_data = AggAwc.objects.filter(**filters).values(
+                'use_salt',
+                'num_launched_awcs').order_by('month').first()
+            awc_data = awc_data if awc_data else {}
+            use_salt = awc_data.get('use_salt', 0)
+            percent = "%.2f" % ((use_salt or 0) * 100 / float(awc_data.get('num_launched_awcs', 0) or 1))
             return [
                 ["Number of AWCs using Iodized Salt:", use_salt],
                 ["% of AWCs:", percent + " %"]
@@ -511,7 +1017,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
         return [
             {
                 'title': "a. Supplementary Nutrition beneficiaries (number of those among "
-                         "residents who were given supplementary nutrition for 21+ days "
+                         "residents who were given supplementary nutrition for 25+ days "
                          "during the reporting month)",
                 'slug': 'programme_coverage_1',
                 'rows_config': (
@@ -586,7 +1092,7 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
                         ('thr_rations_male_st_1', 'thr_rations_male_sc_1', 'thr_rations_male_others_1'),
                         ('rations_female_st', 'rations_female_sc', 'rations_female_others'),
                         ('rations_male_st', 'rations_male_sc', 'rations_male_others'),
-                        ('all_rations_st' 'all_rations_sc', 'all_rations_others'),
+                        ('all_rations_st', 'all_rations_sc', 'all_rations_others'),
                         ('thr_rations_pregnant_st', 'thr_rations_pregnant_sc', 'thr_rations_pregnant_others'),
                         ('thr_rations_lactating_st', 'thr_rations_lactating_sc', 'thr_rations_lactating_others'),
                     ),
@@ -871,6 +1377,152 @@ class MPRProgrammeCoverage(ICDSMixin, MPRData):
                 )
             }
         ]
+
+
+
+class MPRProgrammeCoverageBeta(MPRProgrammeCoverage):
+
+    @property
+    def headers(self):
+        return DataTablesHeader(
+            DataTablesColumn('Category'),
+            DataTablesColumnGroup(
+                _('6-35 months'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys'))
+            ),
+            DataTablesColumnGroup(
+                _('36-71 months'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys'))
+            ),
+            DataTablesColumnGroup(
+                _('All Children (6-71 months)'),
+                DataTablesColumn(_('Girls')),
+                DataTablesColumn(_('Boys')),
+                DataTablesColumn(_('Total'))
+            ),
+            DataTablesColumn(_('Pregnant Women')),
+            DataTablesColumn(_('Lactating mothers'))
+        )
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            thr_rations_female_st=Sum(Case(When(gender='F', then='thr_25_days_st_resident'))),
+            thr_rations_male_st=Sum(Case(When(gender='M', then='thr_25_days_st_resident'))),
+            thr_rations_female_st_1=Sum(Case(When(gender='F', then='lunch_25_days_st_resident'))),
+            thr_rations_male_st_1=Sum(Case(When(gender='M', then='lunch_25_days_st_resident'))),
+
+            thr_rations_female_sc=Sum(Case(When(gender='F', then='thr_25_days_sc_resident'))),
+            thr_rations_male_sc=Sum(Case(When(gender='M', then='thr_25_days_sc_resident'))),
+            thr_rations_female_sc_1=Sum(Case(When(gender='F', then='lunch_25_days_sc_resident'))),
+            thr_rations_male_sc_1=Sum(Case(When(gender='M', then='lunch_25_days_sc_resident'))),
+
+            thr_rations_female_others=Sum(Case(When(gender='F', then='thr_25_days_other_resident'))),
+            thr_rations_male_others=Sum(Case(When(gender='M', then='thr_25_days_other_resident'))),
+            thr_rations_female_others_1=Sum(Case(When(gender='F', then='lunch_25_days_other_resident'))),
+            thr_rations_male_others_1=Sum(Case(When(gender='M', then='lunch_25_days_other_resident'))),
+
+            thr_rations_female_disabled=Sum(Case(When(gender='F', then='thr_25_days_disabled_resident'))),
+            thr_rations_male_disabled=Sum(Case(When(gender='M', then='thr_25_days_disabled_resident'))),
+            thr_rations_female_disabled_1=Sum(Case(When(gender='F', then='lunch_25_days_disabled_resident'))),
+            thr_rations_male_disabled_1=Sum(Case(When(gender='M', then='lunch_25_days_disabled_resident'))),
+
+            thr_rations_female_minority=Sum(Case(When(gender='F', then='thr_25_days_minority_resident'))),
+            thr_rations_male_minority=Sum(Case(When(gender='M', then='thr_25_days_minority_resident'))),
+            thr_rations_female_minority_1=Sum(Case(When(gender='F', then='lunch_25_days_minority_resident'))),
+            thr_rations_male_minority_1=Sum(Case(When(gender='M', then='lunch_25_days_minority_resident'))),
+            child_count_female=Sum(Case(When(gender='F', then='thr_eligible'))),
+            child_count_male=Sum(Case(When(gender='M', then='thr_eligible'))),
+            child_count_female_1=Sum(Case(When(gender='F', then='pse_eligible'))),
+            child_count_male_1=Sum(Case(When(gender='M', then='pse_eligible'))),
+            thr_rations_absent_female=Sum(Case(When(gender='F', then='thr_0_days_resident'))),
+            thr_rations_absent_male=Sum(Case(When(gender='M', then='thr_0_days_resident'))),
+            thr_rations_absent_female_1=Sum(Case(When(gender='F', then='lunch_0_days_resident'))),
+            thr_rations_absent_male_1=Sum(Case(When(gender='M', then='lunch_0_days_resident'))),
+            sum_thr_rations_female=Sum(Case(When(gender='F', then='thr_1_days_resident'))),
+            sum_thr_rations_male=Sum(Case(When(gender='M', then='thr_1_days_resident'))),
+            sum_thr_rations_female_1=Sum(Case(When(gender='F', then='lunch_1_days_resident'))),
+            sum_thr_rations_male_1=Sum(Case(When(gender='M', then='lunch_1_days_resident'))),
+            thr_total_rations_female=Sum(Case(When(gender='F', then='total_thr_resident'))),
+            thr_total_rations_male=Sum(Case(When(gender='M', then='total_thr_resident'))),
+            thr_total_rations_female_1=Sum(Case(When(gender='F', then='total_lunch_resident'))),
+            thr_total_rations_male_1=Sum(Case(When(gender='M', then='total_lunch_resident'))),
+            thr_rations_migrant_female=Sum(Case(When(gender='F', then='thr_1_days_migrant'))),
+            thr_rations_migrant_male=Sum(Case(When(gender='M', then='thr_1_days_migrant'))),
+            thr_rations_migrant_female_1=Sum(Case(When(gender='F', then='lunch_1_days_migrant'))),
+            thr_rations_migrant_male_1=Sum(Case(When(gender='M', then='lunch_1_days_migrant'))),
+        ).order_by('month').first()
+
+        mother_data = AggCcsRecord.objects.filter(**filters).values('month').annotate(
+            thr_rations_pregnant_st=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_st_resident'))),
+            thr_rations_lactating_st=Sum(Case(When(ccs_status='lactating', then='thr_25_days_st_resident'))),
+            thr_rations_pregnant_sc=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_sc_resident'))),
+            thr_rations_lactating_sc=Sum(Case(When(ccs_status='lactating', then='thr_25_days_sc_resident'))),
+            thr_rations_pregnant_others=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_other_resident'))),
+            thr_rations_lactating_others=Sum(Case(When(ccs_status='lactating', then='thr_25_days_other_resident'))),
+            thr_rations_pregnant_disabled=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_disabled_resident'))),
+            thr_rations_lactating_disabled=Sum(Case(When(ccs_status='lactating', then='thr_25_days_disabled_resident'))),
+            thr_rations_pregnant_minority=Sum(Case(When(ccs_status='pregnant', then='thr_25_days_minority_resident'))),
+            thr_rations_lactating_minority=Sum(Case(When(ccs_status='lactating', then='thr_25_days_minority_resident'))),
+            thr_rations_absent_pregnant=Sum(Case(When(ccs_status='pregnant', then='thr_0_days_resident'))),
+            thr_rations_absent_lactating=Sum(Case(When(ccs_status='lactating', then='thr_0_days_resident'))),
+            thr_rations_partial_pregnant=Sum(Case(When(ccs_status='pregnant', then='thr_1_days_resident'))),
+            thr_rations_partial_lactating=Sum(Case(When(ccs_status='lactating', then='thr_1_days_resident'))),
+            thr_total_rations_pregnant=Sum(Case(When(ccs_status='pregnant', then='total_thr_resident'))),
+            thr_total_rations_lactating=Sum(Case(When(ccs_status='lactating', then='total_thr_resident'))),
+            thr_rations_migrant_pregnant=Sum(Case(When(ccs_status='pregnant', then='thr_1_days_migrant'))),
+            thr_rations_migrant_lactating=Sum(Case(When(ccs_status='lactating', then='thr_1_days_migrant'))),
+            pregnant=Sum('pregnant'),
+            lactating=Sum('lactating'),
+        ).order_by('month').first()
+
+        if child_data:
+            data.update(child_data)
+        if mother_data:
+            data.update(mother_data)
+        data = {key: value if value else 0 for key, value in data.items()}
+        return data
+
+    @property
+    def row_config(self):
+        parent_row_config = super(MPRProgrammeCoverageBeta, self).row_config
+
+        feeding_efficiency = list(parent_row_config[1]['rows_config'])
+
+        del feeding_efficiency[3]
+        del feeding_efficiency[4]
+
+        feeding_efficiency[2] = (
+            _('III. Total present for at least one day during the month'),
+            'sum_thr_rations_female',
+            'sum_thr_rations_male',
+            'sum_thr_rations_female_1',
+            'sum_thr_rations_male_1',
+            {
+                'columns': ('sum_thr_rations_female', 'sum_thr_rations_female_1'),
+                'alias': 'total_rations_partial_female',
+            },
+            {
+                'columns': ('sum_thr_rations_male', 'sum_thr_rations_male_1'),
+                'alias': 'total_rations_partial_male'
+            },
+            {
+                'columns': ('total_rations_partial_female', 'total_rations_partial_male'),
+                'alias': 'all_rations_partial'
+            },
+            'thr_rations_partial_pregnant',
+            'thr_rations_partial_lactating'
+        )
+
+        parent_row_config[1]['rows_config'] = tuple(feeding_efficiency)
+        return parent_row_config
 
 
 class MPRPreschoolEducation(ICDSMixin, MPRData):
@@ -1163,6 +1815,355 @@ class MPRPreschoolEducation(ICDSMixin, MPRData):
                 )
             }
         ]
+
+
+class MPRPreschoolEducationBeta(MPRPreschoolEducation):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(self.config['location_id'], self.config['domain'])
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+        data = self.get_child_data(filters)
+        data.update(self.get_activity_data(filters))
+        data = {key: value if value else 0 for key, value in data.items()}
+
+        return data
+
+    def get_child_data(self, filters):
+        child_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            pse_attendance_f_3_4=Sum(Case(When(gender='F',
+                                               age_tranche__in=['36', '48'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_m_3_4=Sum(Case(When(gender='M',
+                                               age_tranche__in=['36', '48'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_f_4_5=Sum(Case(When(gender='F',
+                                               age_tranche__in=['60'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_m_4_5=Sum(Case(When(gender='F',
+                                               age_tranche__in=['60'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_f_5_6=Sum(Case(When(gender='F',
+                                               age_tranche__in=['72'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_attendance_m_5_6=Sum(Case(When(gender='F',
+                                               age_tranche__in=['72'],
+                                               then='total_pse_days_attended',
+                                               ), default=Value(0))),
+            pse_eligible_f=Sum(Case(When(gender='F',
+                                         then='pse_eligible',
+                                         ), default=Value(0))),
+            pse_eligible_m=Sum(Case(When(gender='F',
+                                         then='pse_eligible',
+                                         ), default=Value(0))),
+            pse_attended_0_days_f=Sum(Case(When(gender='F',
+                                                then='pse_attended_0_days',
+                                                ), default=Value(0))),
+            pse_attended_0_days_m=Sum(Case(When(gender='F',
+                                                then='pse_attended_0_days',
+                                                ), default=Value(0))),
+            pse_attended_1_days_f=Sum(Case(When(gender='F',
+                                                then='pse_attended_1_days',
+                                                ), default=Value(0))),
+            pse_attended_1_days_m=Sum(Case(When(gender='M',
+                                                then='pse_attended_1_days',
+                                                ), default=Value(0))),
+            total_pse_days_attended_f=Sum(Case(When(gender='F',
+                                                    then='total_pse_days_attended',
+                                                    ), default=Value(0))),
+            total_pse_days_attended_m=Sum(Case(When(gender='M',
+                                                    then='total_pse_days_attended',
+                                                    ), default=Value(0))),
+            pse_attended_25_days_st_f=Sum(Case(When(gender='F',
+                                                    then='pse_attended_25_days_st',
+                                                    ), default=Value(0))),
+            pse_attended_25_days_st_M=Sum(Case(When(gender='M',
+                                                    then='pse_attended_25_days_st',
+                                                    ), default=Value(0))),
+            pse_attended_25_days_sc_f=Sum(Case(When(gender='F',
+                                                    then='pse_attended_25_days_sc',
+                                                    ), default=Value(0))),
+            pse_attended_25_days_sc_m=Sum(Case(When(gender='M',
+                                                    then='pse_attended_25_days_sc',
+                                                    ), default=Value(0))),
+            pse_attended_25_days_other_f=Sum(Case(When(gender='F',
+                                                       then='pse_attended_25_days_other',
+                                                       ), default=Value(0))),
+            pse_attended_25_days_other_m=Sum(Case(When(gender='M',
+                                                       then='pse_attended_25_days_other',
+                                                       ), default=Value(0))),
+            pse_attended_25_days_disabled_f=Sum(Case(When(gender='F',
+                                                          then='pse_attended_25_days_disabled',
+                                                          ), default=Value(0))),
+            pse_attended_25_days_disabled_m=Sum(Case(When(gender='M',
+                                                          then='pse_attended_25_days_disabled',
+                                                          ), default=Value(0))),
+            pse_attended_25_days_minority_f=Sum(Case(When(gender='F',
+                                                          then='pse_attended_25_days_minority',
+                                                          ), default=Value(0))),
+            pse_attended_25_days_minority_m=Sum(Case(When(gender='M',
+                                                          then='pse_attended_25_days_minority',
+                                                          ), default=Value(0))),
+        ).order_by('month').first()
+
+        if not child_data:
+            return {}
+        attendance_total_data_map = {
+            'total_pse_attendance_3_4': ['pse_attendance_f_3_4', 'pse_attendance_m_3_4'],
+            'total_pse_attendance_4_5': ['pse_attendance_f_4_5', 'pse_attendance_m_4_5'],
+            'total_pse_attendance_5_6': ['pse_attendance_f_5_6', 'pse_attendance_m_5_6'],
+            'total_pse_f': ['pse_attendance_f_3_4', 'pse_attendance_f_4_5', 'pse_attendance_f_5_6'],
+            'total_pse_m': ['pse_attendance_m_3_4', 'pse_attendance_m_4_5', 'pse_attendance_m_5_6'],
+            'total_pse_attendance': ['pse_attendance_f_3_4', 'pse_attendance_m_3_4',
+                                     'pse_attendance_f_4_5', 'pse_attendance_m_4_5',
+                                     'pse_attendance_f_5_6', 'pse_attendance_m_5_6'],
+        }
+
+        for total_attendance_key, total_attendance_summation_cols in attendance_total_data_map.items():
+            child_data[total_attendance_key] = sum([child_data[key] for key in total_attendance_summation_cols])
+        return child_data
+
+    def get_activity_data(self, filters):
+        data = AggAwc.objects.filter(**filters).values(
+            'num_launched_awcs',
+            'num_days_4_pse_activities',
+            'num_days_1_pse_activities',
+            'awc_days_open'
+        ).order_by('month').first()
+
+        if not data:
+            return {}
+
+        pse_4 = data['num_days_4_pse_activities']
+        pse_1 = data['num_days_1_pse_activities']
+        awc_days_open = data['awc_days_open']
+        if data['num_launched_awcs']:
+            pse_4 = pse_4 / data['num_launched_awcs']
+            pse_1 = pse_1 / data['num_launched_awcs']
+            awc_days_open = awc_days_open / data['num_launched_awcs']
+
+        return {
+            'open_four_acts_count': pse_4,
+            'open_one_acts_count': pse_1,
+            'open_pse_count': awc_days_open
+        }
+
+    @property
+    def row_config(self):
+        return [
+            {
+                'title': 'a. Average attendance of children for 25 or more days '
+                         'in the reporting month by different categories',
+                'slug': 'preschool_1',
+                'headers': DataTablesHeader(
+                    DataTablesColumn('Category'),
+                    DataTablesColumn('Girls'),
+                    DataTablesColumn('Boys'),
+                    DataTablesColumn('Total')
+                ),
+                'rows_config': (
+                    (
+                        _('ST'),
+                        'pse_attended_25_days_st_f',
+                        'pse_attended_25_days_st_m',
+                        {
+                            'columns': ('pse_attended_25_days_st_f', 'pse_attended_25_days_st_m'),
+                            'alias': '25_days_st'
+                        }
+                    ),
+                    (
+                        _('SC'),
+                        'pse_attended_25_days_sc_f',
+                        'pse_attended_25_days_sc_m',
+                        {
+                            'columns': ('pse_attended_25_days_sc_f', 'pse_attended_25_days_sc_m'),
+                            'alias': '25_days_sc'
+                        }
+                    ),
+                    (
+                        _('Other'),
+                        'pse_attended_25_days_other_f',
+                        'pse_attended_25_days_other_m',
+                        {
+                            'columns': ('pse_attended_25_days_other_f', 'pse_attended_25_days_other_m'),
+                            'alias': '25_days_others'
+                        }
+                    ),
+                    (
+                        _('All Categories (Total)'),
+                        ('pse_attended_25_days_st_f', 'pse_attended_25_days_sc_f', 'pse_attended_25_days_other_f'),
+                        ('pse_attended_25_days_st_m', 'pse_attended_25_days_sc_m', 'pse_attended_25_days_other_m'),
+                        ('25_days_st', '25_days_sc', '25_days_others')
+                    ),
+                    (
+                        _('Disabled'),
+                        'pse_attended_25_days_disabled_f',
+                        'pse_attended_25_days_disabled_m',
+                        ('pse_attended_25_days_disabled_f', 'pse_attended_25_days_disabled_m')
+                    ),
+                    (
+                        _('Minority'),
+                        'pse_attended_25_days_minority_f',
+                        'pse_attended_25_days_minority_m',
+                        ('pse_attended_25_days_minority_f', 'pse_attended_25_days_minority_m')
+                    )
+                )
+
+            },
+            {
+                'title': 'b. Total Daily Attendance of Children by age category',
+                'slug': 'preschool_2',
+                'headers': DataTablesHeader(
+                    DataTablesColumn('Age Category'),
+                    DataTablesColumn('Girls'),
+                    DataTablesColumn('Boys'),
+                    DataTablesColumn('Total')
+                ),
+                'rows_config': (
+                    (
+                        _('3-4 years'),
+                        'pse_attendance_f_3_4',
+                        'pse_attendance_m_3_4',
+                        'total_pse_attendance_3_4'
+                    ),
+                    (
+                        _('4-5 years'),
+                        'pse_attendance_f_4_5',
+                        'pse_attendance_f_4_5',
+                        'total_pse_attendance_4_5'
+                    ),
+                    (
+                        _('5-6 years'),
+                        'pse_attendance_f_5_6',
+                        'pse_attendance_f_5_6',
+                        'total_pse_attendance_5_6'
+                    ),
+                    (
+                        _('All Children'),
+                        'total_pse_f',
+                        'total_pse_m',
+                        'total_pse_attendance'
+                    )
+                )
+            },
+            {
+                'title': 'c. PSE Attendance Efficiency',
+                'slug': 'preschool_3',
+                'headers': DataTablesHeader(
+                    DataTablesColumn(''),
+                    DataTablesColumn('Girls'),
+                    DataTablesColumn('Boys'),
+                    DataTablesColumn('Total')
+                ),
+                'rows_config': (
+                    (
+                        _('I. Annual Population Totals (3-6 years)'),
+                        'pse_eligible_f',
+                        'pse_eligible_m',
+                        {
+                            'columns': ('pse_eligible_f', 'pse_eligible_m'),
+                            'alias': 'child_count'
+                        }
+                    ),
+                    (
+                        _('II. Usual Absentees during the month'),
+                        'pse_attended_0_days_f',
+                        'pse_attended_0_days_m',
+                        {
+                            'columns': ('pse_attended_0_days_f', 'pse_attended_0_days_m'),
+                            'alias': 'absent'
+                        }
+                    ),
+                    (
+                        _('III. Total present for at least one day in month'),
+                        'pse_attended_1_days_f',
+                        'pse_attended_1_days_m',
+                        {
+                            'columns': ('pse_attended_1_days_f', 'pse_attended_1_days_m'),
+                            'alias': 'partial'
+                        }
+                    ),
+                    (
+                        _('IV. Expected Total Daily Attendance'),
+                        {
+                            'columns': ('pse_attended_1_days_f',),
+                            'func': mul,
+                            'second_value': 'open_pse_count',
+                            'alias': 'expected_attendance_female'
+                        },
+                        {
+                            'columns': ('pse_attended_1_days_m',),
+                            'func': mul,
+                            'second_value': 'open_pse_count',
+                            'alias': 'expected_attendance_male'
+                        },
+                        {
+                            'columns': ('partial',),
+                            'func': mul,
+                            'second_value': 'open_pse_count',
+                            'alias': 'expected_attendance'
+                        }
+                    ),
+                    (
+                        _('V. Actual Total Daily Attendance'),
+                            'total_pse_days_attended_f',
+                            'total_pse_days_attended_m',
+                        {
+                            'columns': (
+                                'total_pse_days_attended_f',
+                                'total_pse_days_attended_m',
+                            ),
+                            'alias': 'attendance'
+                        }
+                    ),
+                    (
+                        _('VI. PSE Attendance Efficiency'),
+                        {
+                            'columns': ('total_pse_days_attended_f',),
+                            'func': truediv,
+                            'second_value': 'expected_attendance_female',
+                            'format': 'percent',
+                        },
+                        {
+                            'columns': 'total_pse_days_attended_m',
+                            'func': truediv,
+                            'second_value': 'expected_attendance_male',
+                            'format': 'percent',
+                        },
+                        {
+                            'columns': 'attendance',
+                            'func': truediv,
+                            'second_value': 'expected_attendance',
+                            'format': 'percent',
+                        }
+                    )
+                )
+            },
+            {
+                'title': 'd. PSE Activities',
+                'slug': 'preschool_4',
+                'headers': [],
+                'rows_config': (
+                    (
+                        _('I. Average no. of days on which at least four PSE activities were conducted at AWCs'),
+                        'open_four_acts_count'
+                    ),
+                    (
+                        _('II. Average no. of days on which any PSE activity was conducted at AWCs'),
+                        'open_one_acts_count'
+                    )
+                )
+            }
+        ]
+
 
 
 class MPRGrowthMonitoring(ICDSMixin, MPRData):
@@ -1624,8 +2625,408 @@ class MPRGrowthMonitoring(ICDSMixin, MPRData):
         )
 
 
-class MPRImmunizationCoverage(ICDSMixin, MPRData):
+class MPRGrowthMonitoringBeta(MPRGrowthMonitoring):
 
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+
+        child_data = AggChildHealth.objects.filter(**filters).values('gender').annotate(
+            weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                  then='nutrition_status_weighed',
+                                  ), default=Value(0))),
+            weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                    then='nutrition_status_weighed',
+                                    ), default=Value(0))),
+            weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                    then='nutrition_status_weighed',
+                                    ), default=Value(0))),
+            child_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                      then='valid_in_month',
+                                      ), default=Value(0))),
+            child_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                        then='valid_in_month',
+                                        ), default=Value(0))),
+            child_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                        then='valid_in_month',
+                                        ), default=Value(0))),
+            norm_weight_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                     then='nutrition_status_normal',
+                                     ), default=Value(0))),
+            norm_weight_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                       then='nutrition_status_normal',
+                                       ), default=Value(0))),
+            norm_weight_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                       then='nutrition_status_normal',
+                                       ), default=Value(0))),
+            mod_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                            then='nutrition_status_moderately_underweight',
+                                            ), default=Value(0))),
+            mod_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                              then='nutrition_status_moderately_underweight',
+                                              ), default=Value(0))),
+            mod_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                              then='nutrition_status_moderately_underweight',
+                                              ), default=Value(0))),
+            sev_weighed_count=Sum(Case(When(age_tranche__in=['0', '6', '12'],
+                                            then='nutrition_status_severely_underweight',
+                                            ), default=Value(0))),
+            sev_weighed_count_1=Sum(Case(When(age_tranche__in=['24', '36'],
+                                              then='nutrition_status_severely_underweight',
+                                              ), default=Value(0))),
+            sev_weighed_count_2=Sum(Case(When(age_tranche__in=['48', '60'],
+                                              then='nutrition_status_severely_underweight',
+                                              ), default=Value(0))),
+        )
+        data = dict()
+
+        for row in child_data:
+            data.update({
+                f"{row['gender']}_{key}": value
+                for key, value in row.items()
+            })
+        data = {key: value if value else 0 for key, value in data.items()}
+        return data
+
+    @property
+    def row_config(self):
+        return (
+            (
+                'I. Total number of children weighed',
+                '',
+                'F_weighed_count',
+                'M_weighed_count',
+                'F_weighed_count_1',
+                'M_weighed_count_1',
+                'F_weighed_count_2',
+                'M_weighed_count_2',
+                {
+                    'columns': (
+                        'F_weighed_count',
+                        'F_weighed_count_1',
+                        'F_weighed_count_2'
+                    ),
+                    'alias': 'resident_female_weight'
+                },
+                {
+                    'columns': (
+                        'M_weighed_count',
+                        'M_weighed_count_1',
+                        'M_weighed_count_2'
+                    ),
+                    'alias': 'resident_male_weight'
+                },
+                {
+                    'columns': ('resident_female_weight', 'resident_male_weight'),
+                    'alias': 'all_resident_weight'
+                },
+            ),
+            (
+                'II. Annual Population Totals',
+                '',
+                'F_child_count',
+                'M_child_count',
+                'F_child_count_1',
+                'M_child_count_1',
+                'F_child_count_2',
+                'M_child_count_2',
+                {
+                    'columns': ('F_child_count', 'F_child_count_1', 'F_child_count_2'),
+                    'alias': 'child_female'
+                },
+                {
+                    'columns': ('M_child_count', 'M_child_count_1', 'M_child_count_2'),
+                    'alias': 'child_male'
+                },
+                {
+                    'columns': ('child_female', 'child_male'),
+                    'alias': 'all_child'
+                },
+            ),
+            (
+                'III. Weighing Efficiency (%)',
+                '',
+                {
+                    'columns': ('F_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_child_count'
+                },
+                {
+                    'columns': ('M_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_child_count'
+                },
+                {
+                    'columns': ('F_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_child_count_1'
+                },
+                {
+                    'columns': ('M_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_child_count_1'
+                },
+                {
+                    'columns': ('F_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_child_count_2'
+                },
+                {
+                    'columns': ('M_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_child_count_2'
+                },
+                {
+                    'columns': ('resident_female_weight',),
+                    'func': truediv,
+                    'second_value': 'child_female'
+                },
+                {
+                    'columns': ('resident_male_weight',),
+                    'func': truediv,
+                    'second_value': 'child_male'
+                },
+                {
+                    'columns': ('all_resident_weight',),
+                    'func': truediv,
+                    'second_value': 'all_child'
+                }
+            ),
+            (
+                'IV. Out of the children weighed, no of children found:',
+            ),
+            (
+                'a. Normal (Green)',
+                'Num',
+                'F_norm_weight_count',
+                'M_norm_weight_count',
+                'F_norm_weight_count_1',
+                'M_norm_weight_count_1',
+                'F_norm_weight_count_2',
+                'M_norm_weight_count_2',
+                {
+                    'columns': ('F_norm_weight_count', 'F_norm_weight_count_1', 'F_norm_weight_count_2'),
+                    'alias': 'all_F_sub_weight'
+                },
+                {
+                    'columns': ('M_norm_weight_count', 'M_norm_weight_count_1', 'M_norm_weight_count_2'),
+                    'alias': 'all_M_sub_weight'
+                },
+                {
+                    'columns': ('all_F_sub_weight', 'all_M_sub_weight'),
+                    'alias': 'all_sub_weight'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_norm_weight_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_norm_weight_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_norm_weight_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_norm_weight_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_norm_weight_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_norm_weight_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('all_F_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('all_M_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_sub_weight',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            ),
+            (
+                'b. Moderately underweight (Yellow)',
+                'Num',
+                'F_mod_weighed_count',
+                'M_mod_weighed_count',
+                'F_mod_weighed_count_1',
+                'M_mod_weighed_count_1',
+                'F_mod_weighed_count_2',
+                'M_mod_weighed_count_2',
+                {
+                    'columns': (
+                        'F_mod_weighed_count',
+                        'F_mod_weighed_count_1',
+                        'F_mod_weighed_count_2'),
+                    'alias': 'F_sum_mod_resident_weighted'
+                },
+                {
+                    'columns': (
+                        'M_mod_weighed_count',
+                        'M_mod_weighed_count_1',
+                        'M_mod_weighed_count_2'),
+                    'alias': 'M_sum_mod_resident_weighted'
+                },
+                {
+                    'columns': ('F_sum_mod_resident_weighted', 'M_sum_mod_resident_weighted'),
+                    'alias': 'all_mod_resident_weighted'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_mod_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_mod_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_mod_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_mod_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_mod_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_mod_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('F_sum_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('M_sum_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_mod_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            ),
+            (
+                'Severely Underweight (Orange)',
+                'Num',
+                'F_sev_weighed_count',
+                'M_sev_weighed_count',
+                'F_sev_weighed_count_1',
+                'M_sev_weighed_count_1',
+                'F_sev_weighed_count_2',
+                'M_sev_weighed_count_2',
+                {
+                    'columns': (
+                        'F_sev_weighed_count',
+                        'F_sev_weighed_count_1',
+                        'F_sev_weighed_count_2'),
+                    'alias': 'F_sum_sev_resident_weighted'
+                },
+                {
+                    'columns': (
+                        'M_sev_weighed_count',
+                        'M_sev_weighed_count_1',
+                        'M_sev_weighed_count_2'),
+                    'alias': 'M_sev_mod_resident_weighted'
+                },
+                {
+                    'columns': ('F_sum_sev_resident_weighted', 'M_sev_mod_resident_weighted'),
+                    'alias': 'all_sev_resident_weighted'
+                }
+            ),
+            (
+                '',
+                '%',
+                {
+                    'columns': ('F_sev_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count',
+                },
+                {
+                    'columns': ('M_sev_weighed_count',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count',
+                },
+                {
+                    'columns': ('F_sev_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_1',
+                },
+                {
+                    'columns': ('M_sev_weighed_count_1',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_1',
+                },
+                {
+                    'columns': ('F_sev_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'F_weighed_count_2',
+                },
+                {
+                    'columns': ('M_sev_weighed_count_2',),
+                    'func': truediv,
+                    'second_value': 'M_weighed_count_2',
+                },
+                {
+                    'columns': ('F_sum_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_female_weight'
+                },
+                {
+                    'columns': ('M_sum_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'resident_male_weight'
+                },
+                {
+                    'columns': ('all_sev_resident_weighted',),
+                    'func': truediv,
+                    'second_value': 'all_resident_weight'
+                },
+            )
+        )
+
+
+class MPRImmunizationCoverage(ICDSMixin, MPRData):
     title = '9. Immunization Coverage'
     slug = 'immunization_coverage'
 
@@ -1634,13 +3035,32 @@ class MPRImmunizationCoverage(ICDSMixin, MPRData):
         if self.config['location_id']:
             data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
             children_completing = data.get('open_child_count', 0)
-            vaccination = data.get('open_child_1yr_immun_complete', 1)
+            vaccination = data.get('open_child_1yr_immun_complete', 0)
             immunization = "%.1f%%" % ((vaccination / float(children_completing or 1)) * 100)
             return [
                 ['(I)', 'Children Completing 12 months during the month:', children_completing],
                 ['(II)', 'Of this, number of children who have received all vaccinations:', vaccination],
                 ['(III)', 'Completed timely immunization coverage (%):', immunization]
             ]
+
+
+class MPRImmunizationCoverageBeta(MPRImmunizationCoverage):
+
+    title = '9. Immunization Coverage'
+    slug = 'immunization_coverage'
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        immunization_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
+            open_child_count=F('fully_immunized_eligible_in_month'),
+            open_child_1yr_immun_complete=F('fully_immun_before_month_end')
+        )
+
+        return immunization_data if immunization_data else {}
 
 
 class MPRVhnd(ICDSMixin, MPRData):
@@ -1816,6 +3236,42 @@ class MPRVhnd(ICDSMixin, MPRData):
                 }
             )
         )
+
+
+class MPRVhndBeta(MPRVhnd):
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            done_when_planned=F('vhnd_done_when_planned'),
+            aww_present=F('vhnd_with_aww_present'),
+            icds_sup=F('vhnd_with_icds_sup'),
+            asha_present=F('vhnd_with_asha_present'),
+            anm_mpw=F('vhnd_with_anm_mpw'),
+            health_edu_org=F('vhnd_with_health_edu_org'),
+            display_tools=F('vhnd_with_display_tools'),
+            thr_distr=F('vhnd_with_thr_distr'),
+            child_immu=F('vhnd_with_child_immu'),
+            vit_a_given=F('vhnd_with_vit_a_given'),
+            anc_today=F('vhnd_with_anc_today'),
+            local_leader=F('vhnd_with_local_leader'),
+            due_list_prep_immunization=F('vhnd_with_due_list_prep_immunization'),
+            due_list_prep_vita_a=F('vhnd_with_due_list_prep_vita_a'),
+            due_list_prep_antenatal_checkup=F('vhnd_with_due_list_prep_antenatal_checkup'),
+        ).order_by('month').first()
+
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+        return {key: value if value else 0 for key,value in data.items() }
 
 
 class MPRReferralServices(ICDSMixin, MPRData):
@@ -2242,6 +3698,101 @@ class MPRReferralServices(ICDSMixin, MPRData):
         )
 
 
+class MPRReferralServicesBeta(MPRReferralServices):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        (
+            'e. Fever/offensive discharge after delivery',
+            'referred_fever_discharge',
+            {
+                'columns': ('referred_fever_discharge',),
+                'func': truediv,
+                'second_value': 'location_number',
+                'format': 'percent'
+            },
+            {
+                'columns': ('referred_fever_discharge_all',),
+                'func': truediv,
+                'second_value': 'location_number',
+            },
+            {
+                'columns': ('fever_discharge_reached_count',),
+                'func': truediv,
+                'second_value': 'location_number',
+            }
+        ),
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values('month').annotate(
+            referred_premature=F('num_premature_referral_awcs'),
+            referred_premature_all=F('total_premature_referrals'),
+            premature_reached_count=F('total_premature_reached_facility'),
+
+            referred_sepsis=F('num_premature_referral_awcs'),
+            referred_sepsis_all=F('total_premature_referrals'),
+            sepsis_reached_count=F('total_premature_reached_facility'),
+
+            referred_diarrhoea=F('num_premature_referral_awcs'),
+            referred_diarrhoea_all=F('total_premature_referrals'),
+            diarrhoea_reached_count=F('total_premature_reached_facility'),
+
+            referred_pneumonia=F('num_premature_referral_awcs'),
+            referred_pneumonia_all=F('total_premature_referrals'),
+            pneumonia_reached_count=F('total_premature_reached_facility'),
+
+            referred_fever_child=F('num_premature_referral_awcs'),
+            referred_fever_child_all=F('total_premature_referrals'),
+            fever_child_reached_count=F('total_premature_reached_facility'),
+
+            referred_severely_underweight=F('num_premature_referral_awcs'),
+            referred_severely_underweight_all=F('total_premature_referrals'),
+            sev_underweight_reached_count=F('total_premature_reached_facility'),
+
+            referred_other_child=F('num_premature_referral_awcs'),
+            referred_other_child_all=F('total_premature_referrals'),
+            other_child_reached_count=F('total_premature_reached_facility'),
+
+            referred_bleeding=F('num_premature_referral_awcs'),
+            referred_bleeding_all=F('total_premature_referrals'),
+            bleeding_reached_count=F('total_premature_reached_facility'),
+
+            referred_convulsions=F('num_premature_referral_awcs'),
+            referred_convulsions_all=F('total_premature_referrals'),
+            convulsions_reached_count=F('total_premature_reached_facility'),
+
+            referred_prolonged_labor=F('num_premature_referral_awcs'),
+            referred_prolonged_labor_all=F('total_premature_referrals'),
+            prolonged_labor_reached_count=F('total_premature_reached_facility'),
+
+            referred_abortion_complications=F('num_premature_referral_awcs'),
+            referred_abortion_complications_all=F('total_premature_referrals'),
+            abort_comp_reached_count=F('total_premature_reached_facility'),
+
+            referred_fever_discharge=F('num_premature_referral_awcs'),
+            referred_fever_discharge_all=F('total_premature_referrals'),
+            fever_discharge_reached_count=F('total_premature_reached_facility'),
+
+            referred_other=F('num_premature_referral_awcs'),
+            referred_other_all=F('total_premature_referrals'),
+            other_reached_count=F('total_premature_reached_facility'),
+
+        ).first()
+
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+
+        return {key: value if value else 0 for key, value in data.items()}
+
+
 class MPRMonitoring(ICDSMixin, MPRData):
 
     title = '12. Monitoring and Supervision During the Month'
@@ -2355,6 +3906,35 @@ class MPRMonitoring(ICDSMixin, MPRData):
                 }
             )
         )
+
+
+class MPRMonitoringBeta(MPRMonitoring):
+
+    def custom_data(self, selected_location, domain):
+        filters = get_location_filter(selected_location.location_id, domain)
+        if filters.get('aggregation_level') > 1:
+            filters['aggregation_level'] -= 1
+
+        filters['month'] = date(self.config['year'], self.config['month'], 1)
+        data = dict()
+        agg_mpr_data = AggMPRAwc.objects.filter(**filters).values(
+            'visitor_icds_sup',
+            'visitor_anm',
+            'visitor_health_sup',
+            'visitor_cdpo',
+            'visitor_med_officer',
+            'visitor_dpo',
+            'visitor_officer_state',
+            'visitor_officer_central'
+        ).order_by('month').first()
+        agg_awc_data = AggAwc.objects.filter(**filters).values('month').annotate(
+            location_number=F('num_launched_awcs')
+        ).order_by('month').first()
+        if agg_mpr_data:
+            data.update(agg_mpr_data)
+        if agg_awc_data:
+            data.update(agg_awc_data)
+        return {key: value if value else 0 for key,value in data.items() }
 
 
 def _get_percent(a, b):

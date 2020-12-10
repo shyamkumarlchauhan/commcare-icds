@@ -103,6 +103,7 @@ SERVICE_DELIVERY_REPORT = 12
 CHILD_GROWTH_TRACKER_REPORT = 13
 AWW_ACTIVITY_REPORT = 14
 POSHAN_PROGRESS_REPORT = 15
+MALNUTRITION_TRACKING_REPORT = 16
 
 AGG_COMP_FEEDING_TABLE = 'icds_dashboard_comp_feed_form'
 AGG_CCS_RECORD_CF_TABLE = 'icds_dashboard_ccs_record_cf_forms'
@@ -112,8 +113,12 @@ AGG_CHILD_HEALTH_THR_TABLE = 'icds_dashboard_child_health_thr_forms'
 AGG_CCS_RECORD_THR_TABLE = 'icds_dashboard_ccs_record_thr_forms'
 AGG_CCS_RECORD_BP_TABLE = 'icds_dashboard_ccs_record_bp_forms'
 AGG_CCS_RECORD_DELIVERY_TABLE = 'icds_dashboard_ccs_record_delivery_forms'
+AGG_DAILY_CHILD_HEALTH_THR_TABLE = 'icds_dashboard_daily_child_health_thr_forms'
+AGG_DAILY_CCS_RECORD_THR_TABLE = 'icds_dashboard_daily_ccs_record_thr_forms'
 AGG_DAILY_FEEDING_TABLE = 'icds_dashboard_daily_feeding_forms'
 AGG_GROWTH_MONITORING_TABLE = 'icds_dashboard_growth_monitoring_forms'
+AGG_SAM_MAM_TABLE = 'icds_dashboard_sam_mam_forms'
+AGG_SAM_MAM_PANCHAYAT_TABLE = 'icds_dashboard_sam_mam_panchayat_forms'
 AGG_INFRASTRUCTURE_TABLE = 'icds_dashboard_infrastructure_forms'
 AWW_INCENTIVE_TABLE = 'icds_dashboard_aww_incentive'
 AGG_LS_AWC_VISIT_TABLE = 'icds_dashboard_ls_awc_visits_forms'
@@ -123,8 +128,10 @@ AGG_THR_V2_TABLE = 'icds_dashboard_thr_v2'
 AGG_DASHBOARD_ACTIVITY = 'icds_dashboard_user_activity'
 AGG_ADOLESCENT_GIRLS_REGISTRATION_TABLE = 'icds_dashboard_adolescent_girls_registration'
 AGG_GOV_DASHBOARD_TABLE = 'agg_gov_dashboard'
+AGG_MPR_AWC_TABLE = 'agg_mpr_awc'
 AGG_MIGRATION_TABLE = 'icds_dashboard_migration_forms'
 AGG_AVAILING_SERVICES_TABLE = 'icds_dashboard_availing_service_forms'
+AGG_PERSON_CASE_TABLE = 'icds_dashboard_person_cases'
 
 AWC_LOCATION_TABLE_ID = 'static-awc_location'
 USAGE_TABLE_ID = 'static-usage_forms'
@@ -210,6 +217,24 @@ PPR_HEADERS_COMPREHENSIVE = [
     'No. of children between 3-6 years ', 'No of children between 3-6 years provided SNP for atleast 21+ days',
     '% of children between 3-6 years provided SNP for atleast 21+ days']
 
+PPR_HEADERS_COMPREHENSIVE_BETA = [
+    'State Name', 'District Name', 'Number of Districts Covered', 'Number of Blocks Covered',
+    'Number of AWCs Launched', 'Average Number of Days AWC Were open', 'Expected Home Visits',
+    'Actual Home Visits', '% of Home Visits', 'Total Number of Children (3-6 yrs)',
+    'No. of children between 3-6 years provided PSE for atleast 21+ days',
+    '% of children between 3-6 years provided PSE for atleast 21+ days',
+    'Children Eligible to have their weight Measured', 'Total number of children that were weighed in the month',
+    'Weighing efficiency', 'Number of women in third trimester',
+    'Number of trimester three women counselled on immediate and EBF',
+    '% of trimester three women counselled on immediate and EBF',
+    'Children Eligible to have their height Measured',
+    'Total number of children that had their height measured in the month',
+    'Height Measurement Efficiency', 'Number of children between 6 months -3 years, P&LW',
+    'No of children between 6 months -3 years, P&LW provided THR for atleast 21+ days',
+    '% of children between 6 months -3 years, P&LW provided THR for atleast 21+ days',
+    'No. of children between 3-6 years ', 'No of children between 3-6 years provided SNP for atleast 21+ days',
+    '% of children between 3-6 years provided SNP for atleast 21+ days']
+
 PPR_COLS_COMPREHENSIVE = [
     'state_name', 'district_name', 'num_launched_districts', 'num_launched_blocks', 'num_launched_awcs',
     'avg_days_awc_open_percent', 'expected_visits', 'valid_visits', 'visits_percent', 'pse_eligible',
@@ -222,6 +247,15 @@ PPR_COLS_COMPREHENSIVE = [
 PPR_HEADERS_SUMMARY = [
     'State Name', 'District Name', 'Number of Districts Covered', 'Number of Blocks Covered',
     'Number of AWCs Launched', '% Number of Days AWC Were opened', '% of Home Visits',
+    '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
+    '% of trimester three women counselled on immediate and EBF',
+    'Height Measurement Efficiency',
+    '% of children between 6 months -3 years, P&LW provided THR for atleast 21+ days',
+    '% of children between 3-6 years provided SNP for atleast 21+ days']
+
+PPR_HEADERS_SUMMARY_BETA = [
+    'State Name', 'District Name', 'Number of Districts Covered', 'Number of Blocks Covered',
+    'Number of AWCs Launched', 'Average Number of Days AWC Were open', '% of Home Visits',
     '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',
     '% of trimester three women counselled on immediate and EBF',
     'Height Measurement Efficiency',
@@ -254,9 +288,24 @@ PPR_COLS_PERCENTAGE_RELATIONS = {
     'lunch_count_21_days_percent': ['lunch_count_21_days', 'lunch_eligible']
 }
 
+PPR_COLS_PERCENTAGE_RELATIONS_BETA = {
+    'avg_days_awc_open_percent': ['awc_days_open', 'num_launched_awcs', True],
+    'visits_percent': ['valid_visits', 'expected_visits'],
+    'pse_attended_21_days_percent': ['pse_attended_21_days', 'pse_eligible'],
+    'weighed_percent': ['wer_weighed', 'wer_eligible'],
+    'counsel_immediate_bf_percent': ['counsel_immediate_bf', 'trimester_3'],
+    'height_measured_in_month_percent': ['height_measured_in_month', 'height_eligible'],
+    'thr_percent': ['thr_rations_21_plus_distributed', 'thr_eligible'],
+    'lunch_count_21_days_percent': ['lunch_count_21_days', 'lunch_eligible']
+}
+
 PPD_ICDS_CAS_COVERAGE_OVERVIEW = [
     'Number of States Covered', 'Number of Districts Covered', 'Number of Blocks Covered',
     'Number of AWCs Launched', '% Number of Days AWC Were opened', '% of Home Visits']
+
+PPD_ICDS_CAS_COVERAGE_OVERVIEW_BETA = [
+    'Number of States Covered', 'Number of Districts Covered', 'Number of Blocks Covered',
+    'Number of AWCs Launched', 'Average Number of Days AWC Were open', '% of Home Visits']
 
 PPD_SERVICE_DELIVERY_OVERVIEW = [
     '% of children between 3-6 years provided PSE for atleast 21+ days', 'Weighing efficiency',

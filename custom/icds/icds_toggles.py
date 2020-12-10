@@ -106,12 +106,6 @@ RUN_CUSTOM_DATA_PULL_REQUESTS = StaticToggle(
     [NAMESPACE_USER],
 )
 
-RUN_DATA_MANAGEMENT_TASKS = StaticToggle(
-    'run_data_management_tasks',
-    '[ICDS] Run data management tasks',
-    TAG_CUSTOM,
-    [NAMESPACE_USER],
-)
 
 ICDS_BIHAR_DEMOGRAPHICS_API = StaticToggle(
     'bihar_demographics_api',
@@ -154,4 +148,12 @@ ICDS_CUSTOM_SMS_REPORT = StaticToggle(
     'The report that is generated will be emailed to the user who requested it',
     TAG_CUSTOM,
     [NAMESPACE_DOMAIN],
+)
+
+
+ENABLE_ICDS_DASHBOARD_MANUAL_UPDATE = StaticToggle(
+    'enable_icds_dashboard_manual_update',
+    'Enable updating ICDS dashboard manual for specific users',
+    TAG_CUSTOM,
+    [NAMESPACE_USER]
 )

@@ -1,0 +1,15 @@
+{% extends 'hqwebapp/base_section.html' %}
+{% load hq_shared_tags %}
+{% block title %}ICDS Dashboard Manual{% endblock %}
+{% requirejs_main 'icds_reports/js/update_manual' %}
+
+{% block page_content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="filter_date_selector">New Manual</label>
+            <input name="dashboard_manual" type='file' class="form-control" id="dashboard_manual"  placeholder="Dashboard Manual">
+        </div>
+        <button class="btn btn-default">Upload manual</button>
+    </form>
+{% endblock %}

@@ -1,11 +1,12 @@
 from collections import OrderedDict
 from datetime import datetime, timedelta, date
+from itertools import chain
 
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import MONTHLY, rrule, DAILY, WEEKLY, MO
 
 from django.db.models import F
-from django.db.models.aggregates import Sum, Avg
+from django.db.models.aggregates import Sum, Avg, Max
 from django.utils.translation import ugettext as _
 
 from corehq.util.view_utils import absolute_reverse
@@ -16,7 +17,8 @@ from custom.icds_reports.messages import wasting_help_text, stunting_help_text, 
     percent_children_enrolled_help_text, percent_adolescent_girls_enrolled_help_text_v2
 from custom.icds_reports.models import AggAwcMonthly, DailyAttendanceView, \
     AggChildHealthMonthly, AggAwcDailyView, AggCcsRecordMonthly, ChildHealthMonthlyView
-from custom.icds_reports.models.views import CcsRecordMonthlyView
+from custom.icds_reports.models.views import CcsRecordMonthlyView, ServiceDeliveryReportView, DailyTHRCCSRecordView, \
+    DailyTHRChildHealthView
 from custom.icds_reports.utils import apply_exclude, percent_diff, get_value, percent_increase, \
     match_age, current_age, exclude_records_by_age_for_column, calculate_date_for_age, \
     person_has_aadhaar_column, person_is_beneficiary_column, get_status, wasting_moderate_column, \
@@ -1289,7 +1291,7 @@ def get_pregnant_details(case_id, awc_id):
 @icds_quickcache([
     'start', 'length', 'order', 'reversed_order', 'awc_id'
 ], timeout=30 * 60)
-def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
+def get_awc_report_lactating(start, length, order, reversed_order, awc_id, beta=False):
     latest_available_month = date.today() - timedelta(days=1)
     first_day_month = latest_available_month.replace(day=1)
     data = CcsRecordMonthlyView.objects.filter(
@@ -1311,6 +1313,14 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
             'num_pnc_visits', 'breastfed_at_birth', 'is_ebf', 'num_rations_distributed', 'month'
         )
         data_count = data.count()
+
+        if beta:
+            breastfed_data = CcsRecordMonthlyView.objects.filter(
+                awc_id=awc_id,
+                date_death=None,
+                case_id__in=case_ids,
+            ).values('case_id').annotate(breastfed_at_birth_latest=Max('breastfed_at_birth')).order_by('case_id')
+            breastfed_data_dict = {row['case_id']: row['breastfed_at_birth_latest'] for row in breastfed_data}
     else:
         data = []
         data_count = 0
@@ -1334,6 +1344,8 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
         )
 
     for row in data:
+        if beta:
+            row['breastfed_at_birth'] = breastfed_data_dict[row['case_id']]
         config['data'].append(base_data(row))
 
     def ordering_format(record):
@@ -1353,3 +1365,77 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id):
     config["recordsFiltered"] = data_count
 
     return config
+
+
+@icds_quickcache(['config', 'month', 'domain', 'show_test', 'now_date'], timeout=30 * 60)
+def get_awc_report_thr(config, month, domain, show_test=False, now_date=None):
+    selected_month = datetime(*month)
+    last_day_of_selected_month = (selected_month + relativedelta(months=1)) - relativedelta(days=1)
+    if now_date:
+        ninety_days_ago = datetime(*now_date) - timedelta(days=90)
+    else:
+        ninety_days_ago = datetime.today() - timedelta(days=90)
+    thr_info = ServiceDeliveryReportView.objects.filter(
+        month=selected_month, **config
+    ).values('thr_eligible', 'thr_25_days', 'thr_distribution_image_count')
+
+    ccs_image_data = DailyTHRCCSRecordView.objects.filter(
+        month=selected_month,
+        submitted_on__gt=ninety_days_ago,
+        awc_id=config['awc_id'],
+        supervisor_id=config['supervisor_id'],
+        block_id=config['block_id'],
+        district_id=config['district_id'],
+        state_id=config['state_id']
+    ).values(
+        'person_name', 'doc_id', 'submitted_on', 'photo_thr_packets_distributed'
+    ).exclude(photo_thr_packets_distributed__isnull=True).exclude(photo_thr_packets_distributed__exact='')
+
+    child_image_data = DailyTHRChildHealthView.objects.filter(
+        month=selected_month,
+        submitted_on__gt=ninety_days_ago,
+        awc_id=config['awc_id'],
+        supervisor_id=config['supervisor_id'],
+        block_id=config['block_id'],
+        district_id=config['district_id'],
+        state_id=config['state_id']
+    ).values(
+        'person_name', 'doc_id', 'submitted_on', 'photo_thr_packets_distributed'
+    ).exclude(photo_thr_packets_distributed__isnull=True).exclude(photo_thr_packets_distributed__exact='')
+
+    if not show_test:
+        ccs_image_data = apply_exclude(domain, ccs_image_data)
+        child_image_data = apply_exclude(domain, child_image_data)
+
+    sorted_result_by_date = sorted(list(chain(ccs_image_data, child_image_data)),
+                                   key=lambda x: x['submitted_on'].strftime("%d/%m/%Y"))
+    sorted_image_data_list = sorted(sorted_result_by_date, key=lambda x: (x['person_name'] or '').lower())
+
+    images = []
+    tmp_image = []
+
+    for image_data in sorted_image_data_list:
+        date_str = image_data['submitted_on'].strftime("%d/%m/%Y")
+        image_name = image_data['photo_thr_packets_distributed']
+        doc_id = image_data['doc_id']
+        person_name = image_data['person_name']
+
+        tmp_image.append({
+            'image': absolute_reverse('icds_image_accessor', args=(domain, doc_id, image_name)),
+            'date': date_str,
+            'person_name': person_name
+        })
+
+        if len(tmp_image) == 5:
+            images.append(tmp_image)
+            tmp_image = []
+
+    if tmp_image:
+        images.append(tmp_image)
+
+    return {
+        'thr_eligible': thr_info[0]['thr_eligible'] if thr_info else None,
+        'thr_25_days': thr_info[0]['thr_25_days'] if thr_info else None,
+        'thr_pictures_count': thr_info[0]['thr_distribution_image_count'] if thr_info else None,
+        'images': images
+    }

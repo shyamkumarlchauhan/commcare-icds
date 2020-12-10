@@ -11,7 +11,7 @@ class AvailingServiceFormsAggregationDistributedHelper(StateBasedAggregationDist
     helper_key = 'availing_service-forms'
     ucr_data_source_id = 'static-availing_service_form'
     aggregate_parent_table = AGG_AVAILING_SERVICES_TABLE
-    months_required = 3
+    months_required = 4
 
     def data_from_ucr_query(self):
         month = self.month.replace(day=1)

@@ -23,7 +23,8 @@
     "icds-test",
     "icds-cas",
     "icds-cas-sandbox",
-    "cas-lab"
+    "cas-lab",
+    "linked-cas-lab"
   ],
   "report_id": "static-it_issues_activity",
   "data_source_table": "static-it_report_follow_issue",

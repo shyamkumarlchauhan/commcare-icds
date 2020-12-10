@@ -51,3 +51,21 @@ DATA_PULL_PERMITTED_END_HOUR = 23
 
 MAX_SMS_REPORT_DURATION = 35
 MAX_CONCURRENT_SMS_REPORTS_ALLOWED = 3
+
+CPMU_ROLE_NAME = "CPMU"
+
+# emails
+SMS_TEAM = 'icds-sms-rule@dimagi.com'
+MONTHLY_SMS_REPORT_RECIPIENTS = [
+    'mshastri@dimagi.com',
+    'akaul@dimagi-associate.com',
+    'dsivaramakrishnan@dimagi.com',
+    'pgoyal@dimagi.com',
+    'asharma@dimagi.com'
+]
+SMS_DAILY_LIMIT_EXCEEDED_RECIPIENTS = [
+    'ndube@dimagi.com',
+    'dsivaramakrishnan@dimagi.com',
+    'mshashtri@dimagi.com',
+    'asharma@dimagi.com'
+]
