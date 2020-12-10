@@ -1822,7 +1822,7 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             },
             {
                 'mData': 'closed',
-                'heading': 'Status',
+                'heading': 'Pregnancy Status',
                 'class': 'medium-col',
                 'value': renderClosed
             },
