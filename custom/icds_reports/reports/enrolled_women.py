@@ -40,10 +40,8 @@ def get_enrolled_women_data_map(domain, config, loc_level, show_test=False, icds
     total_valid = 0
     total = 0
 
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in get_data_for(config):
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
@@ -65,8 +63,7 @@ def get_enrolled_women_data_map(domain, config, loc_level, show_test=False, icds
 
     fills = OrderedDict()
     fills.update({'Women': MapColors.BLUE})
-    if icds_features_flag:
-        fills.update({'Not Launched': MapColors.GREY})
+    fills.update({'Not Launched': MapColors.GREY})
     fills.update({'defaultFill': MapColors.GREY})
 
     return {
@@ -126,15 +123,13 @@ def get_enrolled_women_sector_data(domain, config, loc_level, location_id,
         'valid': 0,
         'all': 0
     })
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in data:
-        if location_launched_status:
-            launched_status = location_launched_status.get(row['%s_name' % loc_level])
-            if launched_status is None or launched_status <= 0:
-                continue
+        launched_status = location_launched_status.get(row['%s_name' % loc_level])
+        if launched_status is None or launched_status <= 0:
+            continue
         valid = row['valid'] or 0
         all_pregnant = row['all'] or 0
         name = row['%s_name' % loc_level]
@@ -199,10 +194,8 @@ def get_enrolled_women_data_chart(domain, config, loc_level, show_test=False, ic
         data['blue'][miliseconds] = {'y': 0, 'all': 0}
 
     best_worst = {}
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in chart_data:
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
