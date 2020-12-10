@@ -2934,16 +2934,14 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             image: "/static/icds_reports/mobile/images/lactatingwoman.png",
             isMobile: true,
         },
-    ];
-    if (vm.haveAccessToFeatures) {
-        steps.push({
+        {
             id: 'take_home_ration',
             route: "/awc_reports/take_home_ration",
             label: "Take Home Ration",
             image: "",
             isMobile: false,
-        })
-    }
+        }
+    ];
     vm.mobileSteps = _.filter(steps, function (step) {
         return step.isMobile;
     });
