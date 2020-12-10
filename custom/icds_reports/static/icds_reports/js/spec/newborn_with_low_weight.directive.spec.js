@@ -89,10 +89,10 @@ describe('Newborn Low Weight Directive', function () {
             '<p>test</p>'
             + '<div>Total Number of Newborns born in given month: <strong>20</strong></div>'
             + '<div>Number of Newborns with LBW in given month: <strong>5</strong></div>'
-            + '<div>Total Number of children born and weight in given month: <strong>10</strong></div>'
+            + '<div>Total Number of children born and weighed in given month: <strong>10</strong></div>'
             + '<div>% newborns with LBW in given month: <strong>50.00%</strong></div>'
-            + '<div>% of children with weight in normal: <strong>50.00%</strong></div>'
-            + '<div>% Unweighted: <strong>50.00%</strong></div></div>');
+            + '<div>% newborns with normal weight: <strong>50.00%</strong></div>'
+            + '<div>% Unweighed newborns: <strong>50.00%</strong></div></div>');
     });
 
     it('tests location change', function () {
@@ -174,10 +174,10 @@ describe('Newborn Low Weight Directive', function () {
         var expected = '<p><strong>Jul 2017</strong></p><br/>'
             + '<div>Total Number of Newborns born in given month: <strong>12</strong></div>'
             + '<div>Number of Newborns with LBW in given month: <strong>5</strong></div>'
-            + '<div>Total Number of children born and weight in given month: <strong>10</strong></div>'
+            + '<div>Total Number of children born and weighed in given month: <strong>10</strong></div>'
             + '<div>% newborns with LBW in given month: <strong>50.00%</strong></div>'
-            + '<div>% of children with weight in normal: <strong>50.00%</strong></div>'
-            + '<div>% Unweighted: <strong>16.67%</strong></div>';
+            + '<div>% newborns with normal weight: <strong>50.00%</strong></div>'
+            + '<div>% Unweighed newborns: <strong>16.67%</strong></div>';
 
         var result = controller.tooltipContent(month.value, data);
         assert.equal(expected, result);
@@ -188,10 +188,10 @@ describe('Newborn Low Weight Directive', function () {
             '<p>Ambah</p>' +
             '<div>Total Number of Newborns born in given month: <strong>25</strong></div>' +
             '<div>Number of Newborns with LBW in given month: <strong>0</strong></div>' +
-            '<div>Total Number of children born and weight in given month: <strong>0</strong></div>' +
+            '<div>Total Number of children born and weighed in given month: <strong>0</strong></div>' +
             '<div>% newborns with LBW in given month: <strong>NaN%</strong></div>' +
-            '<div>% of children with weight in normal: <strong>NaN%</strong></div>' +
-            '<div>% Unweighted: <strong>100.00%</strong></div></div>';
+            '<div>% newborns with normal weight: <strong>NaN%</strong></div>' +
+            '<div>% Unweighed newborns: <strong>100.00%</strong></div></div>';
         controllermapOrSectorView.templatePopup = function (d) {
             return controller.templatePopup(d.loc, d.row);
         };

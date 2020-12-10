@@ -102,10 +102,10 @@ class TestNewBornWithLowWeight(TestCase):
             [
                 {'indicator': 'Total Number of Newborns born in given month:', 'value': "5"},
                 {'indicator': 'Number of Newborns with LBW in given month:', 'value': "1"},
-                {'indicator': 'Total Number of children born and weight in given month:', 'value': '3'},
+                {'indicator': 'Total Number of children born and weighed in given month:', 'value': '3'},
                 {'indicator': '% newborns with LBW in given month:', 'value': '33.33%'},
-                {'indicator': '% of children with weight in normal:', 'value': '66.67%'},
-                {'indicator': '% Unweighted:', 'value': '40.00%'},
+                {'indicator': '% newborns with normal weight:', 'value': '66.67%'},
+                {'indicator': '% Unweighed newborns:', 'value': '40.00%'},
             ]
         )
 

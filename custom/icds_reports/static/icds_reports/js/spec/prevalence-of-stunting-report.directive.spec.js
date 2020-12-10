@@ -89,10 +89,10 @@ describe('Prevalence Of Stunting Directive feature flag disable', function () {
             '<p>test</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>15</strong></div>' +
-            '<div>Number of children (0 - 5 years) unmeasured: <strong>5</strong></div>' +
+            '<div>Number of children (0 - 5 years) with height unmeasured: <strong>5</strong></div>' +
             '<div>% children (0 - 5 years) with severely stunted growth: <strong>33.33%</strong></div>' +
             '<div>% children (0 - 5 years) with moderate stunted growth: <strong>33.33%</strong></div>' +
-            '<div>% children (0 - 5 years) with normal stunted growth: <strong>33.33%</strong></div></div>');
+            '<div>% children (0 - 5 years) with normal height-for-age: <strong>33.33%</strong></div></div>');
     });
 
     it('tests location change', function () {
@@ -173,10 +173,10 @@ describe('Prevalence Of Stunting Directive feature flag disable', function () {
         var expected = '<p><strong>Jul 2017</strong></p><br/>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>10</strong></div>' +
-            '<div>Number of children (0 - 5 years) unmeasured: <strong>10</strong></div>' +
+            '<div>Number of children (0 - 5 years) with height unmeasured: <strong>10</strong></div>' +
             '<div>% children (0 - 5 years) with severely stunted growth: <strong>20.00%</strong></div>' +
             '<div>% children (0 - 5 years) with moderate stunted growth: <strong>15.00%</strong></div>' +
-            '<div>% children (0 - 5 years) with normal stunted growth: <strong>10.00%</strong></div>';
+            '<div>% children (0 - 5 years) with normal height-for-age: <strong>10.00%</strong></div>';
 
         var result = controller.tooltipContent(month.value, 0.1, 0.15, 0.2, 10, 20);
         assert.equal(expected, result);
@@ -187,10 +187,10 @@ describe('Prevalence Of Stunting Directive feature flag disable', function () {
             '<p>Ambah</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>0</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>0</strong></div>' +
-            '<div>Number of children (0 - 5 years) unmeasured: <strong>0</strong></div>' +
+            '<div>Number of children (0 - 5 years) with height unmeasured: <strong>0</strong></div>' +
             '<div>% children (0 - 5 years) with severely stunted growth: <strong>NaN%</strong></div>' +
             '<div>% children (0 - 5 years) with moderate stunted growth: <strong>NaN%</strong></div>' +
-            '<div>% children (0 - 5 years) with normal stunted growth: <strong>NaN%</strong></div></div>';
+            '<div>% children (0 - 5 years) with normal height-for-age: <strong>NaN%</strong></div></div>';
         controllermapOrSectorView.templatePopup = function (d) {
             return controller.templatePopup(d.loc, d.row);
         };
@@ -317,10 +317,10 @@ describe('Prevalence Of Stunting Directive  feature flag enable', function () {
             '<p>test</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>15</strong></div>' +
-            '<div>Number of children (0 - 5 years) unmeasured: <strong>5</strong></div>' +
+            '<div>Number of children (0 - 5 years) with height unmeasured: <strong>5</strong></div>' +
             '<div>% children (0 - 5 years) with severely stunted growth: <strong>33.33%</strong></div>' +
             '<div>% children (0 - 5 years) with moderate stunted growth: <strong>33.33%</strong></div>' +
-            '<div>% children (0 - 5 years) with normal stunted growth: <strong>33.33%</strong></div></div>');
+            '<div>% children (0 - 5 years) with normal height-for-age: <strong>33.33%</strong></div></div>');
     });
 
     it('tests location change', function () {
@@ -401,10 +401,10 @@ describe('Prevalence Of Stunting Directive  feature flag enable', function () {
         var expected = '<p><strong>Jul 2017</strong></p><br/>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>20</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>10</strong></div>' +
-            '<div>Number of children (0 - 5 years) unmeasured: <strong>10</strong></div>' +
+            '<div>Number of children (0 - 5 years) with height unmeasured: <strong>10</strong></div>' +
             '<div>% children (0 - 5 years) with severely stunted growth: <strong>20.00%</strong></div>' +
             '<div>% children (0 - 5 years) with moderate stunted growth: <strong>15.00%</strong></div>' +
-            '<div>% children (0 - 5 years) with normal stunted growth: <strong>10.00%</strong></div>';
+            '<div>% children (0 - 5 years) with normal height-for-age: <strong>10.00%</strong></div>';
 
         var result = controller.tooltipContent(month.value, 0.1, 0.15, 0.2, 10, 20);
         assert.equal(expected, result);
@@ -415,10 +415,10 @@ describe('Prevalence Of Stunting Directive  feature flag enable', function () {
             '<p>Ambah</p>' +
             '<div>Total Children (0 - 5 years) weighed in given month: <strong>0</strong></div>' +
             '<div>Total Children (0 - 5 years) with height measured in given month: <strong>0</strong></div>' +
-            '<div>Number of children (0 - 5 years) unmeasured: <strong>0</strong></div>' +
+            '<div>Number of children (0 - 5 years) with height unmeasured: <strong>0</strong></div>' +
             '<div>% children (0 - 5 years) with severely stunted growth: <strong>NaN%</strong></div>' +
             '<div>% children (0 - 5 years) with moderate stunted growth: <strong>NaN%</strong></div>' +
-            '<div>% children (0 - 5 years) with normal stunted growth: <strong>NaN%</strong></div></div>';
+            '<div>% children (0 - 5 years) with normal height-for-age: <strong>NaN%</strong></div></div>';
         controllermapOrSectorView.templatePopup = function (d) {
             return controller.templatePopup(d.loc, d.row);
         };

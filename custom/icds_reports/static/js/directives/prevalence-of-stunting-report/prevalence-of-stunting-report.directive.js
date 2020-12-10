@@ -64,7 +64,7 @@ function PrevalenceOfStuntingReportController($scope, $routeParams, $location, $
                 indicator_value: measured,
             },
             {
-                indicator_name: 'Number of children ' + vm.chosenFilters() + ' unmeasured: ',
+                indicator_name: 'Number of children ' + vm.chosenFilters() + ' with height unmeasured: ',
                 indicator_value: unmeasured,
             },
             {
@@ -76,7 +76,7 @@ function PrevalenceOfStuntingReportController($scope, $routeParams, $location, $
                 indicator_value: moderate,
             },
             {
-                indicator_name: '% children ' + vm.chosenFilters() + ' with normal stunted growth: ',
+                indicator_name: '% children ' + vm.chosenFilters() + ' with normal height-for-age: ',
                 indicator_value: normal,
             },
         ];
@@ -126,7 +126,7 @@ function PrevalenceOfStuntingReportController($scope, $routeParams, $location, $
                 indicator_value: $filter("indiaNumbers")(measured),
             },
             {
-                indicator_name: 'Number of children ' + vm.chosenFilters() + ' unmeasured: ',
+                indicator_name: 'Number of children ' + vm.chosenFilters() + ' with height unmeasured: ',
                 indicator_value: $filter("indiaNumbers")(all - measured),
             },
             {
@@ -138,7 +138,7 @@ function PrevalenceOfStuntingReportController($scope, $routeParams, $location, $
                 indicator_value: d3.format(".2%")(moderate),
             },
             {
-                indicator_name: '% children ' + vm.chosenFilters() + ' with normal stunted growth: ',
+                indicator_name: '% children ' + vm.chosenFilters() + ' with normal height-for-age: ',
                 indicator_value: d3.format(".2%")(normal),
             }]
         );

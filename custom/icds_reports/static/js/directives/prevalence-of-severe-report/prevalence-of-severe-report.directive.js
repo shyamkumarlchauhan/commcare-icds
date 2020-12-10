@@ -65,7 +65,7 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
                 indicator_value: totalMeasured,
             },
             {
-                indicator_name: 'Number of Children ' + vm.chosenFilters() + ' unmeasured: ',
+                indicator_name: 'Number of Children ' + vm.chosenFilters() + ' with weight and height unmeasured: ',
                 indicator_value: unmeasured,
             },
             {
@@ -129,7 +129,7 @@ function PrevalenceOfSevereReportController($scope, $routeParams, $location, $fi
                 indicator_value: $filter('indiaNumbers')(totalMeasured),
             },
             {
-                indicator_name: 'Number of Children ' + vm.chosenFilters() + ' unmeasured: ',
+                indicator_name: 'Number of Children ' + vm.chosenFilters() + ' with weight and height unmeasured: ',
                 indicator_value: $filter('indiaNumbers')(heightEligible - totalMeasured),
             },
             {
