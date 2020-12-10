@@ -327,7 +327,7 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
             });
         }
 
-        if (vm.isSDRSelected() || vm.isMTRSelected()) {
+        if (vm.isSDRSelected() || vm.isMTRSelected() || vm.isChildGrowthTrackerSelected()) {
             vm.years = _.filter(vm.yearsCopy, function (y) {
                 return y.id >= 2020;
             });
@@ -375,7 +375,18 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
                 }
             });
             vm.selectedMonth = vm.selectedMonth >= 9 ? vm.selectedMonth : 9;
-        }else if (year.id === latest.getFullYear()) {
+        } else if (year.id === 2020 && vm.isChildGrowthTrackerSelected()) {
+            var currentMonth = latest.getMonth() + 1;
+            var currentYear = latest.getFullYear();
+            vm.months = _.filter(vm.monthsCopy, function (month) {
+                if (currentYear === 2020) {
+                    return month.id >= 4 && month.id <= currentMonth;
+                } else {
+                    return month.id >= 4;
+                }
+            });
+            vm.selectedMonth = vm.selectedMonth >= 4 ? vm.selectedMonth : 4;
+        } else if (year.id === latest.getFullYear()) {
             var maxQuarter = Math.floor(latest.getMonth() / 3);
             vm.months = _.filter(vm.monthsCopy, function (month) {
                 return month.id <= latest.getMonth() + 1;
@@ -439,9 +450,15 @@ function DownloadController($scope, $rootScope, $location, locationHierarchy, lo
     vm.onIndicatorSelect = function () {
         var latest = new Date();
         vm.handleViewByShift();
-        if (vm.isChildBeneficiaryListSelected() || vm.isChildGrowthTrackerSelected()) {
+        if (vm.isChildBeneficiaryListSelected()) {
             init();
             vm.selectedFormat = vm.formats[0].id;
+        } else if (vm.isChildGrowthTrackerSelected()) {
+            init();
+            vm.selectedFormat = vm.formats[0].id;
+            var currentYear  = new Date().getFullYear();
+            vm.selectedYear = vm.selectedYear >= 2020 ? vm.selectedYear : currentYear;
+            vm.onSelectYear({'id': vm.selectedYear});
         } else if (vm.isIncentiveReportSelected()) {
             // if current selected year is less than 2018,
             // change the selected year to latest as the report is not available before 2018
