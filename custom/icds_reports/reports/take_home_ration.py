@@ -96,23 +96,19 @@ class TakeHomeRationExport(object):
         thr_eligible_column = 'thr_eligible'
         class_model = ServiceDeliveryReportView
 
-        headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name', 'AWW Phone No.',
+        headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name', 'AWW Phone No.',
                    'Total No. of Beneficiaries eligible for THR',
                    f'Total No. of beneficiaries received THR for at least {thr_days} days in given month',
                    'Total No of Pictures taken by AWW']
 
         columns = [
             'state_name', 'district_name', 'block_name',
-            'supervisor_name', 'awc_name', 'aww_name', 'contact_phone_number',
+            'supervisor_name', 'awc_name', 'awc_site_code', 'aww_name', 'contact_phone_number',
             launched_column,
             thr_eligible_column,
             thr_column,
             'thr_distribution_image_count'
         ]
-
-        if self.beta:
-            headers.insert(5, 'AWC Site Code')
-            columns.insert(5, 'awc_site_code')
 
         query_set = class_model.objects.filter(**filters).order_by(*order_by)
         data = query_set.values(*columns)
@@ -122,7 +118,7 @@ class TakeHomeRationExport(object):
 
         thr_days = '21' if self.month <= THR_21_DAYS_THRESHOLD_DATE else '25'
 
-        headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name', 'AWW Phone No.',
+        headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name', 'AWW Phone No.',
                    'Total No. of PW eligible for THR',
                    'Total No. of LW eligible for THR',
                    'Total No. of Children(6-36 months) eligible for THR',
@@ -132,7 +128,7 @@ class TakeHomeRationExport(object):
                    'Total No of Pictures taken by AWW']
 
         columns = ['state_name', 'district_name', 'block_name',
-                   'supervisor_name', 'awc_name', 'aww_name', 'contact_phone_number',
+                   'supervisor_name', 'awc_name', 'awc_site_code', 'aww_name', 'contact_phone_number',
                    'num_launched_awcs',
                    'pw_thr_eligible',
                    'lw_thr_eligible',
@@ -142,16 +138,12 @@ class TakeHomeRationExport(object):
                    f'child_thr_{thr_days}_days',
                    'thr_distribution_image_count']
 
-        if self.beta:
-            headers.insert(5, 'AWC Site Code')
-            columns.insert(5, 'awc_site_code')
-
         query_set = ServiceDeliveryReportView.objects.filter(**filters).order_by(*order_by)
         data = query_set.values(*columns)
         return headers, data
 
     def get_beneficiary_and_days_wise_data(self, filters, order_by):
-        headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name', 'AWW Phone No.',
+        headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name', 'AWW Phone No.',
                    'Total No. of PW eligible for THR',
                    'Total No. of LW eligible for THR',
                    'Total No. of Children (0-3 years) eligible for THR',
@@ -176,7 +168,7 @@ class TakeHomeRationExport(object):
                    'Total No of Pictures taken by AWW']
 
         columns = ['state_name', 'district_name', 'block_name',
-                   'supervisor_name', 'awc_name',
+                   'supervisor_name', 'awc_name', 'awc_site_code',
                    'aww_name', 'contact_phone_number',
                    'num_launched_awcs', 'pw_thr_eligible',
                    'lw_thr_eligible',
@@ -201,10 +193,6 @@ class TakeHomeRationExport(object):
                    'child_thr_25_days',
                    'thr_distribution_image_count'
                    ]
-
-        if self.beta:
-            headers.insert(5, 'AWC Site Code')
-            columns.insert(5, 'awc_site_code')
 
         query_set = ServiceDeliveryReportView.objects.filter(**filters).order_by(*order_by)
         data = query_set.values(*columns)

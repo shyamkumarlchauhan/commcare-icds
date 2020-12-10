@@ -1094,8 +1094,7 @@ class TestExportData(TestCase):
                     'aggregation_level': 5,
                     'month': date(2017, 5, 1)
                 },
-                loc_level=5,
-                beta=True
+                loc_level=5
             ).get_excel_data('b1', system_usage_num_launched_awcs_formatting_at_awc_level=True),
             [
                 ['System Usage', [

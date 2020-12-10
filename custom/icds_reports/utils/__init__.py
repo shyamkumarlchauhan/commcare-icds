@@ -1133,10 +1133,7 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
 
     thr_days_info = ""
     if report_type == THR_REPORT_DAY_BENEFICIARY_TYPE:
-        if beta:
-            total_column_count = 31
-        else:
-            total_column_count = 30
+        total_column_count = 31
         data_start_row_diff = 3
         secondary_headers = ['Not provided',
                              'Provided for 1-7 days',
@@ -1147,17 +1144,11 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
 
     else:
         if report_type == THR_REPORT_BENEFICIARY_TYPE:
-            if beta:
-                total_column_count = 16
-            else:
-                total_column_count = 15
+            total_column_count = 16
             data_start_row_diff = 2
 
         else:
-            if beta:
-                total_column_count = 12
-            else:
-                total_column_count = 11
+            total_column_count = 12
             data_start_row_diff = 1
 
         if parse(month).date() <= THR_21_DAYS_THRESHOLD_DATE:
@@ -1216,12 +1207,10 @@ def create_thr_report_excel_file(excel_data, data_type, month, aggregation_level
     # table header
     table_header_position_row = 5
     headers = ["S.No"]
-    main_headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWW Name', 'AWW Phone No.',
+    main_headers = ['State', 'District', 'Block', 'Sector', 'Awc Name', 'AWC Site Code', 'AWW Name', 'AWW Phone No.',
                     'Total No. of Beneficiaries eligible for THR',
                     f'Total No. of beneficiaries received THR {thr_days_info} in given month',
                     'Total No of Pictures taken by AWW']
-    if beta:
-        main_headers.insert(5, 'AWC Site Code')
     headers.extend(main_headers[aggregation_level:])
 
     def set_beneficiary_columns(start_column_index, end_column_index, row):
@@ -1364,10 +1353,7 @@ def create_child_report_excel_file(excel_data, data_type, month, aggregation_lev
     export_info = excel_data[1][1]
     max_merged_column_no = aggregation_level
     if aggregation_level == 5:
-        if beta:
-            max_merged_column_no = aggregation_level + 2
-        else:
-            max_merged_column_no = aggregation_level + 1
+        max_merged_column_no = aggregation_level + 2
 
     primary_headers = ['Children weighed', 'Height measured for Children', '', 'Severely Underweight Children',
                        'Moderately Underweight Children', 'Children with normal weight for age (WfA)',
