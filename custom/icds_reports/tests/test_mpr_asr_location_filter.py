@@ -102,7 +102,7 @@ class TestMprAsrLocationFilter(TestCase):
                                                         'uuid': mock.ANY,
                                                         'is_archived': False,
                                                         'can_edit': True}]}]}]
-        self.assertEqual(expected_result, locations)
+        self.assertCountEqual(expected_result, locations)
 
     def test_get_location_all_access_user_no_location_selected(self):
         locations = load_restricted_locs(self.domain.name, '', self.national_user)
@@ -116,7 +116,7 @@ class TestMprAsrLocationFilter(TestCase):
                             'uuid': mock.ANY,
                             'is_archived': False,
                             'can_edit': True}]
-        self.assertEqual(expected_result, locations)
+        self.assertCountEqual(expected_result, locations)
 
     def test_get_location_all_access_user_with_location_selected(self):
         locations = load_restricted_locs(self.domain.name, self.block.location_id, self.national_user)
@@ -140,4 +140,4 @@ class TestMprAsrLocationFilter(TestCase):
                             'uuid': mock.ANY,
                             'is_archived': False,
                             'can_edit': True}]
-        self.assertEqual(expected_result, locations)
+        self.assertCountEqual(expected_result, locations)
