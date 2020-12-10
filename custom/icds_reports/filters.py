@@ -4,11 +4,12 @@ import pytz
 
 from corehq.apps.domain.models import Domain
 from corehq.apps.hqwebapp.crispy import CSS_FIELD_CLASS, CSS_LABEL_CLASS
-from corehq.apps.locations.models import SQLLocation, LocationType
+from corehq.apps.locations.models import SQLLocation
 from corehq.apps.reports.filters.base import BaseSingleOptionFilter
 from corehq.apps.reports.filters.fixtures import AsyncLocationFilter
 from corehq.apps.reports.filters.select import MonthFilter, YearFilter
 from custom.common.filters import RestrictedAsyncLocationFilter
+from custom.icds_reports.const import LOCATION_TYPES
 from memoized import memoized
 from django.db.models import Q
 from collections import defaultdict
@@ -71,7 +72,7 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
         loc1.id: [loc5, loc6, loc7],
         }
         """
-        loc_dict = defaultdict(lambda: [])
+        loc_dict = defaultdict(list)
         for loc in locations:
             # do not include test locations
             if not show_test and loc.metadata.get('is_test_location', 'real') == 'test':
@@ -81,13 +82,12 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
 
         return loc_dict
 
-    location_types = [loc_type.name for loc_type in LocationType.objects.by_domain(domain)]
     accessible_location = SQLLocation.objects.accessible_to_user(domain, user)
     location_level = 0
     lineage = []
     if selected_loc_id:
         location = SQLLocation.by_location_id(selected_loc_id)
-        location_level = location_types.index(location.location_type.name)
+        location_level = LOCATION_TYPES.index(location.location_type.name)
         lineage = location.get_ancestors()
         all_ancestors = [loc.id for loc in lineage]
         # No need to pull the locations whose parents or they themselves do not present in the
@@ -97,7 +97,7 @@ def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=Fals
 
     # Only pull locations which are above or at level of location selected
     accessible_location = accessible_location.filter(
-        location_type__name__in=location_types[:location_level + 1])
+        location_type__name__in=LOCATION_TYPES[:location_level + 1])
 
     parent_child_dict = location_transform(set(accessible_location).union(set(lineage)))
     locations_list = [loc_to_json(loc) for loc in parent_child_dict[None]]
