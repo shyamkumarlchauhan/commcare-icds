@@ -22,7 +22,8 @@ function CleanWaterController($scope, $routeParams, $location, $filter, infrastr
     };
     vm.filters = ['gender', 'age', 'data_period'];
     vm.rightLegend = {
-        info: 'Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having a source of clean drinking water. ',
+        info: 'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage ' +
+            'of AWCs that reported having a source of clean drinking water. ',
     };
 
     vm.getPopupData = function (row) {
@@ -45,7 +46,8 @@ function CleanWaterController($scope, $routeParams, $location, $filter, infrastr
     var options = {
         'xAxisTickFormat': '%b %Y',
         'yAxisTickFormat': ".2%",
-        'captionContent': ' Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having a source of clean drinking water. ',
+        'captionContent': ' Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the ' +
+            'percentage of AWCs that reported having a source of clean drinking water. ',
     };
     vm.chartOptions = vm.getChartOptions(options);
     vm.chartOptions.chart.color = d3.scale.category10().range();
