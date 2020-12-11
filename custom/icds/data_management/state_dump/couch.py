@@ -147,7 +147,7 @@ def mobile_auth_records(domain, context):
     get_doc_count_in_domain_by_type(domain, doc_type, db)
     doc_ids = get_doc_ids_in_domain_by_type(domain, doc_type, db)
     docs = iter_docs(db, doc_ids, chunksize=500)
-    for doc in with_progress_bar(docs, prefix=f"[couch] Dumping {doc_type}", oneline=False):
+    for doc in with_progress_bar(docs, length=len(doc_ids), prefix=f"[couch] Dumping {doc_type}", oneline=False):
         if doc["user_id"] in context.user_ids:
             yield doc
 

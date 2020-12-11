@@ -199,24 +199,24 @@ def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
 
 
 def _get_data_with_related(domain, builders, related_data_filters, limit_to_db, stats, blob_output, slug):
-    prepared_builders = list(get_prepared_builders(domain, [builders], limit_to_db=limit_to_db))
+    prepared_builders = list(get_prepared_builders(domain, builders, limit_to_db=limit_to_db))
     total_chunks = sum(
-        len(prepared_builder.querysets())
+        len(list(prepared_builder.querysets()))
         for _, prepared_builder in prepared_builders
     )
 
     def _get_iterations():
         for model_class, prepared_builder in prepared_builders:
             for iterator in prepared_builder.iterators():
-                yield model_class, prepared_builder, iterator, related_data_filters
+                yield model_class, prepared_builder, iterator
 
-    generator = with_progress_bar(_get_iterations(), length=total_chunks, prefix=f"[sql] Dumping {slug}", oneline=False)
-    for model_class, prepared_builder, iterator, related_models in generator:
+    generator = with_progress_bar(_get_iterations(), length=total_chunks, prefix=f"[sql] Dumping {slug} chunks", oneline=False)
+    for model_class, prepared_builder, iterator in generator:
         for chunk in chunked(iterator, 500, list):
             yield from chunk
             stats[prepared_builder.model_label] += len(chunk)
             dump_form_attachments(model_class, chunk, blob_output, stats)
-            yield from get_related(prepared_builder, chunk, related_models, stats)
+            yield from get_related(prepared_builder, chunk, related_data_filters, stats)
 
 
 def get_related(builder, models, related_models, stats):
