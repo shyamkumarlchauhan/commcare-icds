@@ -82,11 +82,18 @@ class Command(BaseCommand):
 
 
 def _get_user_owner_data(location_ids):
+    seen_user_ids = set()
+    seen_owner_ids = set()
     for location_ids in chunked(with_progress_bar(location_ids), 100):
         user_ids = mobile_user_ids_at_locations(location_ids)
         for doc in iter_docs(CouchUser.get_db(), user_ids):
+            if doc["_id"] in seen_user_ids:
+                continue
+            seen_user_ids.add(doc["_id"])
             user = CouchUser.wrap_correctly(doc)
-            yield ",".join([user._id, user.username]), user.get_owner_ids()
+            owner_ids = set(user.get_owner_ids()) - seen_owner_ids
+            yield ",".join([user._id, user.username]), owner_ids
+            seen_owner_ids |= owner_ids
 
 
 class FilterContext:
