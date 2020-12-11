@@ -79,8 +79,6 @@ class TestMprAsrLocationFilter(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.domain.delete()
-        cls.mobile_user.delete(None, None)
-        cls.role.delete()
         super(TestMprAsrLocationFilter, cls).tearDownClass()
 
     def test_get_locations_for_restricted_user(self):
