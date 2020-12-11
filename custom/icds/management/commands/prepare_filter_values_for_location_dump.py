@@ -52,20 +52,21 @@ class Command(BaseCommand):
 
             location = locations[0]
 
+        print("Collecting location IDs")
         location_ids = list(location.get_descendants(include_self=True).values_list("location_id", flat=True))
         with open(context.location_id_file, 'w') as f:
             f.writelines(f"{item}\n" for item in location_ids)
-        print(f"{len(location_ids)} records written to {context.location_id_file}")
 
         print("Collecting user and owner IDs")
         user_count, owner_count = 0, 0
         with open(context.user_data_file, 'w') as user_file, open(context.owner_id_file, 'w') as owner_file:
             for user_data, owner_ids in _get_user_owner_data(location_ids):
                 user_count += 1
-                owner_count += 1
+                owner_count += len(owner_ids)
                 user_file.write(f"{user_data}\n")
                 owner_file.writelines(f"{item}\n" for item in owner_ids)
 
+        print(f"{len(location_ids)} records written to {context.location_id_file}")
         print(f"{user_count} records written to {context.user_data_file}")
         print(f"{owner_count} records written to {context.owner_id_file}")
 
