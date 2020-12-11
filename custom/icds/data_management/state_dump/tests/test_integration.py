@@ -18,8 +18,13 @@ from corehq.apps.mobile_auth.models import MobileAuthKeyRecord
 from corehq.apps.products.models import SQLProduct
 from corehq.apps.sms.models import PhoneNumber
 from corehq.apps.users.models import CommCareUser
+from corehq.elastic import get_es_new
 from corehq.form_processor.tests.utils import use_sql_backend
+from corehq.pillows.mappings.user_mapping import USER_INDEX_INFO
 from corehq.toggles import all_toggles, NAMESPACE_DOMAIN
+from corehq.util.es.testing import sync_users_to_es
+from corehq.util.test_utils import trap_extra_setup
+from pillowtop.es_utils import initialize_index_and_mapping
 from toggle.shortcuts import set_toggle
 
 
@@ -42,6 +47,10 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
         self._load_domain_data()
 
     def setUp(self):
+        with trap_extra_setup(ConnectionError):
+            es = get_es_new()
+            initialize_index_and_mapping(es, USER_INDEX_INFO)
+
         self.domain_name = uuid.uuid4().hex
         self.domain = Domain(name=self.domain_name)
         self.domain.save()
@@ -82,7 +91,8 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
                 self.domain_name, username=username, password="123", created_by="", created_via="",
             )
             location = locations[username]
-            user.set_location(location)
+            with sync_users_to_es():
+                user.set_location(location)
             MobileAuthKeyRecord(
                 domain=self.domain_name, user_id=username, valid=datetime.utcnow(), expires=datetime.utcnow()
             ).save()
