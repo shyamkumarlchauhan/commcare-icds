@@ -18,37 +18,6 @@ class BaseOperationalization(ICDSMixin):
         return DataTablesHeader(
             DataTablesColumn('', sortable=False),
             DataTablesColumn('Sanctioned', sortable=False),
-            DataTablesColumn('Functioning', sortable=False),
-            DataTablesColumn('Reporting', sortable=False)
-        )
-
-    @property
-    def rows(self):
-        if self.config['location_id']:
-            data = self.custom_data(selected_location=self.selected_location, domain=self.config['domain'])
-            return [
-                [
-                    'No. of AWCs',
-                    self.awc_number,
-                    data['owner_id'],
-                    data['owner_id']
-                ],
-                [
-                    'No. of Mini AWCs',
-                    0,
-                    0,
-                    0
-                ]
-            ]
-
-
-class BaseOperationalizationBeta(BaseOperationalization):
-
-    @property
-    def headers(self):
-        return DataTablesHeader(
-            DataTablesColumn('', sortable=False),
-            DataTablesColumn('Sanctioned', sortable=False),
             DataTablesColumn('Launched', sortable=False),
             DataTablesColumn('AWCs open for at least 1 day in the month', sortable=False)
         )
