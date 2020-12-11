@@ -138,7 +138,7 @@ def get_simple_sql_data(domain, context, stats):
         get_objects_to_dump_from_builders(builders, stats, StringIO()),
         length=total_count,
         prefix="[sql] Dumping data from pgmain",
-        oneline=False
+        oneline='concise'
     )
 
 
@@ -210,7 +210,8 @@ def _get_data_with_related(domain, builders, related_data_filters, limit_to_db, 
             for iterator in prepared_builder.iterators():
                 yield model_class, prepared_builder, iterator
 
-    generator = with_progress_bar(_get_iterations(), length=total_chunks, prefix=f"[sql] Dumping {slug} chunks", oneline=False)
+    prefix = f"[sql] Dumping {slug} chunks from {limit_to_db}"
+    generator = with_progress_bar(_get_iterations(), length=total_chunks, prefix=prefix, oneline='concise')
     for model_class, prepared_builder, iterator in generator:
         for chunk in chunked(iterator, 500, list):
             yield from chunk

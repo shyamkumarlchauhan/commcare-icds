@@ -73,7 +73,6 @@ def _dump_couch_data(data, output, blob_meta_output, meta_tag=None):
         if doc_type != current_doc_type:
             if current_doc_type:
                 meta_tag = None  # reset for next doc_type
-            logger.info(f"[couch] Starting dump of {doc_type}")
             current_doc_type = doc_type
 
         if not meta_tag:
@@ -137,7 +136,7 @@ def users(domain, context):
         iter_docs(CommCareUser.get_db(), context.user_ids, chunksize=500),
         length=len(context.user_ids),
         prefix=f"[couch] Dumping users",
-        oneline=False
+        oneline='concise'
     )
 
 
@@ -147,7 +146,7 @@ def mobile_auth_records(domain, context):
     get_doc_count_in_domain_by_type(domain, doc_type, db)
     doc_ids = get_doc_ids_in_domain_by_type(domain, doc_type, db)
     docs = iter_docs(db, doc_ids, chunksize=500)
-    for doc in with_progress_bar(docs, length=len(doc_ids), prefix=f"[couch] Dumping {doc_type}", oneline=False):
+    for doc in with_progress_bar(docs, length=len(doc_ids), prefix=f"[couch] Dumping {doc_type}", oneline='concise'):
         if doc["user_id"] in context.user_ids:
             yield doc
 
