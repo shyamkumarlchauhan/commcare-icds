@@ -1,5 +1,5 @@
 from corehq.apps.locations.models import SQLLocation
-from custom.icds_reports.models.aggregate import AggregateInactiveAWW
+from custom.icds_reports.models.views import AggregateInactiveAWWView
 from custom.icds_reports.utils import india_now, DATA_NOT_ENTERED
 
 
@@ -36,7 +36,7 @@ class AwwActivityExport(object):
                 pass
         order_by = ('state_name', 'district_name', 'block_name', 'supervisor_name', 'awc_name')
 
-        query_set = AggregateInactiveAWW.objects.filter(**filters).order_by(*order_by)
+        query_set = AggregateInactiveAWWView.objects.filter(**filters).order_by(*order_by)
 
         data = query_set.values('state_name', 'district_name', 'block_name', 'supervisor_name', 'awc_name',
                                 'awc_site_code', 'first_submission', 'last_submission', 'no_of_days_since_start',

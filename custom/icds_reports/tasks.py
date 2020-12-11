@@ -188,6 +188,8 @@ from custom.icds_reports.utils.aggregation_helpers.distributed.mbt import (
     DeliveryChildMbtDistributedHelper,
 )
 
+from custom.icds_reports.models.views import AggregateInactiveAWWView
+
 celery_task_logger = logging.getLogger('celery.task')
 
 UCRAggregationTask = namedtuple("UCRAggregationTask", ['type', 'date'])
@@ -1284,7 +1286,7 @@ def collect_inactive_awws():
     _aggregate_inactive_aww(last_sync_date)
 
     celery_task_logger.info("Collecting inactive AWW to generate zip file")
-    excel_data = AggregateInactiveAWW.objects.all()
+    excel_data = AggregateInactiveAWWView.objects.all()
 
     celery_task_logger.info("Preparing data to csv file")
     columns = [x.name for x in AggregateInactiveAWW._meta.fields] + [

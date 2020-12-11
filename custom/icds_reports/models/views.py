@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 
@@ -1821,5 +1823,42 @@ class DailyTHRCCSRecordView(models.Model):
     class Meta(object):
         app_label = 'icds_reports'
         db_table = 'daily_thr_ccs_record_view'
+        managed = False
+
+
+class AggregateInactiveAWWView(models.Model):
+    awc_id = models.TextField(primary_key=True)
+    awc_name = models.TextField(blank=True, null=True)
+    awc_site_code = models.TextField(blank=True, null=True, db_index=True)
+    supervisor_id = models.TextField(blank=True, null=True)
+    supervisor_name = models.TextField(blank=True, null=True)
+    block_id = models.TextField(blank=True, null=True)
+    block_name = models.TextField(blank=True, null=True)
+    district_id = models.TextField(blank=True, null=True)
+    district_name = models.TextField(blank=True, null=True)
+    state_id = models.TextField(blank=True, null=True)
+    state_name = models.TextField(blank=True, null=True)
+    first_submission = models.DateField(blank=True, null=True)
+    last_submission = models.DateField(blank=True, null=True)
+    no_of_days_since_start = models.PositiveIntegerField(blank=True, null=True)
+    no_of_days_inactive = models.PositiveIntegerField(blank=True, null=True)
+
+    @property
+    def days_since_start(self):
+        if self.first_submission:
+            delta = date.today() - self.first_submission
+            return delta.days
+        return 'N/A'
+
+    @property
+    def days_inactive(self):
+        if self.last_submission:
+            delta = date.today() - self.last_submission
+            return delta.days
+        return 'N/A'
+
+    class Meta(object):
+        app_label = 'icds_reports'
+        db_table = 'inactive_aww_view'
         managed = False
 
