@@ -150,7 +150,7 @@ def output_progress(iterable, db=None):
     for obj in iterable:
         total_count += 1
         if total_count % 1000 == 0:
-            logger.info(f"Total progress %s: %s", db, total_count)
+            logger.info(f">>> Total progress%s: %s", db, total_count)
 
         yield obj
 

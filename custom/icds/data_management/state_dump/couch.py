@@ -70,8 +70,8 @@ def _dump_couch_data(data, output, blob_meta_output, meta_tag=None):
         doc_type = obj["doc_type"]
         if doc_type != current_doc_type:
             if current_doc_type:
-                meta_tag = None  # reset for next doc_type
                 logger.info(f"\tDump of {current_doc_type} complete: {counter[meta_tag]}")
+                meta_tag = None  # reset for next doc_type
             logger.info(f"Starting dump of {doc_type}")
             current_doc_type = doc_type
 
@@ -86,7 +86,7 @@ def _dump_couch_data(data, output, blob_meta_output, meta_tag=None):
 
         total_progress = sum(counter.values())
         if total_progress % 1000 == 0:
-            logger.info(f"Total progress: {total_progress}")
+            logger.info(f">>> Total couch progress: {total_progress}")
         json.dump(obj, output)
         output.write('\n')
     return counter
