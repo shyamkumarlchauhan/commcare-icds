@@ -90,7 +90,7 @@ def _dump_couch_data(data, output, blob_meta_output, meta_tag=None):
 def get_couch_data(domain, context):
     dumper_map = {
         "CommCareUser": users,
-        "MobileAuthKeyRecord": mobile_auth_records,
+        # "MobileAuthKeyRecord": mobile_auth_records,  # skip these since all users will need to reinstall apps
     }
     if context.types:
         dumpers = [
