@@ -100,6 +100,7 @@ class Command(BaseCommand):
         for result in results:
             meta.update(result)
 
+        print(f"All dumps complete. Writing metadata to ZIP.")
         with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
             z.writestr('meta.json', json.dumps(meta))
 
@@ -120,6 +121,8 @@ class Command(BaseCommand):
 
             for result in futures.as_completed(results):
                 yield result.result()
+
+            executor.shutdown()
 
     def _print_stats(self, meta):
         self.stdout.ending = '\n'
@@ -156,6 +159,7 @@ def dump_data_for_backend(domain_name, slug, dumper, context, zipname, ziplock=N
     if blob_stats:
         meta[blob_key] = {get_model_label(BlobMeta): blob_stats}
 
+    print(f"Dump {filename} complete. Copying data to ZIP.")
     with ziplock:
         with zipfile.ZipFile(zipname, mode='a', allowZip64=True) as z:
             z.write(filename, f'{key}.gz')
