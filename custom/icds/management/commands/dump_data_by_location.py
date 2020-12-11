@@ -10,6 +10,7 @@ from threading import Lock
 
 from django.core.management import CommandError
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 
 from corehq.apps.dump_reload.const import DATETIME_FORMAT
 from corehq.apps.dump_reload.util import get_model_label
@@ -72,8 +73,9 @@ class Command(BaseCommand):
                 "Some location ID files are missing. Have you run 'prepare_filter_values_for_location_dump'?"
             )
 
+        backends = "_".join(selected_backends) if options.get("dumper", None) else "all"
         zipname = output or 'data-dump-{}-{}-{}.zip'.format(
-            domain_name, "_".join(selected_backends), datetime.utcnow().strftime(DATETIME_FORMAT)
+            domain_name, backends, slugify(location), datetime.utcnow().strftime(DATETIME_FORMAT)
         )
 
         args_list = []
