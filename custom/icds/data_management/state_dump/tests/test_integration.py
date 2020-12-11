@@ -126,9 +126,11 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
 
         self.expected_meta = {
             "domain": {"Domain": 1},
-            "sql-sql-sharded-blob_meta-default": {"blobs.BlobMeta": 2},
-            "sql-sharded-default": {
+            "sql-sql-forms-blob_meta-default": {"blobs.BlobMeta": 2},
+            "sql-forms-default": {
                 "form_processor.XFormInstanceSQL": 2,
+            },
+            "sql-cases-default": {
                 "form_processor.CommCareCaseSQL": 6,
                 "form_processor.CommCareCaseIndexSQL": 2,
                 "form_processor.CaseTransaction": 6,
@@ -166,16 +168,19 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
 
     def _dump_domain_data(self):
         call_command("dump_data_by_location", self.domain_name, self.state, output_path=self.dump_file_path, thread_count=0)
-        blob_meta_name = 'sql-sql-sharded-blob_meta-default.gz'
+        blob_meta_name = 'sql-sql-forms-blob_meta-default.gz'
         with zipfile.ZipFile(self.dump_file_path, 'r') as archive:
             archive_files = archive.namelist()
+            self.assertEqual(set(archive_files), {
+                'domain.gz', 'toggles.gz', 'couch.gz', 'sql.gz',
+                'sql-forms-default.gz', 'sql-cases-default.gz', blob_meta_name, 'meta.json'
+            })
+
             archive.extract(blob_meta_name)
+
             self.addCleanup(_cleanup_files, [blob_meta_name])
             meta = json.loads(archive.read("meta.json"))
-        self.assertEqual(set(archive_files), {
-            'domain.gz', 'toggles.gz', 'couch.gz', 'sql.gz',
-            'sql-sharded-default.gz', blob_meta_name, 'meta.json'
-        })
+
         self.assertEqual(meta, self.expected_meta)
 
         self._dump_blobs(blob_meta_name)

@@ -1,7 +1,7 @@
 import gzip
 import json
-import multiprocessing
 import os
+import random
 import zipfile
 from collections import namedtuple, Counter
 from concurrent import futures
@@ -18,7 +18,8 @@ from corehq.blobs.models import BlobMeta
 from corehq.sql_db.util import get_db_aliases_for_partitioned_query
 from custom.icds.data_management.state_dump.couch import dump_couch_data, AVAILABLE_COUCH_TYPES, dump_toggle_data, \
     dump_domain_object, BLOB_META_STATS_KEY
-from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES, dump_simple_sql_data, dump_form_case_data
+from custom.icds.data_management.state_dump.sql import AVAILABLE_SQL_TYPES, dump_simple_sql_data, dump_form_data, \
+    dump_case_data
 from custom.icds.management.commands.prepare_filter_values_for_location_dump import FilterContext
 
 Dumper = namedtuple("Dumper", "function, partition_dbs")
@@ -28,7 +29,8 @@ DUMPERS = {
     'toggles': Dumper(dump_toggle_data, False),
     'couch': Dumper(dump_couch_data, False),
     'sql': Dumper(dump_simple_sql_data, False),
-    'sql-sharded': Dumper(dump_form_case_data, True)
+    'sql-forms': Dumper(dump_form_data, True),
+    'sql-cases': Dumper(dump_case_data, True),
 }
 
 
@@ -65,6 +67,8 @@ class Command(BaseCommand):
         if output and os.path.exists(output):
             raise CommandError(f"Path exists: {output}")
 
+        self.pool_size = options.get("thread_count", None)
+
         selected_backends = options.get("dumper", None) or list(DUMPERS)
 
         context = FilterContext(domain_name, location, options.get("type", []))
@@ -78,19 +82,25 @@ class Command(BaseCommand):
             domain_name, backends, slugify(location), datetime.utcnow().strftime(DATETIME_FORMAT)
         )
 
+        shard_dbs = list(get_db_aliases_for_partitioned_query())
         args_list = []
         for slug in selected_backends:
             dumper = DUMPERS[slug]
             args = {"args": (domain_name, slug, dumper, context, zipname), "kwargs": {}}
             if dumper.partition_dbs:
+                if self.pool_size:
+                    # randomize the order to reduce likelihood of hotspotting
+                    random.shuffle(shard_dbs)
                 args_list.extend(
                     {**args, **{"kwargs": {"limit_to_db": db}}}
-                    for db in get_db_aliases_for_partitioned_query()
+                    for db in shard_dbs
                 )
             else:
                 args_list.append(args)
 
-        self.pool_size = options.get("thread_count", len(args_list))
+        if self.pool_size is None:
+            self.pool_size = len(args_list)
+
         lock = Lock()
 
         if self.pool_size == 0:

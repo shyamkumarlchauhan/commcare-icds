@@ -88,15 +88,29 @@ def dump_simple_sql_data(domain, context, output, blob_meta_output):
     return stats
 
 
-def dump_form_case_data(domain, context, output, blob_meta_output, limit_to_db=None):
+def dump_form_data(domain, context, output, blob_meta_output, limit_to_db=None):
     stats = Counter()
-    data = get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
-    JsonLinesSerializer().serialize(
-        data,
-        use_natural_foreign_keys=False,
-        use_natural_primary_keys=True,
-        stream=output
-    )
+    if not context.types or "form_processor.XFormInstanceSQL" in context.types:
+        data = get_form_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
+        JsonLinesSerializer().serialize(
+            data,
+            use_natural_foreign_keys=False,
+            use_natural_primary_keys=True,
+            stream=output
+        )
+    return stats
+
+
+def dump_case_data(domain, context, output, blob_meta_output, limit_to_db=None):
+    stats = Counter()
+    if not context.types or "form_processor.CommCareCaseSQL" in context.types:
+        data = get_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
+        JsonLinesSerializer().serialize(
+            data,
+            use_natural_foreign_keys=False,
+            use_natural_primary_keys=True,
+            stream=output
+        )
     return stats
 
 
@@ -178,24 +192,24 @@ class RelatedFilterById(RelatedFilter):
         return {f"{self.related_field}__in": [getattr(model, self.model_id_field) for model in models]}
 
 
-def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
-    if not context.types or "form_processor.XFormInstanceSQL" in context.types:
-        form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
-        builders = [FilteredModelIteratorBuilder("form_processor.XFormInstanceSQL", form_filter)]
-        related = [("form_processor.XFormOperationSQL", RelatedFilter("form"))]
-        yield from _get_data_with_related(domain, builders, related, limit_to_db, stats, blob_output, 'forms')
+def get_form_data(domain, context, blob_output, stats, limit_to_db=None):
+    form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
+    builders = [FilteredModelIteratorBuilder("form_processor.XFormInstanceSQL", form_filter)]
+    related = [("form_processor.XFormOperationSQL", RelatedFilter("form"))]
+    yield from _get_data_with_related(domain, builders, related, limit_to_db, stats, blob_output, 'forms')
 
-    if not context.types or "form_processor.CommCareCaseSQL" in context.types:
-        case_filter = AndFilter(IDFilter("owner_id", context.owner_ids), SimpleFilter("domain"))
-        builders = [FilteredModelIteratorBuilder("form_processor.CommCareCaseSQL", case_filter),]
-        related = [
-            ("form_processor.CommCareCaseIndexSQL", RelatedFilter("case")),
-            ("form_processor.CaseTransaction", RelatedFilter("case")),
-            ("form_processor.LedgerValue", RelatedFilter("case")),
-            ("form_processor.LedgerTransaction", RelatedFilter("case")),
-            ("sms.PhoneNumber", RelatedFilterById("owner_id", "case_id")),
-        ]
-        yield from _get_data_with_related(domain, builders, related, limit_to_db, stats, blob_output, 'forms')
+
+def get_case_data(domain, context, blob_output, stats, limit_to_db=None):
+    case_filter = AndFilter(IDFilter("owner_id", context.owner_ids), SimpleFilter("domain"))
+    builders = [FilteredModelIteratorBuilder("form_processor.CommCareCaseSQL", case_filter),]
+    related = [
+        ("form_processor.CommCareCaseIndexSQL", RelatedFilter("case")),
+        ("form_processor.CaseTransaction", RelatedFilter("case")),
+        ("form_processor.LedgerValue", RelatedFilter("case")),
+        ("form_processor.LedgerTransaction", RelatedFilter("case")),
+        ("sms.PhoneNumber", RelatedFilterById("owner_id", "case_id")),
+    ]
+    yield from _get_data_with_related(domain, builders, related, limit_to_db, stats, blob_output, 'cases')
 
 
 def _get_data_with_related(domain, builders, related_data_filters, limit_to_db, stats, blob_output, slug):
