@@ -18,7 +18,7 @@ from corehq.apps.mobile_auth.models import MobileAuthKeyRecord
 from corehq.apps.products.models import SQLProduct
 from corehq.apps.sms.models import PhoneNumber
 from corehq.apps.users.models import CommCareUser
-from corehq.elastic import get_es_new
+from corehq.elastic import get_es_new, refresh_elasticsearch_index
 from corehq.form_processor.tests.utils import use_sql_backend
 from corehq.pillows.mappings.user_mapping import USER_INDEX_INFO
 from corehq.toggles import all_toggles, NAMESPACE_DOMAIN
@@ -93,6 +93,7 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
             location = locations[username]
             with sync_users_to_es():
                 user.set_location(location)
+
             MobileAuthKeyRecord(
                 domain=self.domain_name, user_id=username, valid=datetime.utcnow(), expires=datetime.utcnow()
             ).save()
@@ -146,6 +147,7 @@ class TestDumpLoadByLocation(BaseDumpLoadTest):
             "couch": {"users.CommCareUser": 2},
             "toggles": {"Toggle": 2}
         }
+        refresh_elasticsearch_index("users")
 
     def tearDown(self):
         self._delete_domain_data()
