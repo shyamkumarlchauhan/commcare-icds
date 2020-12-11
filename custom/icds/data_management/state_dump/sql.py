@@ -9,11 +9,12 @@ from corehq.apps.dump_reload.sql.dump import get_all_model_iterators_builders_fo
     get_objects_to_dump_from_builders, get_model_iterator_builders_to_dump, APP_LABELS_WITH_FILTER_KWARGS_TO_DUMP
 from corehq.apps.dump_reload.sql.filters import FilteredModelIteratorBuilder, UsernameFilter, SimpleFilter, IDFilter
 from corehq.apps.dump_reload.sql.serialization import JsonLinesSerializer
-from corehq.apps.dump_reload.util import get_model_class, get_model_label
+from corehq.apps.dump_reload.util import get_model_class
 from corehq.blobs import CODES
 from corehq.blobs.models import BlobMeta
 from corehq.sql_db.config import plproxy_config
 from corehq.sql_db.util import split_list_by_db_partition
+from corehq.util.log import with_progress_bar
 from custom.icds.data_management.state_dump.couch import BLOB_META_STATS_KEY
 from dimagi.utils.chunked import chunked
 
@@ -77,7 +78,7 @@ AVAILABLE_SQL_TYPES = (
 
 def dump_simple_sql_data(domain, context, output, blob_meta_output):
     stats = Counter()
-    data = output_progress(get_simple_sql_data(domain, context, stats))
+    data = get_simple_sql_data(domain, context, stats)
     JsonLinesSerializer().serialize(
         data,
         use_natural_foreign_keys=False,
@@ -89,10 +90,7 @@ def dump_simple_sql_data(domain, context, output, blob_meta_output):
 
 def dump_form_case_data(domain, context, output, blob_meta_output, limit_to_db=None):
     stats = Counter()
-    data = output_progress(
-        get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db),
-        limit_to_db
-    )
+    data = get_form_case_data(domain, context, blob_meta_output, stats, limit_to_db=limit_to_db)
     JsonLinesSerializer().serialize(
         data,
         use_natural_foreign_keys=False,
@@ -132,8 +130,16 @@ def get_simple_sql_data(domain, context, stats):
             if b.model_label in context.types or b.model_label.split(".")[0] in context.types
         ]
     filtered_builders = get_prepared_builders(domain, builders)
-    builders = itertools.chain(unfiltered_builders, filtered_builders)
-    yield from get_objects_to_dump_from_builders(builders, stats, StringIO())
+    builders = list(itertools.chain(unfiltered_builders, filtered_builders))
+
+    total_count = sum([query.count() for _, builder in builders for query in builder.querysets()])
+
+    yield from with_progress_bar(
+        get_objects_to_dump_from_builders(builders, stats, StringIO()),
+        length=total_count,
+        prefix="[sql] Dumping data from pgmain",
+        oneline=False
+    )
 
 
 def get_prepared_builders(domain, builders, limit_to_db=None):
@@ -142,17 +148,6 @@ def get_prepared_builders(domain, builders, limit_to_db=None):
         yield from get_all_model_iterators_builders_for_domain(
             model_class, domain, [builder], limit_to_db=limit_to_db
         )
-
-
-def output_progress(iterable, db=None):
-    total_count = 0
-    db = f" ({db})" if db else ""
-    for obj in iterable:
-        total_count += 1
-        if total_count % 1000 == 0:
-            logger.info(f">>> Total progress%s: %s", db, total_count)
-
-        yield obj
 
 
 class AndFilter:
@@ -184,35 +179,44 @@ class RelatedFilterById(RelatedFilter):
 
 
 def get_form_case_data(domain, context, blob_output, stats, limit_to_db=None):
-    builders = []
     if not context.types or "form_processor.XFormInstanceSQL" in context.types:
         form_filter = AndFilter(IDFilter("user_id", context.user_ids), SimpleFilter("domain"))
-        builders.append((
-            FilteredModelIteratorBuilder("form_processor.XFormInstanceSQL", form_filter),
-            [("form_processor.XFormOperationSQL", RelatedFilter("form"))]
-        ))
+        builders = [FilteredModelIteratorBuilder("form_processor.XFormInstanceSQL", form_filter)]
+        related = [("form_processor.XFormOperationSQL", RelatedFilter("form"))]
+        yield from _get_data_with_related(domain, builders, related, limit_to_db, stats, blob_output, 'forms')
 
     if not context.types or "form_processor.CommCareCaseSQL" in context.types:
         case_filter = AndFilter(IDFilter("owner_id", context.owner_ids), SimpleFilter("domain"))
-        builders.append((
-            FilteredModelIteratorBuilder("form_processor.CommCareCaseSQL", case_filter),
-            [
-                ("form_processor.CommCareCaseIndexSQL", RelatedFilter("case")),
-                ("form_processor.CaseTransaction", RelatedFilter("case")),
-                ("form_processor.LedgerValue", RelatedFilter("case")),
-                ("form_processor.LedgerTransaction", RelatedFilter("case")),
-                ("sms.PhoneNumber", RelatedFilterById("owner_id", "case_id")),
-            ]
-        ))
+        builders = [FilteredModelIteratorBuilder("form_processor.CommCareCaseSQL", case_filter),]
+        related = [
+            ("form_processor.CommCareCaseIndexSQL", RelatedFilter("case")),
+            ("form_processor.CaseTransaction", RelatedFilter("case")),
+            ("form_processor.LedgerValue", RelatedFilter("case")),
+            ("form_processor.LedgerTransaction", RelatedFilter("case")),
+            ("sms.PhoneNumber", RelatedFilterById("owner_id", "case_id")),
+        ]
+        yield from _get_data_with_related(domain, builders, related, limit_to_db, stats, blob_output, 'forms')
 
-    for builder, related_models in builders:
-        for model_class, prepared_builder in get_prepared_builders(domain, [builder], limit_to_db=limit_to_db):
+
+def _get_data_with_related(domain, builders, related_data_filters, limit_to_db, stats, blob_output, slug):
+    prepared_builders = list(get_prepared_builders(domain, [builders], limit_to_db=limit_to_db))
+    total_chunks = sum(
+        len(prepared_builder.querysets())
+        for _, prepared_builder in prepared_builders
+    )
+
+    def _get_iterations():
+        for model_class, prepared_builder in prepared_builders:
             for iterator in prepared_builder.iterators():
-                for chunk in chunked(iterator, 500, list):
-                    yield from chunk
-                    stats[prepared_builder.model_label] += len(chunk)
-                    dump_form_attachments(model_class, chunk, blob_output, stats)
-                    yield from get_related(prepared_builder, chunk, related_models, stats)
+                yield model_class, prepared_builder, iterator, related_data_filters
+
+    generator = with_progress_bar(_get_iterations(), length=total_chunks, prefix=f"[sql] Dumping {slug}", oneline=False)
+    for model_class, prepared_builder, iterator, related_models in generator:
+        for chunk in chunked(iterator, 500, list):
+            yield from chunk
+            stats[prepared_builder.model_label] += len(chunk)
+            dump_form_attachments(model_class, chunk, blob_output, stats)
+            yield from get_related(prepared_builder, chunk, related_models, stats)
 
 
 def get_related(builder, models, related_models, stats):
