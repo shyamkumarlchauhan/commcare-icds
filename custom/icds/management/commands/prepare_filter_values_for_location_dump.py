@@ -6,8 +6,12 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 
 from corehq.apps.cleanup.utils import confirm
-from corehq.apps.locations.dbaccessors import get_users_by_location_id
+from corehq.apps.locations.dbaccessors import mobile_user_ids_at_locations
 from corehq.apps.locations.models import SQLLocation
+from corehq.apps.users.models import CouchUser
+from corehq.util.log import with_progress_bar
+from dimagi.utils.chunked import chunked
+from dimagi.utils.couch.database import iter_docs
 
 OWNER = "owner_ids"
 
@@ -49,14 +53,22 @@ class Command(BaseCommand):
             location = locations[0]
 
         location_ids = list(location.get_descendants(include_self=True).values_list("location_id", flat=True))
-        user_data = []
-        owner_ids = []
-        for location_id in location_ids:
-            for user in get_users_by_location_id(domain_name, location_id):
-                user_data.append(",".join([user._id, user.username]))
-                owner_ids.extend(user.get_owner_ids())
+        with open(context.location_id_file, 'w') as f:
+            f.writelines(f"{item}\n" for item in location_ids)
+        print(f"{len(location_ids)} records written to {context.location_id_file}")
 
-        context.write_data(location_ids, user_data, owner_ids)
+        print("Collecting user and owner IDs")
+        user_count, owner_count = 0, 0
+        with open(context.user_data_file, 'w') as user_file, open(context.owner_id_file, 'w') as owner_file:
+            for user_data, owner_ids in _get_user_owner_data(location_ids):
+                user_count += 1
+                owner_count += 1
+                user_file.write(f"{user_data}\n")
+                owner_file.writelines(f"{item}\n" for item in owner_ids)
+
+        print(f"{user_count} records written to {context.user_data_file}")
+        print(f"{owner_count} records written to {context.owner_id_file}")
+
         if options.get("json_output"):
             # this is used in tests to allow cleanup of the files
             return json.dumps({
@@ -66,6 +78,14 @@ class Command(BaseCommand):
                     "owner": context.owner_id_file,
                 }
             })
+
+
+def _get_user_owner_data(location_ids):
+    for location_ids in chunked(with_progress_bar(location_ids), 100):
+        user_ids = mobile_user_ids_at_locations(location_ids)
+        for doc in iter_docs(CouchUser.get_db(), user_ids):
+            user = CouchUser.wrap_correctly(doc)
+            yield ",".join([user._id, user.username]), user.get_owner_ids()
 
 
 class FilterContext:
@@ -112,17 +132,6 @@ class FilterContext:
 
     def validate(self):
         return len(self.files_exist()) == 3
-
-    def write_data(self, location_ids, user_data, owner_ids):
-        _write_data(self.location_id_file, location_ids)
-        _write_data(self.user_data_file, user_data)
-        _write_data(self.owner_id_file, owner_ids)
-
-
-def _write_data(filename, data):
-    print(f"Writing {len(data)} records to {filename}")
-    with open(filename, 'w') as f:
-        f.writelines(f"{item}\n" for item in data)
 
 
 def get_location_id_filename(domain, state, name):
