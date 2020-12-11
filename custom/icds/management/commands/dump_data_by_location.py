@@ -1,5 +1,6 @@
 import gzip
 import json
+import multiprocessing
 import os
 import zipfile
 from collections import namedtuple, Counter
@@ -63,8 +64,6 @@ class Command(BaseCommand):
         if output and os.path.exists(output):
             raise CommandError(f"Path exists: {output}")
 
-        self.pool_size = options.get("thread_count")
-
         selected_backends = options.get("dumper", None) or list(DUMPERS)
 
         context = FilterContext(domain_name, location, options.get("type", []))
@@ -89,6 +88,7 @@ class Command(BaseCommand):
             else:
                 args_list.append(args)
 
+        self.pool_size = options.get("thread_count", len(args_list))
         lock = Lock()
 
         if self.pool_size == 0:
