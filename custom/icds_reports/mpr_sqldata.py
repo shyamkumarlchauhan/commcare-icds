@@ -1386,9 +1386,11 @@ class MPRPreschoolEducation(ICDSMixin, MPRData):
         if not data:
             return {}
 
-        pse_4 = data['num_days_4_pse_activities']
-        pse_1 = data['num_days_1_pse_activities']
-        awc_days_open = data['awc_days_open']
+        data = {key: value if value else 0 for key, value in data.items()}
+
+        pse_4 = data.get('num_days_4_pse_activities', 0)
+        pse_1 = data.get('num_days_1_pse_activities', 0)
+        awc_days_open = data.get('awc_days_open', 0)
         if data['num_launched_awcs']:
             pse_4 = pse_4 / data['num_launched_awcs']
             pse_1 = pse_1 / data['num_launched_awcs']
@@ -2110,7 +2112,7 @@ class MPRImmunizationCoverage(ICDSMixin, MPRData):
         immunization_data = AggChildHealth.objects.filter(**filters).values('month').annotate(
             open_child_count=F('fully_immunized_eligible_in_month'),
             open_child_1yr_immun_complete=F('fully_immun_before_month_end')
-        )
+        ).order_by('month').first()
         return immunization_data if immunization_data else {}
 
 
