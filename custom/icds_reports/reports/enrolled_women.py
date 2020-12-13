@@ -194,6 +194,8 @@ def get_enrolled_women_data_chart(domain, config, loc_level, show_test=False, ic
         data['blue'][miliseconds] = {'y': 0, 'all': 0}
 
     best_worst = {}
+    if 'month' not in config:
+        config['month'] = month
     location_launched_status = get_location_launched_status(config, loc_level)
 
     for row in chart_data:

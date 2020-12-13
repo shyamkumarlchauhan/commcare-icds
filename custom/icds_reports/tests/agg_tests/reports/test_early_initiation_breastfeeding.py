@@ -52,13 +52,9 @@ class TestEarlyInitiationBreastFeeding(TestCase):
         self.assertDictEqual(
             data['data'],
             {
-                'st4': {'in_month': 0, 'original_name': ['st4'], 'birth': 0, 'fillKey': '0%-20%'},
-                'st5': {'in_month': 0, 'original_name': ['st5'], 'birth': 0, 'fillKey': '0%-20%'},
-                'st6': {'in_month': 0, 'original_name': ['st6'], 'birth': 0, 'fillKey': '0%-20%'},
                 'st7': {'in_month': 0, 'original_name': ['st7'], 'birth': 0, 'fillKey': '0%-20%'},
                 'st1': {'in_month': 2, 'original_name': ['st1'], 'birth': 1, 'fillKey': '20%-60%'},
-                'st2': {'in_month': 3, 'original_name': ['st2'], 'birth': 1, 'fillKey': '20%-60%'},
-                'st3': {'in_month': 0, 'original_name': ['st3'], 'birth': 0, 'fillKey': '0%-20%'}
+                'st2': {'in_month': 3, 'original_name': ['st2'], 'birth': 1, 'fillKey': '20%-60%'}
             }
         )
 
@@ -126,6 +122,7 @@ class TestEarlyInitiationBreastFeeding(TestCase):
                 "0%-20%": MapColors.RED,
                 "20%-60%": MapColors.ORANGE,
                 "60%-100%": MapColors.PINK,
+                "Not Launched": MapColors.GREY,
                 "defaultFill": MapColors.GREY
             }
         )
@@ -194,18 +191,14 @@ class TestEarlyInitiationBreastFeeding(TestCase):
             {
                 "location_type": "State",
                 "bottom_five": [
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
-                    {'loc_name': 'st6', 'percent': 0.0},
+                    {'loc_name': 'st1', 'percent': 50.0},
+                    {'loc_name': 'st2', 'percent': 33.333333333333336},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ],
                 "top_five": [
                     {'loc_name': 'st1', 'percent': 50.0},
                     {'loc_name': 'st2', 'percent': 33.333333333333336},
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
+                    {'loc_name': 'st7', 'percent': 0.0},
                 ],
                 "chart_data": [
                     {
@@ -244,10 +237,6 @@ class TestEarlyInitiationBreastFeeding(TestCase):
                 "all_locations": [
                     {'loc_name': 'st1', 'percent': 50.0},
                     {'loc_name': 'st2', 'percent': 33.333333333333336},
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
-                    {'loc_name': 'st6', 'percent': 0.0},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ]
             }

@@ -23,18 +23,14 @@ class TestLactatingEnrolledWomen(TestCase):
             {
                 "location_type": "State",
                 "bottom_five": [
-                    {'loc_name': 'st7', 'value': 1.0},
-                    {'loc_name': 'st3', 'value': 0.0},
-                    {'loc_name': 'st4', 'value': 0.0},
-                    {'loc_name': 'st5', 'value': 0.0},
-                    {'loc_name': 'st6', 'value': 0.0},
+                    {'loc_name': 'st1', 'value': 87.0},
+                    {'loc_name': 'st2', 'value': 79.0},
+                    {'loc_name': 'st7', 'value': 1.0}
                 ],
                 "top_five": [
                     {'loc_name': 'st1', 'value': 87.0},
                     {'loc_name': 'st2', 'value': 79.0},
-                    {'loc_name': 'st7', 'value': 1.0},
-                    {'loc_name': 'st3', 'value': 0.0},
-                    {'loc_name': 'st4', 'value': 0.0},
+                    {'loc_name': 'st7', 'value': 1.0}
                 ],
                 "chart_data": [
                     {
@@ -69,11 +65,7 @@ class TestLactatingEnrolledWomen(TestCase):
                 "all_locations": [
                     {'loc_name': 'st1', 'value': 87.0},
                     {'loc_name': 'st2', 'value': 79.0},
-                    {'loc_name': 'st7', 'value': 1.0},
-                    {'loc_name': 'st3', 'value': 0.0},
-                    {'loc_name': 'st4', 'value': 0.0},
-                    {'loc_name': 'st5', 'value': 0.0},
-                    {'loc_name': 'st6', 'value': 0.0},
+                    {'loc_name': 'st7', 'value': 1.0}
                 ]
             }
         )
@@ -156,16 +148,13 @@ class TestLactatingEnrolledWomen(TestCase):
                 },
                 "fills": {
                     "Women": MapColors.BLUE,
+                    "Not Launched": MapColors.GREY,
                     "defaultFill": MapColors.GREY
                 },
                 "data": {
-                    'st4': {'all': 0, 'valid': 0, 'original_name': ['st4'], 'fillKey': 'Women'},
-                    'st5': {'all': 0, 'valid': 0, 'original_name': ['st5'], 'fillKey': 'Women'},
-                    'st6': {'all': 0, 'valid': 0, 'original_name': ['st6'], 'fillKey': 'Women'},
                     'st7': {'all': 1, 'valid': 1, 'original_name': ['st7'], 'fillKey': 'Women'},
                     'st1': {'all': 87, 'valid': 87, 'original_name': ['st1'], 'fillKey': 'Women'},
-                    'st2': {'all': 79, 'valid': 79, 'original_name': ['st2'], 'fillKey': 'Women'},
-                    'st3': {'all': 0, 'valid': 0, 'original_name': ['st3'], 'fillKey': 'Women'}
+                    'st2': {'all': 79, 'valid': 79, 'original_name': ['st2'], 'fillKey': 'Women'}
                 },
                 "slug": "lactating_enrolled_women",
                 "label": ""
@@ -204,6 +193,7 @@ class TestLactatingEnrolledWomen(TestCase):
                 },
                 "fills": {
                     "Women": MapColors.BLUE,
+                    "Not Launched": MapColors.GREY,
                     "defaultFill": MapColors.GREY
                 },
                 "data": {

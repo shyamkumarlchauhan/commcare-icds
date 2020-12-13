@@ -31,6 +31,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )['rightLegend']
@@ -44,6 +45,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -64,33 +66,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
                      'total': 2565,
                      'original_name': ['st2'],
                      'fillKey': '20%-35%'},
-                'st3': {'moderately_underweight': 0,
-                     'severely_underweight': 0,
-                     'normal': 0,
-                     'weighed': 0,
-                     'total': 1,
-                     'original_name': ['st3'],
-                     'fillKey': '0%-20%'},
-                'st4': {'moderately_underweight': 0,
-                        'severely_underweight': 0,
-                        'normal': 0,
-                        'weighed': 0,
-                        'total': 2,
-                        'original_name': ['st4'],
-                        'fillKey': '0%-20%'},
-                'st5': {'moderately_underweight': 0,
-                        'severely_underweight': 0,
-                        'normal': 0,
-                        'weighed': 0,
-                        'total': 3,
-                        'original_name': ['st5'],
-                        'fillKey': '0%-20%'},
-                'st6': {'moderately_underweight': 0,
-                        'severely_underweight': 0,
-                        'normal': 0,
-                        'weighed': 0,
-                        'total': 4,
-                        'original_name': ['st6'], 'fillKey': '0%-20%'},
                 'st7': {'moderately_underweight': 0,
                         'severely_underweight': 0,
                         'normal': 0,
@@ -105,6 +80,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -116,6 +92,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -126,6 +103,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -145,6 +123,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -154,6 +133,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 "0%-20%": MapColors.PINK,
                 "20%-35%": MapColors.ORANGE,
                 "35%-100%": MapColors.RED,
+                "Not Launched": MapColors.GREY,
                 "defaultFill": MapColors.GREY
             }
         )
@@ -163,6 +143,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -173,6 +154,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -447,6 +429,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -461,6 +444,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -478,6 +462,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -517,6 +502,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -529,10 +515,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
                     "classed": "dashed",
                     "strokeWidth": 2,
                     "values": [
-                        [
-                            None,
-                            0.3227848101265823
-                        ],
                         [
                             "s1",
                             0.3283582089552239

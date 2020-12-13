@@ -47,8 +47,7 @@ def get_registered_household_data_map(domain, config, loc_level, show_test=False
 
     fills = OrderedDict()
     fills.update({'Household': MapColors.BLUE})
-    if beta:
-        fills.update({'Not Launched': MapColors.GREY})
+    fills.update({'Not Launched': MapColors.GREY})
     fills.update({'defaultFill': MapColors.GREY})
 
     return {
