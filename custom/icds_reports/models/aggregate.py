@@ -411,8 +411,8 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
 
     weighed_within_3_days = models.SmallIntegerField(blank=True, null=True)
     mother_resident_status = models.TextField(blank=True, null=True)
-    birth_weight_kg = models.PositiveSmallIntegerFieldDecimalField(max_digits=64, decimal_places=20, blank=True,
-                                                                   null=True, help_text="birth weight in kg")
+    birth_weight_kg = models.DecimalField(max_digits=64, decimal_places=20, blank=True,
+                                          null=True, help_text="birth weight in kg")
 
     class Meta:
         managed = False
