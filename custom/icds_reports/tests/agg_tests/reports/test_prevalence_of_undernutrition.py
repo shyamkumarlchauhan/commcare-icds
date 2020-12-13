@@ -53,25 +53,25 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertDictEqual(
             data['data'],
             {
-                'st1': {'moderately_underweight': 320,
-                     'severely_underweight': 40,
-                     'normal': 1225,
-                     'weighed': 1585,
-                     'total': 2375,
+                'st1': {'moderately_underweight': 64,
+                     'severely_underweight': 8,
+                     'normal': 245,
+                     'weighed': 317,
+                     'total': 475,
                      'original_name': ['st1'],
                      'fillKey': '20%-35%'},
-                'st2': {'moderately_underweight': 325,
-                     'severely_underweight': 60,
-                     'normal': 1505,
-                     'weighed': 1890,
-                     'total': 2565,
+                'st2': {'moderately_underweight': 65,
+                     'severely_underweight': 12,
+                     'normal': 301,
+                     'weighed': 378,
+                     'total': 513,
                      'original_name': ['st2'],
                      'fillKey': '20%-35%'},
                 'st7': {'moderately_underweight': 0,
                         'severely_underweight': 0,
                         'normal': 0,
                         'weighed': 0,
-                        'total': 5,
+                        'total': 1,
                         'original_name': ['st7'], 'fillKey': '0%-20%'}
             }
         )
@@ -89,6 +89,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['rightLegend']['info'], expected)
 
     def test_map_data_right_legend_average(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
@@ -100,6 +101,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['rightLegend']['average'], '21.44')
 
     def test_map_data_right_legend_extended_info(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
@@ -162,6 +164,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['label'], 'Percent of Children Underweight (0 - 5 years)')
 
     def test_map_name_two_locations_represent_by_one_topojson(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
@@ -188,6 +191,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_average_with_two_locations_represent_by_one_topojson(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
@@ -201,6 +205,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['rightLegend']['average'], '22.71')
 
     def test_chart_data_keys_length(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -212,6 +217,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(len(data), 5)
 
     def test_chart_data_location_type(self):
+
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -223,6 +229,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['location_type'], 'State')
 
     def test_chart_data_bottom_five(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -241,6 +248,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_top_five(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -270,6 +278,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(len(data['chart_data']), 3)
 
     def test_chart_data_pink(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -315,6 +324,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_orange(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -360,6 +370,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_red(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -405,6 +416,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_all_locations(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -456,6 +468,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_sector_data_tooltips_data(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_sector_data(
             'icds-cas',
             config={
@@ -496,6 +509,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_sector_data_chart_data(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_sector_data(
             'icds-cas',
             config={
