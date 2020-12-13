@@ -41,6 +41,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertIn('extended_info', data)
 
     def test_map_data(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
