@@ -202,7 +202,7 @@ class TestChildrenInitiated(TestCase):
             {
                 "location_type": "State",
                 "bottom_five": [
-                    {'loc_name': 'st2', 'percent': 86.95652173913044}
+                    {'loc_name': 'st2', 'percent': 86.95652173913044},
                     {'loc_name': 'st1', 'percent': 82.3529411764706},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ],
