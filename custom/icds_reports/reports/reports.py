@@ -9,10 +9,7 @@ from custom.icds_reports.asr_sqldata import ASRIdentification, ASROperationaliza
 from custom.icds_reports.filters import ICDSMonthFilter, IcdsLocationFilter, IcdsASRLocationFilter
 from custom.icds_reports.mpr_sqldata import MPRIdentification, MPRSectors, MPRPopulation, MPRBirthsAndDeaths, \
     MPRAWCDetails, MPRSupplementaryNutrition, MPRUsingSalt, MPRProgrammeCoverage, MPRPreschoolEducation, \
-    MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring, \
-    MPROperationalizationBeta, MPRPopulationBeta, MPRGrowthMonitoringBeta, MPRSupplementaryNutritionBeta, \
-    MPRMonitoringBeta, MPRVhndBeta, MPRUsingSaltBeta, MPRImmunizationCoverageBeta, MPRPreschoolEducationBeta, \
-    MPRProgrammeCoverageBeta, MPRAWCDetailsBeta, MPRReferralServicesBeta, MPRBirthsAndDeathsBeta
+    MPRGrowthMonitoring, MPRImmunizationCoverage, MPRVhnd, MPRReferralServices, MPRMonitoring
 
 from custom.icds_reports.mpr_sqldata import MPROperationalization
 from custom.icds_reports.reports import IcdsBaseReport
@@ -31,20 +28,20 @@ class MPRReport(IcdsBaseReport):
     def data_provider_classes(self):
         return [
             MPRIdentification,
-            MPROperationalization if not self.icds_pre_release_features() else MPROperationalizationBeta,
+            MPROperationalization,
             MPRSectors,
-            MPRPopulation if not self.icds_pre_release_features() else MPRPopulationBeta,
-            MPRBirthsAndDeaths if not self.icds_pre_release_features() else MPRBirthsAndDeathsBeta,
-            MPRAWCDetails if not self.icds_pre_release_features() else MPRAWCDetailsBeta,
-            MPRSupplementaryNutrition if not self.icds_pre_release_features() else MPRSupplementaryNutritionBeta,
-            MPRUsingSalt if not self.icds_pre_release_features() else MPRUsingSaltBeta,
-            MPRProgrammeCoverage if not self.icds_pre_release_features() else MPRProgrammeCoverageBeta,
-            MPRPreschoolEducation if not self.icds_pre_release_features() else MPRPreschoolEducationBeta,
-            MPRGrowthMonitoring if not self.icds_pre_release_features() else MPRGrowthMonitoringBeta,
-            MPRImmunizationCoverage if not self.icds_pre_release_features() else MPRImmunizationCoverageBeta,
-            MPRVhnd if not self.icds_pre_release_features() else MPRVhndBeta,
-            MPRReferralServices if not self.icds_pre_release_features() else MPRReferralServicesBeta,
-            MPRMonitoring if not self.icds_pre_release_features() else MPRMonitoringBeta
+            MPRPopulation,
+            MPRBirthsAndDeaths,
+            MPRAWCDetails,
+            MPRSupplementaryNutrition,
+            MPRUsingSalt,
+            MPRProgrammeCoverage,
+            MPRPreschoolEducation,
+            MPRGrowthMonitoring,
+            MPRImmunizationCoverage,
+            MPRVhnd,
+            MPRReferralServices,
+            MPRMonitoring
         ]
 
 
