@@ -19,7 +19,8 @@
     "icds-sql",
     "icds-cas",
     "cas-lab",
-    "icds-cas-sandbox"
+    "icds-cas-sandbox",
+    "linked-cas-lab"
   ],
   "server_environment": [
     "india",
@@ -132,7 +133,8 @@
           "asm": "মহিলা",
           "pan": "ਔਰਤ",
           "kan": "ಮಹಿಳೆ",
-          "urd": "عورت"
+          "urd": "عورت",
+          "ori": "ମହିଳା"
         }
       },
       {
@@ -155,7 +157,8 @@
           "asm": "সাম্ভাব্য় প্ৰসৱৰ তাৰিখ",
           "pan": "ਜਣੇਪੇ ਦੀ ਸੰਭਾਵਿਤ ਮਿਤੀ",
           "kan": "ಹೆರಿಗೆಯ ಅಂದಾಜು ದಿನಾಂಕ",
-          "urd": "Delivery کی تخمینی تاریخ"
+          "urd": "Delivery کی تخمینی تاریخ",
+          "ori": "ସମ୍ଭାବ୍ୟ ପ୍ରସବ ତାରିଖ"
         }
       }
     ],

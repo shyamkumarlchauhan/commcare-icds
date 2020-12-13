@@ -1816,7 +1816,7 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             },
             {
                 'mData': 'closed',
-                'heading': 'Status',
+                'heading': 'Pregnancy Status',
                 'class': 'medium-col',
                 'value': renderClosed
             },
@@ -1927,14 +1927,15 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
         ],
     };
 
-    if (vm.haveAccessToFeatures) {
+    if (dateHelperService.getSelectedDate() >= new Date(2020, 0)) {
         vm.awcReportTableData['beneficiary'].push(
-        {
-            'mData': 'beneficiary_status',
-            'heading': 'Status',
-            'class': 'medium-col',
-            'value': renderBeneficairyStatus
-        })
+            {
+                'mData': 'beneficiary_status',
+                'heading': 'Status',
+                'class': 'medium-col',
+                'value': renderBeneficairyStatus
+            }
+        )
     }
 
     vm.dtColumns = [];
@@ -2086,6 +2087,7 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
         lng: 78.22,
         zoom: 5,
     };
+    vm.defaults = {scrollWheelZoom: false}
     if (Object.keys($location.search()).length === 0) {
         $location.search(storageService.getKey('search'));
     } else {
@@ -2228,6 +2230,12 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             }).then(
                 function (response) {
                     vm.data = response.data;
+                    if (step === 'take_home_ration') {
+                        vm.thr_eligible_beneficiaries = vm.data['thr_eligible'];
+                        vm.thr_25_days = vm.data['thr_25_days'];
+                        vm.thr_pictures_count = vm.data['thr_pictures_count'];
+                        vm.thr_images = vm.data['images'];
+                    }
                     vm.message = false;
                     if (vm.data.map) {
                         vm.markers = vm.data.map.markers;
@@ -2931,6 +2939,13 @@ function AwcReportsController($scope, $http, $location, $routeParams, $log, DTOp
             image: "/static/icds_reports/mobile/images/lactatingwoman.png",
             isMobile: true,
         },
+        {
+            id: 'take_home_ration',
+            route: "/awc_reports/take_home_ration",
+            label: "Take Home Ration",
+            image: "",
+            isMobile: false,
+        }
     ];
     vm.mobileSteps = _.filter(steps, function (step) {
         return step.isMobile;

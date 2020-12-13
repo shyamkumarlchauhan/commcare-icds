@@ -2,7 +2,7 @@ language: python
 sudo: required
 group: edge
 env:
-  - TEST=python REUSE_DB=true  # can't drop the citus DB since it's the postgres database
+  - TEST=python TEST_MIGRATIONS=true REUSE_DB=true  # can't drop the citus DB since it's the postgres database
 before_install:
   # get newer version of docker-compose for variable substitution in compose files
   - sudo rm /usr/local/bin/docker-compose

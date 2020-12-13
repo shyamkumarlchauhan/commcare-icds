@@ -46,16 +46,13 @@ class TestEnrolledChildren(TestCase):
                 },
                 "fills": {
                     "Children": MapColors.BLUE,
+                    "Not Launched": MapColors.GREY,
                     "defaultFill": MapColors.GREY
                 },
                 "data": {
-                    'st4': {'all': 0, 'valid': 0, 'original_name': ['st4'], 'fillKey': 'Children'},
-                    'st5': {'all': 0, 'valid': 0, 'original_name': ['st5'], 'fillKey': 'Children'},
-                    'st6': {'all': 0, 'valid': 0, 'original_name': ['st6'], 'fillKey': 'Children'},
                     'st7': {'all': 1, 'valid': 1, 'original_name': ['st7'], 'fillKey': 'Children'},
                     'st1': {'all': 618, 'valid': 618, 'original_name': ['st1'], 'fillKey': 'Children'},
-                    'st2': {'all': 668, 'valid': 668, 'original_name': ['st2'], 'fillKey': 'Children'},
-                    'st3': {'all': 0, 'valid': 0, 'original_name': ['st3'], 'fillKey': 'Children'}
+                    'st2': {'all': 668, 'valid': 668, 'original_name': ['st2'], 'fillKey': 'Children'}
                 },
                 "slug": "enrolled_children",
                 "label": ""
@@ -99,6 +96,7 @@ class TestEnrolledChildren(TestCase):
                 },
                 "fills": {
                     "Children": MapColors.BLUE,
+                    "Not Launched": MapColors.GREY,
                     "defaultFill": MapColors.GREY
                 },
                 "data": {

@@ -13,7 +13,8 @@ from custom.icds_reports.const import (
     AGG_THR_V2_TABLE,
     AGG_ADOLESCENT_GIRLS_REGISTRATION_TABLE,
     AGG_MIGRATION_TABLE,
-    AGG_AVAILING_SERVICES_TABLE
+    AGG_AVAILING_SERVICES_TABLE,
+    AGG_PERSON_CASE_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers.distributed.base import BaseICDSAggregationDistributedHelper
 
@@ -169,6 +170,9 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
         yield """
         UPDATE "{tablename}" agg_awc SET
             awc_days_open = ut.awc_days_open,
+            awc_open_with_attended_children = ut.awc_open_with_attended_children,
+            num_days_4_pse_activities = COALESCE(ut.open_4_acts_count, 0),
+            num_days_1_pse_activities = COALESCE(ut.open_1_acts_count, 0),
             awc_num_open = ut.awc_num_open,
             awc_days_pse_conducted = ut.awc_days_pse_conducted
         FROM (
@@ -177,6 +181,9 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
                 supervisor_id,
                 month,
                 sum(awc_open_count) AS awc_days_open,
+                sum(CASE WHEN attended_children>0 then awc_open_count ELSE 0 END) as awc_open_with_attended_children,
+                sum(open_4_acts_count) as open_4_acts_count,
+                sum(open_1_acts_count) as open_1_acts_count,
                 CASE WHEN (sum(awc_open_count) > 0) THEN 1 ELSE 0 END AS awc_num_open,
                 sum(pse_conducted) as awc_days_pse_conducted
             FROM "{daily_attendance}"
@@ -225,72 +232,18 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
            cases_person_referred = ut.cases_person_referred,
            cases_person_adolescent_girls_11_14_all_v2 = ut.cases_person_adolescent_girls_11_14_all_v2,
            cases_person_adolescent_girls_11_14_out_of_school=0
-        FROM (
-        SELECT
-            ucr.awc_id,
-            ucr.supervisor_id,
-            sum({seeking_services}) AS cases_person,
-            count(*) AS cases_person_all,
-            sum(CASE WHEN
-                %(month_end_11yr)s > dob AND %(month_start_15yr)s <= dob AND sex = 'F'
-                THEN ({seeking_services}) ELSE 0 END
-            ) as cases_person_adolescent_girls_11_14,
-            sum(
-                CASE WHEN %(month_end_11yr)s > dob AND %(month_start_15yr)s <= dob AND sex = 'F'
-                THEN 1 ELSE 0 END
-            ) as cases_person_adolescent_girls_11_14_all,
-            sum(
-                CASE WHEN %(month_end_11yr)s > dob AND %(month_start_14yr)s <= dob AND sex = 'F'
-                    AND (agg_migration.is_migrated IS DISTINCT FROM 1 OR agg_migration.migration_date::date >= %(start_date)s)
-                THEN 1 ELSE 0 END
-            ) as cases_person_adolescent_girls_11_14_all_v2,
-            sum(
-                CASE WHEN %(month_end_15yr)s > dob AND %(month_start_18yr)s <= dob AND sex = 'F'
-                THEN ({seeking_services}) ELSE 0 END
-            ) as cases_person_adolescent_girls_15_18,
-            sum(
-                CASE WHEN %(month_end_15yr)s > dob AND %(month_start_18yr)s <= dob AND sex = 'F'
-                    AND (agg_migration.is_migrated IS DISTINCT FROM 1 OR agg_migration.migration_date::date >= %(start_date)s)
-                THEN 1 ELSE 0 END
-            ) as cases_person_adolescent_girls_15_18_all,
-            sum(
-                CASE WHEN last_referral_date BETWEEN %(start_date)s AND %(end_date)s
-                THEN 1 ELSE 0 END
-            ) as cases_person_referred
-        FROM "{ucr_tablename}" ucr LEFT JOIN
-             "{migration_table}" agg_migration ON (
-                ucr.doc_id = agg_migration.person_case_id AND
-                agg_migration.month = %(start_date)s AND
-                ucr.supervisor_id = agg_migration.supervisor_id
-             ) LEFT JOIN
-             "{availing_services_table}" agg_availing ON (
-                ucr.doc_id = agg_availing.person_case_id AND
-                agg_availing.month = %(start_date)s AND
-                ucr.supervisor_id = agg_availing.supervisor_id
-             )
-        WHERE (opened_on <= %(end_date)s AND
-              (closed_on IS NULL OR closed_on >= %(start_date)s ))
-        GROUP BY ucr.supervisor_id, ucr.awc_id) ut
-        WHERE ut.awc_id = agg_awc.awc_id and ut.supervisor_id=agg_awc.supervisor_id;
+        FROM "{agg_person_cases}" ut
+        WHERE ut.awc_id = agg_awc.awc_id AND 
+            ut.supervisor_id=agg_awc.supervisor_id AND
+            ut.month=%(start_date)s AND
+            ut.month=agg_awc.month
         """.format(
             tablename=self.temporary_tablename,
             ucr_tablename=self.get_table('static-person_cases_v3'),
-            migration_table=AGG_MIGRATION_TABLE,
-            availing_services_table=AGG_AVAILING_SERVICES_TABLE,
-            seeking_services=(
-                "CASE WHEN "
-                "((agg_availing.is_registered IS DISTINCT FROM 0 OR agg_availing.registration_date::date >= %(start_date)s) AND "
-                "(agg_migration.is_migrated IS DISTINCT FROM 1 OR agg_migration.migration_date::date >= %(start_date)s)) "
-                "THEN 1 ELSE 0 END"
-            )
+            agg_person_cases=AGG_PERSON_CASE_TABLE,
+
         ), {
-            'start_date': self.month_start,
-            'end_date': self.month_end,
-            'month_end_11yr': self.month_end_11yr,
-            'month_start_15yr': self.month_start_15yr,
-            'month_start_14yr': self.month_start_14yr,
-            'month_end_15yr': self.month_end_15yr,
-            'month_start_18yr': self.month_start_18yr,
+            'start_date': self.month_start
         }
 
         yield """
@@ -448,7 +401,8 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
             electricity_awc = ut.electricity_awc,
             infantometer = ut.infantometer,
             stadiometer = ut.stadiometer,
-            awc_with_gm_devices = ut.awc_with_gm_devices
+            awc_with_gm_devices = ut.awc_with_gm_devices,
+            use_salt = ut.use_salt
         FROM (
             SELECT
                 awc_id,
@@ -480,7 +434,8 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
                 stadiometer_usable AS stadiometer,
                 CASE WHEN GREATEST(adult_scale_available, adult_scale_usable, baby_scale_available,
                               flat_scale_available, baby_scale_usable,
-                              infantometer_usable, stadiometer_usable, 0) > 0 THEN 1 ELSE 0 END as awc_with_gm_devices
+                              infantometer_usable, stadiometer_usable, 0) > 0 THEN 1 ELSE 0 END as awc_with_gm_devices,
+                COALESCE(use_salt, 0) as use_salt
             FROM icds_dashboard_infrastructure_forms
             WHERE month = %(start_date)s
         ) ut
@@ -684,6 +639,9 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
             ('month', 'month'),
             ('num_awcs',),
             ('awc_days_open',),
+            ('awc_open_with_attended_children',),
+            ('num_days_4_pse_activities',),
+            ('num_days_1_pse_activities',),
             ('awc_num_open',),
             ('wer_weighed',),
             ('wer_eligible',),
@@ -721,6 +679,7 @@ class AggAwcDistributedHelper(BaseICDSAggregationDistributedHelper):
             ('infra_cooking_utensils',),
             ('infra_medicine_kits',),
             ('infra_adequate_space_pse',),
+            ('use_salt',),
             ('usage_num_hh_reg',),
             ('usage_num_add_person',),
             ('usage_num_add_pregnancy',),

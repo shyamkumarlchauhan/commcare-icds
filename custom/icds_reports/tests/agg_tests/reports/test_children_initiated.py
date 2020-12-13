@@ -52,13 +52,9 @@ class TestChildrenInitiated(TestCase):
         self.assertDictEqual(
             data['data'],
             {
-                'st4': {'all': 0, 'original_name': ['st4'], 'children': 0, 'fillKey': '0%-20%'},
-                'st5': {'all': 0, 'original_name': ['st5'], 'children': 0, 'fillKey': '0%-20%'},
-                'st6': {'all': 0, 'original_name': ['st6'], 'children': 0, 'fillKey': '0%-20%'},
                 'st7': {'all': 0, 'original_name': ['st7'], 'children': 0, 'fillKey': '0%-20%'},
                 'st1': {'all': 17, 'original_name': ['st1'], 'children': 14, 'fillKey': '60%-100%'},
                 'st2': {'all': 23, 'original_name': ['st2'], 'children': 20, 'fillKey': '60%-100%'},
-                'st3': {'all': 0, 'original_name': ['st3'], 'children': 0, 'fillKey': '0%-20%'}
             }
         )
 
@@ -130,6 +126,7 @@ class TestChildrenInitiated(TestCase):
                 "0%-20%": MapColors.RED,
                 "20%-60%": MapColors.ORANGE,
                 "60%-100%": MapColors.PINK,
+                "Not Launched": MapColors.GREY,
                 "defaultFill": MapColors.GREY
             }
         )
@@ -205,18 +202,14 @@ class TestChildrenInitiated(TestCase):
             {
                 "location_type": "State",
                 "bottom_five": [
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
-                    {'loc_name': 'st6', 'percent': 0.0},
+                    {'loc_name': 'st2', 'percent': 86.95652173913044},
+                    {'loc_name': 'st1', 'percent': 82.3529411764706},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ],
                 "top_five": [
                     {'loc_name': 'st2', 'percent': 86.95652173913044},
                     {'loc_name': 'st1', 'percent': 82.3529411764706},
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
+                    {'loc_name': 'st7', 'percent': 0.0},
                 ],
                 "chart_data": [
                     {
@@ -255,10 +248,6 @@ class TestChildrenInitiated(TestCase):
                 "all_locations": [
                     {'loc_name': 'st2', 'percent': 86.95652173913044},
                     {'loc_name': 'st1', 'percent': 82.3529411764706},
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
-                    {'loc_name': 'st6', 'percent': 0.0},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ]
             }

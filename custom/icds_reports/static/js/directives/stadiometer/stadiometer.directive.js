@@ -22,7 +22,8 @@ function StadiometerController($scope, $routeParams, $location, $filter, infrast
     };
     vm.filters = ['gender', 'age', 'data_period'];
     vm.rightLegend = {
-        info: 'Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having a Stadiometer. ',
+        info: 'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage ' +
+            'of AWCs that reported having a Stadiometer. ',
     };
 
     vm.getPopupData = function (row) {
@@ -45,7 +46,8 @@ function StadiometerController($scope, $routeParams, $location, $filter, infrast
     var options = {
         'xAxisTickFormat': '%b %Y',
         'yAxisTickFormat': ".2%",
-        'captionContent': ' Of the AWCs that have submitted an Infrastructure Details form, the percentage of AWCs that reported having a Stadiometer. ',
+        'captionContent': ' Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the ' +
+            'percentage of AWCs that reported having a Stadiometer. ',
     };
     vm.chartOptions = vm.getChartOptions(options);
     vm.chartOptions.chart.color = d3.scale.category10().range();

@@ -39,12 +39,11 @@ class ChildrenExport(ExportableMixin, IcdsSqlData):
             columns.append(DatabaseColumn('Supervisor', SimpleColumn('supervisor_name'), slug='supervisor_name'))
         if self.loc_level > 4:
             columns.append(DatabaseColumn('AWC', SimpleColumn('awc_name'), slug='awc_name'))
-            if self.beta:
-                columns.append(DatabaseColumn(
-                    'AWC Site Code',
-                    SimpleColumn('awc_site_code'),
-                    slug='awc_site_code')
-                )
+            columns.append(DatabaseColumn(
+                'AWC Site Code',
+                SimpleColumn('awc_site_code'),
+                slug='awc_site_code')
+            )
             columns.append(DatabaseColumn(
                 'AWW Phone Number',
                 SimpleColumn('contact_phone_number'),

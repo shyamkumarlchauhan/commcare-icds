@@ -55,8 +55,8 @@ def get_functional_toilet_data_map(domain, config, loc_level, show_test=False, b
         "rightLegend": {
             "average": average,
             "info": _((
-                "Of the AWCs that submitted an Infrastructure Details form, the percentage of AWCs that "
-                "reported having a functional toilet"
+                "Of the AWCs that submitted an Infrastructure Details form in the last 6 months, "
+                "the percentage of AWCs that reported having a functional toilet"
             )),
             "extended_info": [
                 {

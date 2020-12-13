@@ -27,7 +27,13 @@ from custom.icds_reports.const import (
     AGG_MIGRATION_TABLE,
     BIHAR_API_DEMOGRAPHICS_TABLE,
     AGG_AVAILING_SERVICES_TABLE,
-    CHILD_VACCINE_TABLE
+    CHILD_VACCINE_TABLE,
+    AGG_MPR_AWC_TABLE,
+    AGG_SAM_MAM_TABLE,
+    AGG_SAM_MAM_PANCHAYAT_TABLE,
+    AGG_DAILY_CCS_RECORD_THR_TABLE,
+    AGG_DAILY_CHILD_HEALTH_THR_TABLE,
+    AGG_PERSON_CASE_TABLE
 )
 from custom.icds_reports.utils.aggregation_helpers.distributed import (
     AggAwcDailyAggregationDistributedHelper,
@@ -63,8 +69,15 @@ from custom.icds_reports.utils.aggregation_helpers.distributed import (
     MigrationFormsAggregationDistributedHelper,
     BiharApiDemographicsHelper,
     AvailingServiceFormsAggregationDistributedHelper,
-    ChildVaccineHelper
+    ChildVaccineHelper,
+    AggMprAwcHelper,
+    SamMamFormAggregationDistributedHelper,
+    DailyTHRCCSRecordHelper,
+    DailyTHRChildHealthHelper,
+    SamMamFormAggregationPanchayatDistributedHelper,
+    PersonCaseAggregationDistributedHelper
 )
+
 
 def get_cursor(model):
     db = router.db_for_write(model)
@@ -213,6 +226,8 @@ class CcsRecordMonthly(models.Model, AggregateMixin):
     new_ifa_tablets_total_bp = models.SmallIntegerField(blank=True, null=True)
     new_ifa_tablets_total_pnc = models.SmallIntegerField(blank=True, null=True)
     ifa_last_seven_days = models.PositiveSmallIntegerField(blank=True, null=True)
+    bpl_apl = models.TextField(blank=True, null=True)
+    religion = models.TextField(blank=True, null=True)
 
     class Meta(object):
         managed = False
@@ -376,7 +391,28 @@ class ChildHealthMonthly(models.Model, AggregateMixin):
     alive_status_daily = models.SmallIntegerField(blank=True, null=True)
     duplicate_status_daily = models.SmallIntegerField(blank=True, null=True)
     seeking_services_status_daily = models.SmallIntegerField(blank=True, null=True)
-    birth_weight_kg = models.PositiveSmallIntegerFieldDecimalField(max_digits=64, decimal_places=20, blank=True, null=True, help_text="birth weight in kg")
+    birth_status_in_month = models.TextField(blank=True, null=True)
+    fully_immun_before_month_end = models.SmallIntegerField(blank=True, null=True)
+    last_referral_date = models.DateField(blank=True, null=True)
+    referral_health_problem = models.TextField(blank=True, null=True)
+    referral_reached_date = models.DateField(blank=True, null=True)
+    last_referral_discharge_date = models.DateField(blank=True, null=True)
+    last_recorded_weight = models.DecimalField(max_digits=64, decimal_places=20, blank=True, null=True)
+    last_recorded_height = models.DecimalField(max_digits=64, decimal_places=20, blank=True, null=True)
+    sam_mam_visit_date_1 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_2 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_3 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_4 = models.DateField(blank=True, null=True)
+
+    poshan_panchayat_date_1 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_2 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_3 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_4 = models.DateField(blank=True, null=True)
+
+    weighed_within_3_days = models.SmallIntegerField(blank=True, null=True)
+    mother_resident_status = models.TextField(blank=True, null=True)
+    birth_weight_kg = models.PositiveSmallIntegerFieldDecimalField(max_digits=64, decimal_places=20, blank=True,
+                                                                   null=True, help_text="birth weight in kg")
 
     class Meta:
         managed = False
@@ -550,6 +586,10 @@ class AggAwc(models.Model, AggregateMixin):
     cases_ccs_lactating_reg_in_month = models.IntegerField(blank=True, null=True)
     cases_ccs_pregnant_all_reg_in_month = models.IntegerField(blank=True, null=True)
     cases_ccs_lactating_all_reg_in_month = models.IntegerField(blank=True, null=True)
+    awc_open_with_attended_children = models.IntegerField(blank=True, null=True)
+    num_days_4_pse_activities = models.IntegerField(blank=True, null=True)
+    num_days_1_pse_activities = models.IntegerField(blank=True, null=True)
+    use_salt = models.IntegerField(null=True)
 
     class Meta:
         managed = False
@@ -699,6 +739,18 @@ class AggCcsRecord(models.Model, AggregateMixin):
     pregnant_all_registered_in_month = models.IntegerField(null=True)
     valid_visits = models.IntegerField(null=True)
     expected_visits = models.IntegerField(null=True)
+    pregnant_permanent_resident = models.IntegerField(null=True)
+    pregnant_temp_resident = models.IntegerField(null=True)
+
+    thr_0_days_resident = models.IntegerField(null=True)
+    thr_1_days_resident = models.IntegerField(null=True)
+    thr_25_days_sc_resident = models.IntegerField(null=True)
+    thr_25_days_st_resident = models.IntegerField(null=True)
+    thr_25_days_other_resident = models.IntegerField(null=True)
+    thr_25_days_disabled_resident = models.IntegerField(null=True)
+    thr_25_days_minority_resident = models.IntegerField(null=True)
+    total_thr_resident = models.IntegerField(null=True)
+    thr_1_days_migrant = models.IntegerField(null=True)
 
     class Meta:
         managed = False
@@ -780,6 +832,58 @@ class AggChildHealth(models.Model, AggregateMixin):
     zscore_grading_hfa_recorded_in_month = models.IntegerField(blank=True, null=True)
     zscore_grading_wfh_recorded_in_month = models.IntegerField(blank=True, null=True)
     lunch_count_21_days = models.IntegerField(blank=True, null=True)
+    live_birth_permanent_resident = models.IntegerField(blank=True, null=True)
+    live_birth_temp_resident = models.IntegerField(blank=True, null=True)
+    permanent_resident = models.IntegerField(blank=True, null=True)
+    temp_resident = models.IntegerField(blank=True, null=True)
+
+    total_pse_days_attended = models.IntegerField(blank=True, null=True)
+    pse_attended_0_days = models.IntegerField(null=True)
+    pse_attended_1_days = models.IntegerField(null=True)
+
+    thr_0_days_resident = models.IntegerField(null=True)
+    thr_1_days_resident = models.IntegerField(null=True)
+    thr_25_days_sc_resident = models.IntegerField(null=True)
+    thr_25_days_st_resident = models.IntegerField(null=True)
+    thr_25_days_other_resident = models.IntegerField(null=True)
+    thr_25_days_disabled_resident = models.IntegerField(null=True)
+    thr_25_days_minority_resident = models.IntegerField(null=True)
+    total_thr_resident = models.IntegerField(null=True)
+
+    lunch_0_days_resident = models.IntegerField(null=True)
+    lunch_1_days_resident = models.IntegerField(null=True)
+    lunch_25_days_sc_resident = models.IntegerField(null=True)
+    lunch_25_days_st_resident = models.IntegerField(null=True)
+    lunch_25_days_other_resident = models.IntegerField(null=True)
+    lunch_25_days_disabled_resident = models.IntegerField(null=True)
+    lunch_25_days_minority_resident = models.IntegerField(null=True)
+    total_lunch_resident = models.IntegerField(null=True)
+
+    thr_1_days_migrant = models.IntegerField(null=True)
+    lunch_1_days_migrant = models.IntegerField(null=True)
+
+    pse_attended_25_days_sc = models.IntegerField(null=True)
+    pse_attended_25_days_st = models.IntegerField(null=True)
+    pse_attended_25_days_other = models.IntegerField(null=True)
+    pse_attended_25_days_disabled = models.IntegerField(null=True)
+    pse_attended_25_days_minority = models.IntegerField(null=True)
+    fully_immunized_eligible_in_month = models.IntegerField(blank=True, null=True)
+    fully_immun_before_month_end = models.IntegerField(blank=True, null=True)
+
+    live_birth_permanent_resident = models.IntegerField(blank=True, null=True)
+    live_birth_temp_resident = models.IntegerField(blank=True, null=True)
+    still_birth_permanent_resident = models.IntegerField(blank=True, null=True)
+    still_birth_temp_resident = models.IntegerField(blank=True, null=True)
+    weighed_in_3_days_permanent_resident = models.IntegerField(blank=True, null=True)
+    weighed_in_3_days_temp_resident = models.IntegerField(blank=True, null=True)
+    neonatal_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    neonatal_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    post_neonatal_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    post_neonatal_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    total_deaths_permanent_resident = models.IntegerField(blank=True, null=True)
+    total_deaths_temp_resident = models.IntegerField(blank=True, null=True)
+    lbw_permanent_resident = models.IntegerField(blank=True, null=True)
+    lbw_temp_resident = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -848,7 +952,13 @@ class DailyAttendance(models.Model, AggregateMixin):
     form_location_long = models.DecimalField(max_digits=64, decimal_places=16, null=True)
     image_name = models.TextField(null=True)
     pse_conducted = models.SmallIntegerField(null=True)
+    open_bfast_count = models.IntegerField(null=True)
+    open_hotcooked_count = models.IntegerField(null=True)
+    days_thr_provided_count = models.IntegerField(null=True)
+    open_pse_count = models.IntegerField(null=True)
     state_id = models.TextField(null=True)
+    open_4_acts_count = models.SmallIntegerField(null=True)
+    open_1_acts_count = models.SmallIntegerField(null=True)
 
     class Meta:
         managed = False
@@ -866,8 +976,6 @@ class DailyAttendance(models.Model, AggregateMixin):
 class AggregateComplementaryFeedingForms(models.Model, AggregateMixin):
     """Aggregated data based on AWW App, Home Visit Scheduler module,
     Complementary Feeding form.
-
-    A child table exists for each state_id and month.
 
     A row exists for every case that has ever had a Complementary Feeding Form
     submitted against it.
@@ -932,8 +1040,6 @@ class AggregateCcsRecordComplementaryFeedingForms(models.Model, AggregateMixin):
     """Aggregated data based on AWW App, Home Visit Scheduler module,
     Complementary Feeding form.
 
-    A child table exists for each state_id and month.
-
     A row exists for every ccs_record case that has ever had a Complementary Feeding Form
     submitted against it.
     """
@@ -966,8 +1072,6 @@ class AggregateChildHealthPostnatalCareForms(models.Model, AggregateMixin):
     """Aggregated data for child health cases based on
     AWW App, Home Visit Scheduler module,
     Post Natal Care and Exclusive Breastfeeding forms.
-
-    A child table exists for each state_id and month.
 
     A row exists for every case that has ever had a Complementary Feeding Form
     submitted against it.
@@ -1048,8 +1152,6 @@ class AggregateCcsRecordPostnatalCareForms(models.Model, AggregateMixin):
     AWW App, Home Visit Scheduler module,
     Post Natal Care and Exclusive Breastfeeding forms.
 
-    A child table exists for each state_id and month.
-
     A row exists for every case that has ever had a Complementary Feeding Form
     submitted against it.
     """
@@ -1094,8 +1196,6 @@ class AggregateChildHealthTHRForms(models.Model, AggregateMixin):
     """Aggregated data for child_health cases based on
     Take Home Ration forms
 
-    A child table exists for each state_id and month.
-
     A row exists for every child_health case that has had a THR Form
     submitted against it this month.
     """
@@ -1128,8 +1228,6 @@ class AggregateCcsRecordTHRForms(models.Model, AggregateMixin):
     """Aggregated data for ccs_record cases based on
     Take Home Ration forms
 
-    A child table exists for each state_id and month.
-
     A row exists for every ccs_record case that has had a THR Form
     submitted against it this month.
     """
@@ -1158,14 +1256,62 @@ class AggregateCcsRecordTHRForms(models.Model, AggregateMixin):
     _agg_atomic = False
 
 
+class AggregateDailyChildHealthTHRForms(models.Model, AggregateMixin):
+    # partitioned based on these fields
+    doc_id = models.TextField()
+    state_id = models.TextField()
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    case_id = models.CharField(max_length=40, primary_key=True)
+
+    latest_time_end_processed = models.DateTimeField(
+        help_text="The latest form.meta.timeEnd that has been processed for this case"
+    )
+
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        db_table = AGG_DAILY_CHILD_HEALTH_THR_TABLE
+        unique_together = ('month', 'supervisor_id', 'case_id', 'latest_time_end_processed')  # pkey
+
+    _agg_helper_cls = DailyTHRChildHealthHelper
+    _agg_atomic = False
+
+
+class AggregateDailyCcsRecordTHRForms(models.Model, AggregateMixin):
+    # partitioned based on these fields
+    doc_id = models.TextField()
+    state_id = models.TextField()
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    case_id = models.CharField(max_length=40, primary_key=True)
+
+    latest_time_end_processed = models.DateTimeField(
+        help_text="The latest form.meta.timeEnd that has been processed for this case"
+    )
+
+    photo_thr_packets_distributed = models.TextField(null=True,
+                                                     help_text="Photo taken during thr distribution")
+
+    class Meta(object):
+        db_table = AGG_DAILY_CCS_RECORD_THR_TABLE
+        unique_together = ('month', 'supervisor_id', 'case_id', 'latest_time_end_processed')  # pkey
+
+    _agg_helper_cls = DailyTHRCCSRecordHelper
+    _agg_atomic = False
+
+
 class AggregateGrowthMonitoringForms(models.Model, AggregateMixin):
     """Aggregated data based on AWW App
 
     376FA2E1 -> Delivery
     b183124a -> Growth Monitoring
     7a557541 -> Advanced Growth Monitoring
-
-    A child table exists for each state_id and month.
     """
 
     # partitioned based on these fields
@@ -1358,8 +1504,6 @@ class AggregateCcsRecordDeliveryForms(models.Model, AggregateMixin):
     """Aggregated data for ccs_record cases based on
     Delivery forms
 
-    A child table exists for each state_id and month.
-
     A row exists for every ccs_record case that has had a Delivery Form
     submitted against it this month.
     """
@@ -1447,8 +1591,6 @@ class AggregateChildHealthDailyFeedingForms(models.Model, AggregateMixin):
     """Aggregated data for child_health cases based on
     Daily Feeding forms
 
-    A child table exists for each state_id and month.
-
     A row exists for every child_health case that has had a daily feeding form
     submitted against it this month.
     """
@@ -1522,6 +1664,7 @@ class AggregateAwcInfrastructureForms(models.Model, AggregateMixin):
     stadiometer_usable = models.PositiveSmallIntegerField(null=True)
     preschool_kit_usable = models.PositiveSmallIntegerField(null=True)
     preschool_kit_available = models.PositiveSmallIntegerField(null=True)
+    use_salt = models.PositiveSmallIntegerField(null=True)
 
     class Meta(object):
         db_table = AGG_INFRASTRUCTURE_TABLE
@@ -1549,6 +1692,7 @@ class AWWIncentiveReport(models.Model, AggregateMixin):
     supervisor_name = models.TextField(null=True)
     awc_name = models.TextField(null=True)
     aww_name = models.TextField(null=True)
+    awc_site_code = models.TextField(blank=True, null=True)
     contact_phone_number = models.TextField(null=True)
     wer_weighed = models.SmallIntegerField(null=True)
     wer_eligible = models.SmallIntegerField(null=True)
@@ -1611,8 +1755,6 @@ class AggregateAdolescentGirlsRegistrationForms(models.Model, AggregateMixin):
 class AggregateMigrationForms(models.Model, AggregateMixin):
     """Aggregated data for migration
 
-    A migration table exists for each state_id and month.
-
     A row exists for every person case that has had a record of migration
     submitted against it this month.
     """
@@ -1639,9 +1781,7 @@ class AggregateMigrationForms(models.Model, AggregateMixin):
 class AggregateAvailingServiceForms(models.Model, AggregateMixin):
     """ Aggregated data for the availing services
 
-    A availing services exists for each state_id
-
-    A row for every person case that has ever had an availing services form
+    A row for every person case that has ever had an availing services form submitted
     """
     state_id = models.TextField(null=True)
     supervisor_id = models.TextField(null=True)
@@ -1790,6 +1930,16 @@ class AggServiceDeliveryReport(models.Model, AggregateMixin):
     suposhan_diwas_count = models.IntegerField(null=True)
     coming_of_age_count = models.IntegerField(null=True)
     public_health_message_count = models.IntegerField(null=True)
+    breakfast_served = models.IntegerField(null=True)
+    hcm_served = models.IntegerField(null=True)
+    thr_served = models.IntegerField(null=True)
+    pse_provided = models.IntegerField(null=True)
+    breakfast_25_days = models.IntegerField(null=True)
+    hcm_25_days = models.IntegerField(null=True)
+    pse_awc_25_days = models.IntegerField(null=True)
+    breakfast_9_days = models.IntegerField(null=True)
+    hcm_9_days = models.IntegerField(null=True)
+    pse_awc_9_days = models.IntegerField(null=True)
 
     class Meta(object):
         db_table = AGG_SDR_TABLE
@@ -1929,3 +2079,222 @@ class ChildVaccines(models.Model, AggregateMixin):
     _agg_helper_cls = ChildVaccineHelper
     _agg_atomic = False
 
+
+class AggMPRAwc(models.Model, AggregateMixin):
+    state_id = models.TextField(null=True)
+    district_id = models.TextField(null=True)
+    block_id = models.TextField(null=True)
+    supervisor_id = models.TextField(null=True)
+    awc_id = models.TextField(primary_key=True)
+    state_is_test = models.SmallIntegerField(null=True)
+    district_is_test = models.SmallIntegerField(null=True)
+    block_is_test = models.SmallIntegerField(null=True)
+    supervisor_is_test = models.SmallIntegerField(null=True)
+    awc_is_test = models.SmallIntegerField(null=True)
+    month = models.DateField(null=True)
+    aggregation_level = models.SmallIntegerField(null=True)
+    visitor_icds_sup = models.IntegerField(null=True)
+    visitor_anm = models.IntegerField(null=True)
+    visitor_health_sup = models.IntegerField(null=True)
+    visitor_cdpo = models.IntegerField(null=True)
+    visitor_med_officer = models.IntegerField(null=True)
+    visitor_dpo = models.IntegerField(null=True)
+    visitor_officer_state = models.IntegerField(null=True)
+    visitor_officer_central = models.IntegerField(null=True)
+    vhnd_done_when_planned = models.IntegerField(null=True)
+    vhnd_with_aww_present = models.IntegerField(null=True)
+    vhnd_with_icds_sup = models.IntegerField(null=True)
+    vhnd_with_asha_present = models.IntegerField(null=True)
+    vhnd_with_anm_mpw = models.IntegerField(null=True)
+    vhnd_with_health_edu_org = models.IntegerField(null=True)
+    vhnd_with_display_tools = models.IntegerField(null=True)
+    vhnd_with_thr_distr = models.IntegerField(null=True)
+    vhnd_with_child_immu = models.IntegerField(null=True)
+    vhnd_with_vit_a_given = models.IntegerField(null=True)
+    vhnd_with_anc_today = models.IntegerField(null=True)
+    vhnd_with_local_leader = models.IntegerField(null=True)
+    vhnd_with_due_list_prep_immunization = models.IntegerField(null=True)
+    vhnd_with_due_list_prep_vita_a = models.IntegerField(null=True)
+    vhnd_with_due_list_prep_antenatal_checkup = models.IntegerField(null=True)
+
+    num_premature_referral_awcs = models.IntegerField(null=True)
+    total_premature_referrals = models.IntegerField(null=True)
+    total_premature_reached_facility = models.IntegerField(null=True)
+
+    num_sepsis_referral_awcs = models.IntegerField(null=True)
+    total_sepsis_referrals = models.IntegerField(null=True)
+    total_sepsis_reached_facility = models.IntegerField(null=True)
+
+    num_diarrhoea_referral_awcs = models.IntegerField(null=True)
+    total_diarrhoea_referrals = models.IntegerField(null=True)
+    total_diarrhoea_reached_facility = models.IntegerField(null=True)
+
+    num_pneumonia_referral_awcs = models.IntegerField(null=True)
+    total_pneumonia_referrals = models.IntegerField(null=True)
+    total_pneumonia_reached_facility = models.IntegerField(null=True)
+
+    num_fever_referral_awcs = models.IntegerField(null=True)
+    total_fever_referrals = models.IntegerField(null=True)
+    total_fever_reached_facility = models.IntegerField(null=True)
+
+    num_severely_underweight_referral_awcs = models.IntegerField(null=True)
+    total_severely_underweight_referrals = models.IntegerField(null=True)
+    total_severely_underweight_reached_facility = models.IntegerField(null=True)
+
+    num_other_child_referral_awcs = models.IntegerField(null=True)
+    total_other_child_referrals = models.IntegerField(null=True)
+    total_other_child_reached_facility = models.IntegerField(null=True)
+
+    num_bleeding_referral_awcs = models.IntegerField(null=True)
+    total_bleeding_referrals = models.IntegerField(null=True)
+    total_bleeding_reached_facility = models.IntegerField(null=True)
+
+    num_convulsions_referral_awcs = models.IntegerField(null=True)
+    total_convulsions_referrals = models.IntegerField(null=True)
+    total_convulsions_reached_facility = models.IntegerField(null=True)
+
+    num_prolonged_labor_referral_awcs = models.IntegerField(null=True)
+    total_prolonged_labor_referrals = models.IntegerField(null=True)
+    total_prolonged_labor_reached_facility = models.IntegerField(null=True)
+
+    num_abortion_complications_referral_awcs = models.IntegerField(null=True)
+    total_abortion_complications_referrals = models.IntegerField(null=True)
+    total_abortion_complications_reached_facility = models.IntegerField(null=True)
+
+    num_fever_discharge_referral_awcs = models.IntegerField(null=True)
+    total_fever_discharge_referrals = models.IntegerField(null=True)
+    total_fever_discharge_reached_facility = models.IntegerField(null=True)
+
+    num_other_referral_awcs = models.IntegerField(null=True)
+    total_other_referrals = models.IntegerField(null=True)
+    total_other_reached_facility = models.IntegerField(null=True)
+    mother_death_permanent_resident = models.IntegerField(null=True)
+    mother_death_temp_resident = models.IntegerField(null=True)
+    pregnancy_death_permanent_resident = models.IntegerField(null=True)
+    pregnancy_death_temp_resident = models.IntegerField(null=True)
+    delivery_death_permanent_resident = models.IntegerField(null=True)
+    delivery_death_temp_resident = models.IntegerField(null=True)
+    pnc_death_permanent_resident = models.IntegerField(null=True)
+    pnc_death_temp_resident = models.IntegerField(null=True)
+
+    class Meta(object):
+        db_table = AGG_MPR_AWC_TABLE
+        unique_together = ('month', 'aggregation_level', 'state_id', 'district_id', 'block_id',
+                           'supervisor_id', 'awc_id')  # pkey
+
+    _agg_helper_cls = AggMprAwcHelper
+    _agg_atomic = False
+
+
+class AggregateSamMamForm(models.Model, AggregateMixin):
+    state_id = models.TextField(null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    child_health_case_id = models.TextField(primary_key=True)
+
+    sam_mam_visit_date_1 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_2 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_3 = models.DateField(blank=True, null=True)
+    sam_mam_visit_date_4 = models.DateField(blank=True, null=True)
+
+    class Meta(object):
+        db_table = AGG_SAM_MAM_TABLE
+        unique_together = ('month', 'state_id', 'supervisor_id', 'child_health_case_id')  # pkey
+
+    _agg_helper_cls = SamMamFormAggregationDistributedHelper
+    _agg_atomic = False
+
+
+class AggregateSamMamPanchayatForm(models.Model, AggregateMixin):
+    state_id = models.TextField(null=True)
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    awc_id = models.TextField(primary_key=True)
+
+    poshan_panchayat_date_1 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_2 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_3 = models.DateField(blank=True, null=True)
+    poshan_panchayat_date_4 = models.DateField(blank=True, null=True)
+
+    class Meta(object):
+        db_table = AGG_SAM_MAM_PANCHAYAT_TABLE
+        unique_together = ('month', 'state_id', 'supervisor_id', 'awc_id')  # pkey
+
+    _agg_helper_cls = SamMamFormAggregationPanchayatDistributedHelper
+    _agg_atomic = False
+
+
+class AggregatePersonCase(models.Model, AggregateMixin):
+    supervisor_id = models.TextField(null=True)
+    month = models.DateField(help_text="Will always be YYYY-MM-01")
+
+    # not the real pkey - see unique_together
+    awc_id = models.TextField(primary_key=True)
+
+    cases_person = models.IntegerField(null=True)
+    cases_person_all = models.IntegerField(null=True)
+    cases_person_adolescent_girls_11_14 = models.IntegerField(null=True)
+    cases_person_adolescent_girls_11_14_all = models.IntegerField(null=True)
+    cases_person_adolescent_girls_11_14_all_v2 = models.IntegerField(null=True)
+    cases_person_adolescent_girls_15_18 = models.IntegerField(null=True)
+    cases_person_adolescent_girls_15_18_all = models.IntegerField(null=True)
+    cases_person_referred = models.IntegerField(null=True)
+
+    total_premature_referrals = models.IntegerField(null=True)
+    total_premature_reached_facility = models.IntegerField(null=True)
+
+    total_sepsis_referrals = models.IntegerField(null=True)
+    total_sepsis_reached_facility = models.IntegerField(null=True)
+
+    total_diarrhoea_referrals = models.IntegerField(null=True)
+    total_diarrhoea_reached_facility = models.IntegerField(null=True)
+
+    total_pneumonia_referrals = models.IntegerField(null=True)
+    total_pneumonia_reached_facility = models.IntegerField(null=True)
+
+    total_fever_referrals = models.IntegerField(null=True)
+    total_fever_reached_facility = models.IntegerField(null=True)
+
+    total_severely_underweight_referrals = models.IntegerField(null=True)
+    total_severely_underweight_reached_facility = models.IntegerField(null=True)
+
+    total_other_child_referrals = models.IntegerField(null=True)
+    total_other_child_reached_facility = models.IntegerField(null=True)
+
+    total_bleeding_referrals = models.IntegerField(null=True)
+    total_bleeding_reached_facility = models.IntegerField(null=True)
+
+    total_convulsions_referrals = models.IntegerField(null=True)
+    total_convulsions_reached_facility = models.IntegerField(null=True)
+
+    total_prolonged_labor_referrals = models.IntegerField(null=True)
+    total_prolonged_labor_reached_facility = models.IntegerField(null=True)
+
+    total_abortion_complications_referrals = models.IntegerField(null=True)
+    total_abortion_complications_reached_facility = models.IntegerField(null=True)
+
+    total_fever_discharge_referrals = models.IntegerField(null=True)
+    total_fever_discharge_reached_facility = models.IntegerField(null=True)
+
+    total_other_referrals = models.IntegerField(null=True)
+    total_other_reached_facility = models.IntegerField(null=True)
+
+    mother_death_permanent_resident = models.IntegerField(null=True)
+    mother_death_temp_resident = models.IntegerField(null=True)
+    pregnancy_death_permanent_resident = models.IntegerField(null=True)
+    pregnancy_death_temp_resident = models.IntegerField(null=True)
+    delivery_death_permanent_resident = models.IntegerField(null=True)
+    delivery_death_temp_resident = models.IntegerField(null=True)
+    pnc_death_permanent_resident = models.IntegerField(null=True)
+    pnc_death_temp_resident = models.IntegerField(null=True)
+
+    class Meta(object):
+        db_table = AGG_PERSON_CASE_TABLE
+        unique_together = ('month', 'supervisor_id', 'awc_id')  # pkey
+
+    _agg_helper_cls = PersonCaseAggregationDistributedHelper
+    _agg_atomic = False

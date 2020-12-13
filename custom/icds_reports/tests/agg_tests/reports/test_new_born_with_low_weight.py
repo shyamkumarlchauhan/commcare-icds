@@ -53,13 +53,9 @@ class TestNewBornWithLowWeight(TestCase):
         self.assertDictEqual(
             data['data'],
             {
-                'st4': {'in_month': 0, 'original_name': ['st4'], 'low_birth': 0, 'all': 0, 'fillKey': '0%-20%'},
-                'st5': {'in_month': 0, 'original_name': ['st5'], 'low_birth': 0, 'all': 0, 'fillKey': '0%-20%'},
-                'st6': {'in_month': 0, 'original_name': ['st6'], 'low_birth': 0, 'all': 0, 'fillKey': '0%-20%'},
                 'st7': {'in_month': 0, 'original_name': ['st7'], 'low_birth': 0, 'all': 0, 'fillKey': '0%-20%'},
                 'st1': {'in_month': 2, 'original_name': ['st1'], 'low_birth': 1, 'all': 2, 'fillKey': '20%-60%'},
                 'st2': {'in_month': 1, 'original_name': ['st2'], 'low_birth': 0, 'all': 3, 'fillKey': '0%-20%'},
-                'st3': {'in_month': 0, 'original_name': ['st3'], 'low_birth': 0, 'all': 0, 'fillKey': '0%-20%'}
             }
         )
 
@@ -102,10 +98,10 @@ class TestNewBornWithLowWeight(TestCase):
             [
                 {'indicator': 'Total Number of Newborns born in given month:', 'value': "5"},
                 {'indicator': 'Number of Newborns with LBW in given month:', 'value': "1"},
-                {'indicator': 'Total Number of children born and weight in given month:', 'value': '3'},
+                {'indicator': 'Total Number of children born and weighed in given month:', 'value': '3'},
                 {'indicator': '% newborns with LBW in given month:', 'value': '33.33%'},
-                {'indicator': '% of children with weight in normal:', 'value': '66.67%'},
-                {'indicator': '% Unweighted:', 'value': '40.00%'},
+                {'indicator': '% newborns with normal weight:', 'value': '66.67%'},
+                {'indicator': '% Unweighed newborns:', 'value': '40.00%'},
             ]
         )
 
@@ -124,6 +120,7 @@ class TestNewBornWithLowWeight(TestCase):
                 "0%-20%": MapColors.PINK,
                 "20%-60%": MapColors.ORANGE,
                 "60%-100%": MapColors.RED,
+                "Not Launched": "#9D9D9D",
                 "defaultFill": MapColors.GREY
             }
         )
@@ -221,9 +218,7 @@ class TestNewBornWithLowWeight(TestCase):
         self.assertListEqual(
             data['bottom_five'],
             [
-                {'loc_name': 'st4', 'percent': 0.0},
-                {'loc_name': 'st5', 'percent': 0.0},
-                {'loc_name': 'st6', 'percent': 0.0},
+                {'loc_name': 'st2', 'percent': 0.0},
                 {'loc_name': 'st7', 'percent': 0.0},
                 {'loc_name': 'st1', 'percent': 50.0}
             ]
@@ -242,10 +237,8 @@ class TestNewBornWithLowWeight(TestCase):
             data['top_five'],
             [
                 {'loc_name': 'st2', 'percent': 0.0},
-                {'loc_name': 'st3', 'percent': 0.0},
-                {'loc_name': 'st4', 'percent': 0.0},
-                {'loc_name': 'st5', 'percent': 0.0},
-                {'loc_name': 'st6', 'percent': 0.0},
+                {'loc_name': 'st7', 'percent': 0.0},
+                {'loc_name': 'st1', 'percent': 50.0}
             ]
         )
 
@@ -319,10 +312,6 @@ class TestNewBornWithLowWeight(TestCase):
             data['all_locations'],
             [
                 {'loc_name': 'st2', 'percent': 0.0},
-                {'loc_name': 'st3', 'percent': 0.0},
-                {'loc_name': 'st4', 'percent': 0.0},
-                {'loc_name': 'st5', 'percent': 0.0},
-                {'loc_name': 'st6', 'percent': 0.0},
                 {'loc_name': 'st7', 'percent': 0.0},
                 {'loc_name': 'st1', 'percent': 50.0}
             ]

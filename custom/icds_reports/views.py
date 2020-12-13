@@ -17,6 +17,7 @@ from django.http.response import (
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic.base import RedirectView, TemplateView, View
+from django.contrib.staticfiles import finders
 
 import requests
 from celery.result import AsyncResult
@@ -29,7 +30,7 @@ from custom.icds_reports.utils.topojson_util.topojson_util import get_block_topo
 from dimagi.utils.dates import add_months, force_to_date
 
 from custom.icds import icds_toggles
-from corehq.apps.domain.decorators import api_auth, login_and_domain_required
+from corehq.apps.domain.decorators import api_auth, login_and_domain_required, require_superuser
 from corehq.apps.domain.views.base import BaseDomainView
 from corehq.apps.hqwebapp.decorators import use_daterangepicker
 from corehq.apps.hqwebapp.views import BugReportView
@@ -67,7 +68,8 @@ from custom.icds_reports.const import (
     SERVICE_DELIVERY_REPORT,
     CHILD_GROWTH_TRACKER_REPORT,
     POSHAN_PROGRESS_REPORT,
-    AWW_ACTIVITY_REPORT
+    AWW_ACTIVITY_REPORT,
+    MALNUTRITION_TRACKING_REPORT
 )
 from custom.icds_reports.dashboard_utils import get_dashboard_template_context
 from custom.icds_reports.models.aggregate import AwcLocation
@@ -106,6 +108,7 @@ from custom.icds_reports.reports.awc_reports import (
     get_awc_reports_system_usage,
     get_beneficiary_details,
     get_pregnant_details,
+    get_awc_report_thr,
 )
 from custom.icds_reports.reports.children_initiated_data import (
     get_children_initiated_data_chart,
@@ -962,8 +965,16 @@ class AwcReportsView(BaseReportView):
                     length,
                     order_by_name_column,
                     reversed_order,
-                    config['awc_id']
+                    config['awc_id'],
+                    icds_features_flag
                 )
+        elif step == 'take_home_ration':
+            data = get_awc_report_thr(
+                config,
+                tuple(current_month.timetuple())[:3],
+                self.kwargs.get('domain'),
+                include_test
+            )
         return JsonResponse(data=data)
 
 
@@ -1082,7 +1093,7 @@ class ExportIndicatorView(View):
                          AWC_INFRASTRUCTURE_EXPORT, GROWTH_MONITORING_LIST_EXPORT, AWW_INCENTIVE_REPORT,
                          LS_REPORT_EXPORT, THR_REPORT_EXPORT, DASHBOARD_USAGE_EXPORT,
                          SERVICE_DELIVERY_REPORT, CHILD_GROWTH_TRACKER_REPORT, AWW_ACTIVITY_REPORT,
-                         POSHAN_PROGRESS_REPORT):
+                         POSHAN_PROGRESS_REPORT, MALNUTRITION_TRACKING_REPORT):
             task = prepare_excel_reports.delay(
                 config,
                 aggregation_level,
@@ -2439,7 +2450,7 @@ class CasDataExportAPIView(View):
 
     @property
     def valid_types(self):
-        return ('woman', 'child', 'awc')
+        return ('woman', 'child', 'awc', 'birth', 'deliverychild')
 
     @staticmethod
     def get_type_code(data_type):
@@ -2447,6 +2458,8 @@ class CasDataExportAPIView(View):
             "child": 'child_health_monthly',
             "woman": 'ccs_record_monthly',
             "awc": 'agg_awc',
+            "birth": 'birth_preparedness',
+            "deliverychild": 'delivery_child'
         }
         return type_map[data_type]
 
@@ -2852,3 +2865,40 @@ class PoshanProgressDashboardView(BaseReportView):
             pre_release_features
         )
         return JsonResponse(data=data)
+
+
+@location_safe
+@method_decorator([login_and_domain_required,
+                   icds_toggles.ENABLE_ICDS_DASHBOARD_MANUAL_UPDATE.required_decorator(),
+                   require_superuser], name='dispatch')
+class ManualUpdateView(TemplateView):
+    page_title = 'Update Dashboard Manual'
+    urlname = 'update_dashboard_manual'
+    template_name = 'icds_reports/update_manual.html'
+
+    def post(self, request, *args, **kwargs):
+        data = request.FILES['dashboard_manual']
+        icds_file, _ = IcdsFile.objects.get_or_create(blob_id="dashboard_manual.pdf",
+                    data_type='dashboard_manual')
+
+        icds_file.store_file_in_blobdb(data)
+        icds_file.save()
+        messages.success(request, 'ICDS Dashboard Manual uploaded Successfully')
+        return redirect(self.urlname, domain=request.domain)
+
+
+@location_safe
+@method_decorator([login_and_domain_required], name='dispatch')
+class DowloadManual(View):
+    def get(self, request, *argv, **kwarg):
+        if icds_pre_release_features(self.request.couch_user):
+            manual_file = IcdsFile.objects.filter(blob_id="dashboard_manual.pdf").order_by('file_added').last()
+            manual = manual_file.get_file_from_blobdb()
+        else:
+            dashboard_manual_absolute_path = finders.find('media/Dashboard_Training_Manual.pdf')
+            manual = open(dashboard_manual_absolute_path, 'rb')
+
+        response = HttpResponse(manual.read(), content_type='application/pdf')
+        response['Content-Disposition'] = safe_filename_header("ICDS_dashboard_manual.pdf")
+
+        return response

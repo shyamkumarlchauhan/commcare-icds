@@ -105,6 +105,26 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
                 "sum(CASE WHEN (date_trunc('month',crm.opened_on)=%(start_date)s) THEN "
                 "crm.pregnant_all ELSE 0 END)"),
             ('valid_visits', 'sum(crm.valid_visits)'),
+            ('thr_0_days_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' "
+                                    "AND crm.num_rations_distributed=0 THEN 1 ELSE 0 END)"),
+            ('thr_1_days_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' "
+                                    "AND crm.num_rations_distributed>=1 THEN 1 ELSE 0 END)"),
+            ('thr_25_days_sc_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' AND crm.caste='sc' "
+                                        "AND crm.num_rations_distributed>=25 THEN 1 ELSE 0 END)"),
+            ('thr_25_days_st_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' AND crm.caste='st' "
+                                        "AND crm.num_rations_distributed>=25 THEN 1 ELSE 0 END)"),
+            ('thr_25_days_other_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' AND crm.caste='other' "
+                                           "AND crm.num_rations_distributed>=25 THEN 1 ELSE 0 END)"),
+            ('thr_25_days_disabled_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' AND "
+                                              "COALESCE(crm.disabled, 'no')='yes' "
+                                              "AND crm.num_rations_distributed>=25 THEN 1 ELSE 0 END)"),
+            ('thr_25_days_minority_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' AND "
+                                              "COALESCE(crm.minority, 'no')='yes' "
+                                              "AND crm.num_rations_distributed>=25 THEN 1 ELSE 0 END)"),
+            ('total_thr_resident', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident='yes' "
+                                    "THEN crm.num_rations_distributed ELSE 0 END)"),
+            ('thr_1_days_migrant', "sum(CASE WHEN crm.thr_eligible=1 AND crm.resident is distinct from 'yes' "
+                                    "AND crm.num_rations_distributed>=1 THEN 1 ELSE 0 END)"),
             ('expected_visits', 'sum( '
              'CASE '
              'WHEN crm.pregnant=1 THEN 0.44 '
@@ -112,6 +132,9 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
              'WHEN crm.month - crm.add < 182 THEN 1 '
              'ELSE 0.39 END'
              ')'),
+            ('pregnant_permanent_resident', "sum(CASE WHEN crm.resident='yes' THEN crm.pregnant_all ELSE 0 END)"),
+            ('pregnant_temp_resident', "sum(CASE WHEN crm.resident IS DISTINCT FROM 'yes' THEN "
+                                       "crm.pregnant_all ELSE 0 END)"),
         )
         query_cols = []
         for c in columns:
@@ -245,6 +268,17 @@ class AggCcsRecordAggregationDistributedHelper(BaseICDSAggregationDistributedHel
             ('pregnant_all_registered_in_month',),
             ('valid_visits', ),
             ('expected_visits', ),
+            ('pregnant_permanent_resident',),
+            ('pregnant_temp_resident',),
+            ('thr_0_days_resident',),
+            ('thr_1_days_resident',),
+            ('thr_25_days_sc_resident',),
+            ('thr_25_days_st_resident',),
+            ('thr_25_days_other_resident',),
+            ('thr_25_days_disabled_resident',),
+            ('thr_25_days_minority_resident',),
+            ('total_thr_resident',),
+            ('thr_1_days_migrant',),
             ('state_is_test', 'MAX(state_is_test)'),
             (
                 'district_is_test',

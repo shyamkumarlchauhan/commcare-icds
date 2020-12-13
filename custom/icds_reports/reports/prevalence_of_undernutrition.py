@@ -51,10 +51,8 @@ def get_prevalence_of_undernutrition_data_map(domain, config, loc_level,
     weighed_total = 0
 
     values_to_calculate_average = {'numerator': 0, 'denominator': 0}
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+
+    location_launched_status = get_location_launched_status(config, loc_level)
 
     for row in get_data_for(config):
         if location_launched_status:
@@ -100,8 +98,7 @@ def get_prevalence_of_undernutrition_data_map(domain, config, loc_level,
     fills.update({'0%-20%': MapColors.PINK})
     fills.update({'20%-35%': MapColors.ORANGE})
     fills.update({'35%-100%': MapColors.RED})
-    if icds_features_flag:
-        fills.update({'Not Launched': MapColors.GREY})
+    fills.update({'Not Launched': MapColors.GREY})
     fills.update({'defaultFill': MapColors.GREY})
 
     average = (
@@ -156,8 +153,7 @@ def get_prevalence_of_undernutrition_data_chart(domain, config, loc_level,
 
     config['month__range'] = (three_before, month)
     del config['month']
-    # using child health monthly while querying for sector level due to performance issues
-    if icds_features_flag and config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
+    if config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
         chm_filter = get_filters_from_config_for_chart_view(config)
         chm_queryset = ChildHealthMonthlyView.objects.filter(**chm_filter)
     else:
@@ -193,12 +189,11 @@ def get_prevalence_of_undernutrition_data_chart(domain, config, loc_level,
         data['red'][miliseconds] = {'y': 0, 'weighed': 0, 'unweighed': 0}
 
     best_worst = {}
-    if icds_features_flag:
-        if 'month' not in config:
-            config['month'] = month
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+
+    if 'month' not in config:
+        config['month'] = month
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in chart_data:
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
@@ -324,10 +319,7 @@ def get_prevalence_of_undernutrition_sector_data(domain, config, loc_level, loca
         'normal': 0,
         'total': 0
     })
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
 
     for row in data:
         if location_launched_status:

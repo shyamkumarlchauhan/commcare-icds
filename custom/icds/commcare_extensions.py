@@ -1,11 +1,17 @@
 import os
+import re
+import sys
 
+from django import forms
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
 from corehq.apps.reports.extension_points import user_query_mutators
 from custom.icds import icds_toggles
-from corehq.apps.domain.extension_points import custom_domain_module
+from corehq.apps.domain.extension_points import (
+    custom_clean_password,
+    custom_domain_module,
+)
 from corehq.apps.userreports.extension_points import (
     custom_ucr_expressions,
     custom_ucr_report_filter_values,
@@ -28,7 +34,13 @@ from custom.icds_core.const import (
 )
 
 
-@uitab_dropdown_items.extend(domains=["icds-cas"])
+SUPPORTED_DOMAINS = [
+    'icds-cas',
+    'cas-lab',
+]
+
+
+@uitab_dropdown_items.extend(domains=SUPPORTED_DOMAINS)
 def icds_uitab_dropdown_items(tab_name, tab, domain, request):
     if tab_name == 'ApplicationsTab' and icds_toggles.MANAGE_CCZ_HOSTING.enabled_for_request(request):
         return [{
@@ -37,7 +49,7 @@ def icds_uitab_dropdown_items(tab_name, tab, domain, request):
         }]
 
 
-@uitab_sidebar_items.extend(domains=["icds-cas"])
+@uitab_sidebar_items.extend(domains=SUPPORTED_DOMAINS)
 def icds_uitab_sidebar_items(tab_name, tab, domain, request):
 
     if tab_name == "ProjectReportsTab" and icds_toggles.PERFORM_LOCATION_REASSIGNMENT.enabled_for_request(request):
@@ -77,7 +89,6 @@ def urls_domain_specific():
     return [
         'custom.icds_reports.urls',
         'custom.icds.urls',
-        'custom.icds.data_management.urls',
     ]
 
 
@@ -161,9 +172,39 @@ def icds_tabs():
     ]
 
 
-@user_query_mutators.extend(domains=["icds-cas"])
+@user_query_mutators.extend(domains=SUPPORTED_DOMAINS)
 def icds_emwf_options_user_query_mutators(domain):
     from custom.icds.report_filters import filter_users_in_test_locations
     return [
         filter_users_in_test_locations,
     ]
+
+
+@custom_clean_password.extend()
+def clean_password(password):
+    if not _complex_password(password):
+        return _('Password is not strong enough. Requirements: 1 special character, '
+                 '1 number, 1 capital letter, minimum length of 8 characters.')
+
+
+def _complex_password(password):
+    # 1 Special Character, 1 Number, 1 Capital Letter with the length of Minimum 8
+    return len(password) >= 8 and all(regex.search(password) for regex in (SPECIAL, NUMBER, UPPERCASE))
+
+
+def _get_uppercase_unicode_regexp():
+    # rather than add another dependency (regex library)
+    # http://stackoverflow.com/a/17065040/10840
+    uppers = ['[']
+    for i in range(sys.maxunicode):
+        c = chr(i)
+        if c.isupper():
+            uppers.append(c)
+    uppers.append(']')
+    upper_group = "".join(uppers)
+    return re.compile(upper_group, re.UNICODE)
+
+
+SPECIAL = re.compile(r"\W", re.UNICODE)
+NUMBER = re.compile(r"\d", re.UNICODE)  # are there other unicode numerals?
+UPPERCASE = _get_uppercase_unicode_regexp()

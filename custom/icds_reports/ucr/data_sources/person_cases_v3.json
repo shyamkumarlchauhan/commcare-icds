@@ -13,6 +13,7 @@
     "icds-test",
     "jessica-icds-cas",
     "laurence-project-1",
+    "linked-cas-lab",
     "marissa-test",
     "priyanka-app",
     "reach-dashboard-qa",
@@ -234,6 +235,12 @@
         "datatype": "date",
         "type": "raw",
         "property_name": "referral_reached_date"
+      },
+      {
+        "column_id": "last_referral_discharge_date",
+        "datatype": "date",
+        "type": "raw",
+        "property_name": "last_referral_discharge_date"
       },
       {
         "column_id": "referral_reached_facility",

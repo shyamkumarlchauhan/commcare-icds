@@ -138,35 +138,35 @@ def percent_adolescent_girls_enrolled_help_text_v2():
 
 def awcs_reported_clean_drinking_water_help_text():
     return _(
-        'Of the AWCs that have submitted an Infrastructure Details form, the '
+        'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the '
         'percentage of AWCs that reported having a source of clean drinking water. '
     )
 
 
 def awcs_reported_functional_toilet_help_text():
     return _(
-        'Of the AWCs that submitted an Infrastructure Details form, the percentage '
+        'Of the AWCs that submitted an Infrastructure Details form in the last 6 months, the percentage '
         'of AWCs that reported having a functional toilet'
     )
 
 
 def awcs_reported_weighing_scale_infants_help_text():
     return _(
-        'Of the AWCs that have submitted an Infrastructure Details form, the '
+        'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the '
         'percentage of AWCs that reported having a weighing scale for infants'
     )
 
 
 def awcs_reported_weighing_scale_mother_and_child_help_text():
     return _(
-        'Of the AWCs that have submitted an Infrastructure Details form, the percentage of '
+        'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage of '
         'AWCs that reported having a weighing scale for mother and child'
     )
 
 
 def awcs_reported_medicine_kit_help_text():
     return _(
-        'Of the AWCs that have submitted an Infrastructure Details form, '
+        'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, '
         'the percentage of AWCs that reported having a Medicine Kit'
     )
 
@@ -191,13 +191,13 @@ def lady_supervisor_number_of_vhnds_observed_help_text():
 
 def awcs_reported_infantometer_text():
     return _(
-        'Of the AWCs that have submitted an Infrastructure Details form, the percentage of '
+        'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage of '
         'AWCs that reported having an Infantometer. '
     )
 
 
 def awcs_reported_stadiometer_text():
     return _(
-        'Of the AWCs that have submitted an Infrastructure Details form, the percentage of '
+        'Of the AWCs that have submitted an Infrastructure Details form in the last 6 months, the percentage of '
         'AWCs that reported having a Stadiometer. '
     )

@@ -40,10 +40,9 @@ def get_enrolled_children_data_map(domain, config, loc_level, show_test=False, i
     average = []
     total_valid = 0
     total = 0
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in get_data_for(config):
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
@@ -63,8 +62,7 @@ def get_enrolled_children_data_map(domain, config, loc_level, show_test=False, i
 
     fills = OrderedDict()
     fills.update({'Children': MapColors.BLUE})
-    if icds_features_flag:
-        fills.update({'Not Launched': MapColors.GREY})
+    fills.update({'Not Launched': MapColors.GREY})
     fills.update({'defaultFill': MapColors.GREY})
 
     gender_ignored, age_label, chosen_filters = chosen_filters_to_labels(config, default_interval='0 - 6 years')
@@ -127,15 +125,13 @@ def get_enrolled_children_data_chart(domain, config, loc_level, show_test=False,
 
     all = 0
     best_worst = {}
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in chart_data:
-        if icds_features_flag:
-            launched_status = location_launched_status.get(row['%s_name' % loc_level])
-            if launched_status is None or launched_status <= 0:
-                continue
+        launched_status = location_launched_status.get(row['%s_name' % loc_level])
+        if launched_status is None or launched_status <= 0:
+            continue
         location = row['%s_name' % loc_level]
 
         if not row['age_tranche']:
@@ -196,15 +192,13 @@ def get_enrolled_children_sector_data(domain, config, loc_level, location_id, sh
         'valid': 0,
         'all': 0
     })
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in data:
-        if location_launched_status:
-            launched_status = location_launched_status.get(row['%s_name' % loc_level])
-            if launched_status is None or launched_status <= 0:
-                continue
+        launched_status = location_launched_status.get(row['%s_name' % loc_level])
+        if launched_status is None or launched_status <= 0:
+            continue
         valid = row['valid'] or 0
         all_children = row['all'] or 0
         name = row['%s_name' % loc_level]

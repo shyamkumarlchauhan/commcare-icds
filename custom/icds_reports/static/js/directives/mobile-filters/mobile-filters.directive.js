@@ -2,20 +2,24 @@ function MobileFiltersController($scope, $rootScope) {
     const MONTH = 'month';
     const LOCATION = 'location';
     $scope.selectedTab = LOCATION;
-    if ($scope.$ctrl && $scope.$ctrl.selectSddDate) {
-        $scope.selectedTab = MONTH;
-    }
     $scope.filterData = {};
     var vm = this;
     vm.showGenderFilter = false;
     vm.showAgeFilter = false;
-    // eg:vm.filters = ['gender', 'age']
-    // this array has filters that are not to be shown. so if 'gender' is not in array, it can be shown.
-    if (vm.filters && vm.filters.indexOf('gender') === -1) {
-        vm.showGenderFilter = true;
-    }
-    if (vm.filters && vm.filters.indexOf('age') === -1) {
-        vm.showAgeFilter = true;
+    // Using binding variables inside onInit lifecycle hook to properly initialize controller variables
+    // Reference: https://stackoverflow.com/a/38591834/12839195
+    vm.$onInit = function () {
+        if (vm.selectSddDate) {
+            $scope.selectedTab = MONTH;
+        }
+        // eg:vm.filters = ['gender', 'age']
+        // this array has filters that are not to be shown. so if 'gender' is not in array, it can be shown.
+        if (vm.filters && vm.filters.indexOf('gender') === -1) {
+            vm.showGenderFilter = true;
+        }
+        if (vm.filters && vm.filters.indexOf('age') === -1) {
+            vm.showAgeFilter = true;
+        }
     }
     $scope.closeFilters = function () {
         $rootScope.$broadcast('closeFilterMenu', {});

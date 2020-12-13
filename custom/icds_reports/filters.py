@@ -9,7 +9,10 @@ from corehq.apps.reports.filters.base import BaseSingleOptionFilter
 from corehq.apps.reports.filters.fixtures import AsyncLocationFilter
 from corehq.apps.reports.filters.select import MonthFilter, YearFilter
 from custom.common.filters import RestrictedAsyncLocationFilter
+from custom.icds_reports.const import LOCATION_TYPES
 from memoized import memoized
+from django.db.models import Q
+from collections import defaultdict
 
 
 def location_hierarchy_config(domain, location_types=None):
@@ -22,11 +25,30 @@ def location_hierarchy_config(domain, location_types=None):
     ]
 
 
-# copy/paste from corehq.apps.location.utils
-# added possibility to exclude test locations, test flag is custom added to the metadata in location object
-def load_locs_json(domain, selected_loc_id=None, user=None, show_test=False):
+def load_restricted_locs(domain, selected_loc_id=None, user=None, show_test=False):
+    """
+    Returns a dict of a set of locations based on location selected and accessible locations.
+    1. User with full organisation access:
+       a) with no location selected: use root locations.
+       b) with a location selected: along with root locations
+         include the hierarchal path uptil the selected location from the root. For example :
+           if loc2 is selected and hierarchy is loc1>loc2>loc3 then it will return
+            [{ name:loc1,
+               children: [{ name: loc2
+                          }]
+             },
+             { name: loc5 }
+            ]
+    2. User with limited access(only locations under user access are included)
+       a) with no location selected: By default selected location is user's primary location and
+                                     rest is same as point 1.b
+       b) with a location selected: Same as Point 1.b
 
-    def loc_to_json(loc, project):
+    Basic logic is: Start with all root locations, put all children of location
+                    which is drilled(based on user permission) but drill only the  location
+                    which lies in hierarchy of selected location.
+    """
+    def loc_to_json(loc):
         return {
             'name': loc.name,
             'location_type': loc.location_type.name,  # todo: remove when types aren't optional
@@ -35,41 +57,72 @@ def load_locs_json(domain, selected_loc_id=None, user=None, show_test=False):
             'can_edit': True
         }
 
-    project = Domain.get_by_name(domain)
+    def _get_ancestor_loc_dict(location_list, location_id):
+        for parent_location in location_list:
+            if parent_location['uuid'] == location_id:
+                return parent_location
+        return None
 
-    locations = SQLLocation.root_locations(domain)
-    if not show_test:
-        locations = [
-            loc for loc in locations if loc.metadata.get('is_test_location', 'real') != 'test'
-        ]
+    def location_transform(locations):
+        """
+        It returns a dict of locations mapped with their parents.
+        :param locations: list of locations(list of SQLLocation objects)
+        :return: {
+        None: [loc1, loc2, loc3],  # None signifies No parent. i.e locs are root locations
+        loc1.id: [loc5, loc6, loc7],
+        }
+        """
+        loc_dict = defaultdict(list)
+        for loc in locations:
+            # do not include test locations
+            if not show_test and loc.metadata.get('is_test_location', 'real') == 'test':
+                continue
+            parent_id = loc.parent_id
+            loc_dict[parent_id].append(loc)
 
-    loc_json = [loc_to_json(loc, project) for loc in locations]
+        return loc_dict
+
+    accessible_location = SQLLocation.objects.accessible_to_user(domain, user)
+    location_level = 0
+    lineage = []
+    if selected_loc_id:
+        location = SQLLocation.by_location_id(selected_loc_id)
+        location_level = LOCATION_TYPES.index(location.location_type.name)
+        lineage = location.get_ancestors()
+        all_ancestors = [loc.id for loc in lineage]
+        # No need to pull the locations whose parents or they themselves do not present in the
+        # hierarchy of the location selected. Also check for parent_id null in case root location
+        # is selected
+        accessible_location = accessible_location.filter(Q(parent_id__in=all_ancestors) | Q(parent_id__isnull=True))
+
+    # Only pull locations which are above or at level of location selected
+    accessible_location = accessible_location.filter(
+        location_type__name__in=LOCATION_TYPES[:location_level + 1])
+
+    parent_child_dict = location_transform(set(accessible_location).union(set(lineage)))
+    locations_list = [loc_to_json(loc) for loc in parent_child_dict[None]]
 
     # if a location is selected, we need to pre-populate its location hierarchy
     # so that the data is available client-side to pre-populate the drop-downs
     if selected_loc_id:
-        selected = SQLLocation.objects.get(
-            domain=domain,
-            location_id=selected_loc_id
-        )
-
-        lineage = selected.get_ancestors()
-
-        parent = {'children': loc_json}
+        json_at_level = locations_list
         for loc in lineage:
-            children = loc.child_locations()
-            # find existing entry in the json tree that corresponds to this loc
-            try:
-                this_loc = [k for k in parent['children'] if k['uuid'] == loc.location_id][0]
-            except IndexError:
-                # if we couldn't find this location the view just break out of the loop.
-                # there are some instances in viewing archived locations where we don't actually
-                # support drilling all the way down.
-                break
-            this_loc['children'] = [loc_to_json(loc, project) for loc in children]
-            parent = this_loc
+            # Get the ancestor_dict out of all present at the level
+            # which needs to be drilled down
+            ancestor_loc_dict = _get_ancestor_loc_dict(json_at_level, loc.location_id)
 
-    return loc_json
+            # could not find the ancestor at the level,
+            # user should not have reached at this point to try and access an ancestor that is not permitted
+            if ancestor_loc_dict is None:
+                break
+
+            children = parent_child_dict.get(loc.id, [])
+            ancestor_loc_dict['children'] = [loc_to_json(loc) for loc in children]
+
+            # reset level to one level down to find ancestor in next iteration
+            json_at_level = ancestor_loc_dict['children']
+
+    return locations_list
 
 
 class ICDSTableauFilterMixin(object):
@@ -96,10 +149,10 @@ class IcdsLocationFilter(AsyncLocationFilter):
 
     def load_locations_json(self, loc_id):
         show_test = self.request.GET.get('include_test', False)
-        return load_locs_json(self.domain, loc_id, user=self.request.couch_user, show_test=show_test)
+        return load_restricted_locs(self.domain, loc_id, user=self.request.couch_user, show_test=show_test)
 
 
-class IcdsRestrictedLocationFilter(AsyncLocationFilter):
+class IcdsASRLocationFilter(IcdsLocationFilter):
 
     @property
     def location_hierarchy_config(self):

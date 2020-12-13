@@ -58,10 +58,7 @@ def get_prevalence_of_severe_data_map(domain, config, loc_level, show_test=False
     height_eligible_for_all_locations = 0
 
     values_to_calculate_average = {'numerator': 0, 'denominator': 0}
-    if icds_feature_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
     for row in get_data_for(config):
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
@@ -109,8 +106,7 @@ def get_prevalence_of_severe_data_map(domain, config, loc_level, show_test=False
     fills.update({'0%-5%': MapColors.PINK})
     fills.update({'5%-7%': MapColors.ORANGE})
     fills.update({'7%-100%': MapColors.RED})
-    if icds_feature_flag:
-        fills.update({'Not Launched': MapColors.GREY})
+    fills.update({'Not Launched': MapColors.GREY})
     fills.update({'defaultFill': MapColors.GREY})
 
     gender_label, age_label, chosen_filters = chosen_filters_to_labels(
@@ -144,7 +140,7 @@ def get_prevalence_of_severe_data_map(domain, config, loc_level, show_test=False
                     'value': indian_formatted_number(measured_for_all_locations)
                 },
                 {
-                    'indicator': 'Number of children{} unmeasured:'.format(chosen_filters),
+                    'indicator': 'Number of children{} with weight and height unmeasured:'.format(chosen_filters),
                     'value': indian_formatted_number(height_eligible_for_all_locations - weighed_for_all_locations)
                 },
                 {
@@ -173,7 +169,7 @@ def get_prevalence_of_severe_data_chart(domain, config, loc_level, show_test=Fal
     config['month__range'] = (three_before, month)
     del config['month']
     # using child health monthly while querying for sector level due to performance issues
-    if icds_feature_flag and config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
+    if config['aggregation_level'] >= AggregationLevels.SUPERVISOR:
         chm_filter = get_filters_from_config_for_chart_view(config)
         chm_queryset = ChildHealthMonthlyView.objects.filter(**chm_filter)
     else:
@@ -210,12 +206,10 @@ def get_prevalence_of_severe_data_chart(domain, config, loc_level, show_test=Fal
         data['peach'][miliseconds] = {'y': 0, 'total_weighed': 0, 'total_measured': 0, 'total_height_eligible': 0}
 
     best_worst = {}
-    if icds_feature_flag:
-        if 'month' not in config:
-            config['month'] = month
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    if 'month' not in config:
+        config['month'] = month
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     for row in chart_data:
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
@@ -345,10 +339,7 @@ def get_prevalence_of_severe_sector_data(domain, config, loc_level, location_id,
         'total_weighed': 0,
         'total_measured': 0
     })
-    if icds_feature_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
     for row in data:
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])
