@@ -253,7 +253,9 @@ class TestInstitutionalDeliveriesSector(TestCase):
                     }
                 ],
                 "all_locations": [
-                    c
+                    {'loc_name': 'st1', 'percent': 100.0},
+                    {'loc_name': 'st2', 'percent': 100.0},
+                    {'loc_name': 'st7', 'percent': 0.0},
                 ]
             }
         )
