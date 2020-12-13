@@ -31,10 +31,8 @@ def get_early_initiation_breastfeeding_map(domain, config, loc_level, show_test=
             queryset = apply_exclude(domain, queryset)
         return queryset
 
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
+
     data_for_map, in_month_total, birth_total, average, total = generate_data_for_map(
         get_data_for(config),
         loc_level,
@@ -49,8 +47,7 @@ def get_early_initiation_breastfeeding_map(domain, config, loc_level, show_test=
     fills.update({'0%-20%': MapColors.RED})
     fills.update({'20%-60%': MapColors.ORANGE})
     fills.update({'60%-100%': MapColors.PINK})
-    if icds_features_flag:
-        fills.update({'Not Launched': MapColors.GREY})
+    fills.update({'Not Launched': MapColors.GREY})
     fills.update({'defaultFill': MapColors.GREY})
 
     gender_ignored, age_ignored, chosen_filters = chosen_filters_to_labels(config)
@@ -120,12 +117,9 @@ def get_early_initiation_breastfeeding_chart(domain, config, loc_level, show_tes
         data['blue'][miliseconds] = {'y': 0, 'all': 0, 'birth': 0}
 
     best_worst = {}
-    if icds_features_flag:
-        if 'month' not in config:
-            config['month'] = month
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    if 'month' not in config:
+        config['month'] = month
+    location_launched_status = get_location_launched_status(config, loc_level)
 
     for row in chart_data:
         if location_launched_status:
@@ -208,10 +202,7 @@ def get_early_initiation_breastfeeding_data(domain, config, loc_level, location_
         'in_month': 0,
         'birth': 0,
     })
-    if icds_features_flag:
-        location_launched_status = get_location_launched_status(config, loc_level)
-    else:
-        location_launched_status = None
+    location_launched_status = get_location_launched_status(config, loc_level)
     for row in data:
         if location_launched_status:
             launched_status = location_launched_status.get(row['%s_name' % loc_level])

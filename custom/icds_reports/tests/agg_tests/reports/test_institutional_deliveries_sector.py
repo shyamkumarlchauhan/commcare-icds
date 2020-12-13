@@ -51,13 +51,9 @@ class TestInstitutionalDeliveriesSector(TestCase):
         self.assertDictEqual(
             data['data'],
             {
-                'st4': {'all': 0, 'original_name': ['st4'], 'children': 0, 'fillKey': '0%-20%'},
-                'st5': {'all': 0, 'original_name': ['st5'], 'children': 0, 'fillKey': '0%-20%'},
-                'st6': {'all': 0, 'original_name': ['st6'], 'children': 0, 'fillKey': '0%-20%'},
                 'st7': {'all': 0, 'original_name': ['st7'], 'children': 0, 'fillKey': '0%-20%'},
                 'st1': {'all': 9, 'original_name': ['st1'], 'children': 9, 'fillKey': '60%-100%'},
                 'st2': {'all': 11, 'original_name': ['st2'], 'children': 11, 'fillKey': '60%-100%'},
-                'st3': {'all': 0, 'original_name': ['st3'], 'children': 0, 'fillKey': '0%-20%'}
             }
         )
 
@@ -137,6 +133,7 @@ class TestInstitutionalDeliveriesSector(TestCase):
                 "0%-20%": MapColors.RED,
                 "20%-60%": MapColors.ORANGE,
                 "60%-100%": MapColors.PINK,
+                "Not Launched": MapColors.GREY,
                 "defaultFill": MapColors.GREY
             }
         )
@@ -212,18 +209,14 @@ class TestInstitutionalDeliveriesSector(TestCase):
             {
                 "location_type": "State",
                 "bottom_five": [
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
-                    {'loc_name': 'st6', 'percent': 0.0},
+                    {'loc_name': 'st1', 'percent': 100.0},
+                    {'loc_name': 'st2', 'percent': 100.0},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ],
                 "top_five": [
                     {'loc_name': 'st1', 'percent': 100.0},
                     {'loc_name': 'st2', 'percent': 100.0},
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
+                    {'loc_name': 'st7', 'percent': 0.0},
                 ],
                 "chart_data": [
                     {
@@ -262,10 +255,6 @@ class TestInstitutionalDeliveriesSector(TestCase):
                 "all_locations": [
                     {'loc_name': 'st1', 'percent': 100.0},
                     {'loc_name': 'st2', 'percent': 100.0},
-                    {'loc_name': 'st3', 'percent': 0.0},
-                    {'loc_name': 'st4', 'percent': 0.0},
-                    {'loc_name': 'st5', 'percent': 0.0},
-                    {'loc_name': 'st6', 'percent': 0.0},
                     {'loc_name': 'st7', 'percent': 0.0},
                 ]
             }

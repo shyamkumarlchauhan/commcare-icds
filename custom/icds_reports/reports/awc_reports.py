@@ -1314,13 +1314,12 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id, beta=
         )
         data_count = data.count()
 
-        if beta:
-            breastfed_data = CcsRecordMonthlyView.objects.filter(
-                awc_id=awc_id,
-                date_death=None,
-                case_id__in=case_ids,
-            ).values('case_id').annotate(breastfed_at_birth_latest=Max('breastfed_at_birth')).order_by('case_id')
-            breastfed_data_dict = {row['case_id']: row['breastfed_at_birth_latest'] for row in breastfed_data}
+        breastfed_data = CcsRecordMonthlyView.objects.filter(
+            awc_id=awc_id,
+            date_death=None,
+            case_id__in=case_ids,
+        ).values('case_id').annotate(breastfed_at_birth_latest=Max('breastfed_at_birth')).order_by('case_id')
+        breastfed_data_dict = {row['case_id']: row['breastfed_at_birth_latest'] for row in breastfed_data}
     else:
         data = []
         data_count = 0
@@ -1344,8 +1343,7 @@ def get_awc_report_lactating(start, length, order, reversed_order, awc_id, beta=
         )
 
     for row in data:
-        if beta:
-            row['breastfed_at_birth'] = breastfed_data_dict[row['case_id']]
+        row['breastfed_at_birth'] = breastfed_data_dict[row['case_id']]
         config['data'].append(base_data(row))
 
     def ordering_format(record):

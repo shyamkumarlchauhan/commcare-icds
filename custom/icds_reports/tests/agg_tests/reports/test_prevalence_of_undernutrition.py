@@ -31,6 +31,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )['rightLegend']
@@ -40,62 +41,37 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertIn('extended_info', data)
 
     def test_map_data(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertDictEqual(
             data['data'],
             {
-                'st1': {'moderately_underweight': 320,
-                     'severely_underweight': 40,
-                     'normal': 1225,
-                     'weighed': 1585,
-                     'total': 2375,
+                'st1': {'moderately_underweight': 64,
+                     'severely_underweight': 8,
+                     'normal': 245,
+                     'weighed': 317,
+                     'total': 475,
                      'original_name': ['st1'],
                      'fillKey': '20%-35%'},
-                'st2': {'moderately_underweight': 325,
-                     'severely_underweight': 60,
-                     'normal': 1505,
-                     'weighed': 1890,
-                     'total': 2565,
+                'st2': {'moderately_underweight': 65,
+                     'severely_underweight': 12,
+                     'normal': 301,
+                     'weighed': 378,
+                     'total': 513,
                      'original_name': ['st2'],
                      'fillKey': '20%-35%'},
-                'st3': {'moderately_underweight': 0,
-                     'severely_underweight': 0,
-                     'normal': 0,
-                     'weighed': 0,
-                     'total': 1,
-                     'original_name': ['st3'],
-                     'fillKey': '0%-20%'},
-                'st4': {'moderately_underweight': 0,
-                        'severely_underweight': 0,
-                        'normal': 0,
-                        'weighed': 0,
-                        'total': 2,
-                        'original_name': ['st4'],
-                        'fillKey': '0%-20%'},
-                'st5': {'moderately_underweight': 0,
-                        'severely_underweight': 0,
-                        'normal': 0,
-                        'weighed': 0,
-                        'total': 3,
-                        'original_name': ['st5'],
-                        'fillKey': '0%-20%'},
-                'st6': {'moderately_underweight': 0,
-                        'severely_underweight': 0,
-                        'normal': 0,
-                        'weighed': 0,
-                        'total': 4,
-                        'original_name': ['st6'], 'fillKey': '0%-20%'},
                 'st7': {'moderately_underweight': 0,
                         'severely_underweight': 0,
                         'normal': 0,
                         'weighed': 0,
-                        'total': 5,
+                        'total': 1,
                         'original_name': ['st7'], 'fillKey': '0%-20%'}
             }
         )
@@ -105,6 +81,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -112,28 +89,32 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['rightLegend']['info'], expected)
 
     def test_map_data_right_legend_average(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertEqual(data['rightLegend']['average'], '21.44')
 
     def test_map_data_right_legend_extended_info(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertListEqual(
             data['rightLegend']['extended_info'],
             [
-                {'indicator': 'Total Children (0 - 5 years) weighed in given month:', 'value': '3,475'},
-                {'indicator': 'Number of children unweighed (0 - 5 years):', 'value': '1,480'},
+                {'indicator': 'Total Children (0 - 5 years) weighed in given month:', 'value': '695'},
+                {'indicator': 'Number of children unweighed (0 - 5 years):', 'value': '294'},
                 {'indicator': '% Severely Underweight (0 - 5 years):', 'value': '2.88%'},
                 {'indicator': '% Moderately Underweight (0 - 5 years):', 'value': '18.56%'},
                 {'indicator': '% Normal (0 - 5 years):', 'value': '78.56%'}
@@ -145,6 +126,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -154,6 +136,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 "0%-20%": MapColors.PINK,
                 "20%-35%": MapColors.ORANGE,
                 "35%-100%": MapColors.RED,
+                "Not Launched": MapColors.GREY,
                 "defaultFill": MapColors.GREY
             }
         )
@@ -163,6 +146,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
@@ -173,12 +157,14 @@ class TestPrevalenceOfUndernutrition(TestCase):
             'icds-cas',
             config={
                 'month': (2017, 5, 1),
+                'aggregation_level': 1
             },
             loc_level='state'
         )
         self.assertEqual(data['label'], 'Percent of Children Underweight (0 - 5 years)')
 
     def test_map_name_two_locations_represent_by_one_topojson(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
@@ -205,6 +191,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_average_with_two_locations_represent_by_one_topojson(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_map(
             'icds-cas',
             config={
@@ -218,6 +205,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['rightLegend']['average'], '22.71')
 
     def test_chart_data_keys_length(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -229,6 +217,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(len(data), 5)
 
     def test_chart_data_location_type(self):
+
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -240,6 +229,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(data['location_type'], 'State')
 
     def test_chart_data_bottom_five(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -258,6 +248,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_top_five(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -287,6 +278,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         self.assertEqual(len(data['chart_data']), 3)
 
     def test_chart_data_pink(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -332,6 +324,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_orange(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -377,6 +370,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_red(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -422,6 +416,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_chart_data_all_locations(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_data_chart(
             'icds-cas',
             config={
@@ -447,6 +442,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -461,6 +457,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -471,6 +468,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
         )
 
     def test_sector_data_tooltips_data(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_sector_data(
             'icds-cas',
             config={
@@ -478,6 +476,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -486,30 +485,24 @@ class TestPrevalenceOfUndernutrition(TestCase):
             data['tooltips_data'],
             {
                 "s2": {
-                    "weighed": 182,
-                    "severely_underweight": 4,
-                    "moderately_underweight": 54,
-                    "normal": 124,
-                    "total": 326
+                    "weighed": 91,
+                    "severely_underweight": 2,
+                    "moderately_underweight": 27,
+                    "normal": 62,
+                    "total": 163
                 },
                 "s1": {
-                    "weighed": 134,
-                    "severely_underweight": 8,
-                    "moderately_underweight": 36,
-                    "normal": 90,
-                    "total": 144
-                },
-                None: {
-                    "weighed": 158,
-                    "severely_underweight": 6,
-                    "moderately_underweight": 45,
-                    "normal": 107,
-                    "total": 235
+                    "weighed": 67,
+                    "severely_underweight": 4,
+                    "moderately_underweight": 18,
+                    "normal": 45,
+                    "total": 72
                 }
             }
         )
 
     def test_sector_data_chart_data(self):
+        self.maxDiff = None
         data = get_prevalence_of_undernutrition_sector_data(
             'icds-cas',
             config={
@@ -517,6 +510,7 @@ class TestPrevalenceOfUndernutrition(TestCase):
                 'state_id': 'st1',
                 'district_id': 'd1',
                 'block_id': 'b1',
+                'aggregation_level': 4
             },
             location_id='b1',
             loc_level='supervisor'
@@ -529,10 +523,6 @@ class TestPrevalenceOfUndernutrition(TestCase):
                     "classed": "dashed",
                     "strokeWidth": 2,
                     "values": [
-                        [
-                            None,
-                            0.3227848101265823
-                        ],
                         [
                             "s1",
                             0.3283582089552239
