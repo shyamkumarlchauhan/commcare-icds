@@ -38,6 +38,13 @@
     ],
     "filters": [
       {
+        "display": "Date of Delivery within year",
+        "slug": "add_within_year",
+        "type": "date",
+        "field": "add",
+        "datatype": "date"
+      },
+      {
         "compare_as_string": false,
         "datatype": "date",
         "required": false,
@@ -58,8 +65,8 @@
           "type": "location"
         },
         "ancestor_expression": {
-            "field": "supervisor_id",
-            "location_type": "supervisor"
+          "field": "supervisor_id",
+          "location_type": "supervisor"
         },
         "display": "Filter by AWW"
       },

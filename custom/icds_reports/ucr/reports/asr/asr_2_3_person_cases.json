@@ -38,6 +38,13 @@
     ],
     "filters": [
       {
+        "display": "Opened on",
+        "slug": "opened_on",
+        "type": "date",
+        "field": "opened_on",
+        "datatype": "date"
+      },
+      {
         "display": "Date of Birth",
         "slug": "dob",
         "type": "date",
@@ -53,8 +60,8 @@
           "type": "location"
         },
         "ancestor_expression": {
-            "field": "supervisor_id",
-            "location_type": "supervisor"
+          "field": "supervisor_id",
+          "location_type": "supervisor"
         }
       },
       {
