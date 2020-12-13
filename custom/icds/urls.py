@@ -19,6 +19,8 @@ from custom.icds.views.hosted_ccz import (
     remove_hosted_ccz,
 )
 
+from extensions.icds.custom.icds.importers.views import ValidateUserInventoryImportsView
+
 urlpatterns = [
     url(r'^ccz/hostings/manage', ManageHostedCCZ.as_view(), name=ManageHostedCCZ.urlname),
     url(r'^ccz/hostings/json', ccz_hostings_json, name='ccz_hostings_json'),
@@ -44,4 +46,6 @@ urlpatterns = [
     url(r'^location_reassignment/download/$', download_location_reassignment_template,
         name='download_location_reassignment_template'),
     url(r'^custom_message_report/$', SMSUsageReport.as_view(), name=SMSUsageReport.urlname),
+    url(r'^importers/validate', ValidateUserInventoryImportsView.as_view(),
+        name=ValidateUserInventoryImportsView.urlname)
 ]
