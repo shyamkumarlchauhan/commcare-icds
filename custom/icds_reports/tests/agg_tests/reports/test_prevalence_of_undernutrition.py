@@ -485,25 +485,18 @@ class TestPrevalenceOfUndernutrition(TestCase):
             data['tooltips_data'],
             {
                 "s2": {
-                    "weighed": 182,
-                    "severely_underweight": 4,
-                    "moderately_underweight": 54,
-                    "normal": 124,
-                    "total": 326
+                    "weighed": 91,
+                    "severely_underweight": 2,
+                    "moderately_underweight": 27,
+                    "normal": 62,
+                    "total": 163
                 },
                 "s1": {
-                    "weighed": 134,
-                    "severely_underweight": 8,
-                    "moderately_underweight": 36,
-                    "normal": 90,
-                    "total": 144
-                },
-                None: {
-                    "weighed": 158,
-                    "severely_underweight": 6,
-                    "moderately_underweight": 45,
-                    "normal": 107,
-                    "total": 235
+                    "weighed": 67,
+                    "severely_underweight": 4,
+                    "moderately_underweight": 18,
+                    "normal": 45,
+                    "total": 72
                 }
             }
         )
